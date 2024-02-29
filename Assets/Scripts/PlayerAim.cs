@@ -24,7 +24,6 @@ public class PlayerAim : MonoBehaviour
 
     private void Update()
     {
-        Inputk();
         Aim();
     }
 
@@ -76,6 +75,10 @@ public class PlayerAim : MonoBehaviour
                 child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, new Vector3(0, child.localEulerAngles.y, 0), Time.deltaTime * 8f);
             }
         }
+    }
+
+    public void Attack()
+    {
 
     }
 }

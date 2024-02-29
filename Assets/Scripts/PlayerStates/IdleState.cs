@@ -1,6 +1,5 @@
 ﻿
-
-using UnityEngine.UIElements;
+using UnityEngine;
 
 public class IdleState : PlayerState
 {
@@ -20,6 +19,13 @@ public class IdleState : PlayerState
     public override void FrameUpdate() 
     {
         controller.Aim();
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            playerStateMachine.ChangeState(controller.attackState);
+        }
     }
+
+
 }
 

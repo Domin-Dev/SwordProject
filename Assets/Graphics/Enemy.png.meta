@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: d79c1b64b4a984a488da39da40020031
+guid: 3ffae734500791b49b476218d133b043
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -175,7 +175,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Hero 1_0
+      name: Enemy_0
       rect:
         serializedVersion: 2
         x: 4
@@ -189,14 +189,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 96d4917bf4a67854cbbc0c9b70e37a7e
-      internalID: -298597231
+      spriteID: 9b82c1d3885125b498ce102c4bf63737
+      internalID: 1673882932
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Hero 1_1
+      name: Enemy_1
       rect:
         serializedVersion: 2
         x: 10
@@ -210,14 +210,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6fe1cf0207e4188428002a311a121789
-      internalID: 1602000645
+      spriteID: c305d3c5d27a1fa4784bf78a9c74bcf7
+      internalID: 268243819
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Hero 1_2
+      name: Enemy_2
       rect:
         serializedVersion: 2
         x: 10
@@ -231,14 +231,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c3c0a2890c9a4d04f88529b655c347dd
-      internalID: -187205790
+      spriteID: 13d06713076c7ef45bdf18a0ff22579e
+      internalID: -475016557
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Hero 1_3
+      name: Enemy_3
       rect:
         serializedVersion: 2
         x: 22
@@ -252,8 +252,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 9e4f8b0ca79ee37469fd33c69dc7cefb
-      internalID: -812293976
+      spriteID: 1678ba404cde0b74ba9cc45daa739004
+      internalID: 1144656396
       vertices: []
       indices: 
       edges: []
@@ -269,10 +269,10 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      Hero 1_0: -298597231
-      Hero 1_1: 1602000645
-      Hero 1_2: -187205790
-      Hero 1_3: -812293976
+      Enemy_0: 1673882932
+      Enemy_1: 268243819
+      Enemy_2: -475016557
+      Enemy_3: 1144656396
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
