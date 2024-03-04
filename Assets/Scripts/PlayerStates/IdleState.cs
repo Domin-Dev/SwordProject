@@ -16,9 +16,13 @@ public class IdleState : PlayerState
     { 
     
     }
-    public override void FrameUpdate() 
+    public override void FrameUpdate()
     {
-        controller.Aim();
+        if (Input.GetMouseButton(1))
+        {
+            controller.UpdateShield();
+        }else
+             controller.Aim();
 
         if(Input.GetMouseButtonDown(0))
         {

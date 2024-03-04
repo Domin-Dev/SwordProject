@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Body
   - Head
+  - Enemy
+  - Sword
+  - Shield
   layers:
   - Default
   - TransparentFX
