@@ -12,10 +12,10 @@ public class Sword : MonoBehaviour
         }
         else if(collision.tag == "Head" || collision.tag == "Body")
         {
-            Sounds.instance.Hit();
             if(collision.transform.parent.tag == "Enemy")
             {
-                collision.transform.parent.GetComponent<Enemy>().Hit(10);
+                Sounds.instance.Hit();
+                collision.transform.parent.GetComponent<NPCController>().Hit(10);
             }
         }
     }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class CharacterController: MonoBehaviour
 {
-
+   
     private Rigidbody2D rigidbody2D;
     private Vector2 moveDir;
 
@@ -13,7 +13,7 @@ public class CharacterController: MonoBehaviour
     private Transform shieldTransform;
     private Transform child;
 
-    public PlayerStateMachine playerStateMachine {set; get; }
+    public HeroStateMachine heroStateMachine { set; get; }
     public IdleState idleState { set; get; }
     public AttackState attackState { set; get; }
 
@@ -23,35 +23,50 @@ public class CharacterController: MonoBehaviour
         weaponTransform = transform.Find("Weapon");
         shieldTransform = transform.Find("Shield");
         child = weaponTransform.GetChild(0);
-        playerStateMachine = new PlayerStateMachine();
-
-        idleState = new IdleState(this, playerStateMachine);
-        attackState = new AttackState(this, playerStateMachine);
+        SetStateMachine();
     }
+
 
     private void Start()
     {
-        playerStateMachine.RunMachine(idleState);
+        heroStateMachine.RunMachine(idleState);
     }
     private void Update()
     {
-        float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
-        moveDir = new Vector2(x, y).normalized;
-        playerStateMachine.currentState.FrameUpdate();
+        heroStateMachine.currentState.FrameUpdate();
 
 
    //     Debug.Log(child.localEulerAngles);
 
     }
 
+    private void SetStateMachine()
+    {
+        heroStateMachine = new HeroStateMachine();
+        idleState = new IdleState(this, heroStateMachine);
+        attackState = new AttackState(this, heroStateMachine);
+    }
+
+
     private void FixedUpdate()
     {
-        rigidbody2D.velocity = moveDir;      
+        heroStateMachine.currentState.FrameFixedUpdate();
+    }
+
+
+    public void GetMovementInput()
+    {
+        float x = Input.GetAxisRaw("Horizontal");
+        float y = Input.GetAxisRaw("Vertical");
+        moveDir = new Vector2(x, y).normalized;
+    }
+
+    public void UpdateMovement()
+    {
+        rigidbody2D.velocity = moveDir;
     }
 
     private bool flip;
-
     private float GetAngle(Vector3 mousePos,Transform aimTransform,float addValue)
     {
         Vector3 aimDir = (mousePos - transform.position).normalized;
@@ -112,10 +127,7 @@ public class CharacterController: MonoBehaviour
         attackVector = position + child.localPosition;
         back = false;
     }
-
-
     bool back;
-
     public void UpdateShield()
     {
         Vector3 mousePos = MyTools.GetMouseWorldPosition();
@@ -142,7 +154,7 @@ public class CharacterController: MonoBehaviour
             child.localPosition = Vector3.Lerp(child.localPosition, lastWeaponPosition, Time.deltaTime * 15f);
             if (Vector3.Distance(child.localPosition, lastWeaponPosition) < 0.5)
             {
-                playerStateMachine.ChangeState(idleState);
+                heroStateMachine.ChangeState(idleState);
                 child.localPosition = lastWeaponPosition;
             }
         }

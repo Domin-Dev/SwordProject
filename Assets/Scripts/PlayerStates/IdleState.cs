@@ -1,13 +1,13 @@
 ﻿
 using UnityEngine;
 
-public class IdleState : PlayerState
+public class IdleState : HeroState
 {
-    public IdleState(CharacterController controller, PlayerStateMachine playerStateMachine) : base(controller, playerStateMachine)
+    private CharacterController controller;
+    public IdleState(CharacterController controller, HeroStateMachine heroStateMachine) : base(heroStateMachine)
     {
-
+        this.controller = controller;
     }
-
     public override void EnterState() 
     { 
     
@@ -20,16 +20,22 @@ public class IdleState : PlayerState
     {
         if (Input.GetMouseButton(1))
         {
-            controller.UpdateShield();
+             controller.UpdateShield();
         }else
              controller.Aim();
 
         if(Input.GetMouseButtonDown(0))
         {
-            playerStateMachine.ChangeState(controller.attackState);
+            heroStateMachine.ChangeState(controller.attackState);
         }
+
+        controller.GetMovementInput();
     }
 
+    public override void FrameFixedUpdate()
+    {
+        controller.UpdateMovement();
+    }
 
 }
 

@@ -1,12 +1,10 @@
-﻿
-
-using UnityEngine;
-
-public class AttackState : PlayerState
+﻿using UnityEngine;
+public class AttackState : HeroState
 {
-    public AttackState(CharacterController controller, PlayerStateMachine playerStateMachine) : base(controller, playerStateMachine)
+    CharacterController controller;
+    public AttackState(CharacterController controller, HeroStateMachine heroStateMachine) : base(heroStateMachine)
     {
-
+        this.controller = controller;
     }
 
     public override void EnterState() 
@@ -14,12 +12,14 @@ public class AttackState : PlayerState
         controller.SetAttackVector(new Vector3(0,0,100),new Vector3(0.06f, 0, 0));
     }
     public override void ExitState() 
-    { 
-    
+    {
+
+        controller.GetMovementInput();
     }
     public override void FrameUpdate() 
     {
         controller.UpdateAttack();
+        controller.UpdateMovement();
     }
 }
 
