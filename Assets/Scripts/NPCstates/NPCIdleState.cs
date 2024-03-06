@@ -18,8 +18,8 @@ public class NPCIdleState : HeroState
     
     }
     public override void FrameUpdate()
-    {
-        if(controller.isTarget)
+    {       
+        if (controller.isTarget)
         {
             heroStateMachine.ChangeState(controller.followState);
         }

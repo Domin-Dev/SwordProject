@@ -9,7 +9,14 @@ public class AttackState : HeroState
 
     public override void EnterState() 
     {
-        controller.SetAttackVector(new Vector3(0,0,100),new Vector3(0.06f, 0, 0));
+        if (Input.GetMouseButton(1))
+        {
+            controller.SetAttackVector(new Vector3(0, 0, 10), new Vector3(-0.06f, 0, 0), false);
+        }
+        else
+        {
+            controller.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0), true);
+        }
     }
     public override void ExitState() 
     {

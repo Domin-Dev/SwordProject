@@ -12,6 +12,7 @@ public class NPCAttackState : HeroState
     public override void EnterState() 
     {
         controller.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0));
+        Debug.Log("NPC Attack");
     }
     public override void ExitState() 
     { 
@@ -19,7 +20,8 @@ public class NPCAttackState : HeroState
     }
     public override void FrameUpdate()
     {
-       //controller.UpdateAttack();
+       controller.Follow();
+       controller.UpdateAttack();
     }
     public override void FrameFixedUpdate()
     {

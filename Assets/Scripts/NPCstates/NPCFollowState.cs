@@ -19,11 +19,18 @@ public class NPCFollowState : HeroState
     }
     public override void FrameUpdate()
     {
-        Debug.Log("follow");
+
         if (controller.isTarget)
         {
+            controller.Aim();
             controller.Follow();
-            if(controller.GetDistance() < 0.4f)
+            if(controller.GetDistance() < 0.4f && controller.canAttack)
+            {
+                controller.canAttack = false;
+                heroStateMachine.ChangeState(controller.attackState);              
+            }
+
+            if (Input.GetMouseButtonDown(0))
             {
                 heroStateMachine.ChangeState(controller.attackState);
             }
@@ -32,6 +39,7 @@ public class NPCFollowState : HeroState
         {
             heroStateMachine.ChangeState(controller.idleState);
         }
+
     }
     public override void FrameFixedUpdate()
     {

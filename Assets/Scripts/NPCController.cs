@@ -19,14 +19,20 @@ public class NPCController : MonoBehaviour
     private Transform child;
 
     public HeroStateMachine heroStateMachine;
+
     public NPCIdleState idleState;
     public NPCFollowState followState;
     public NPCAttackState attackState;
 
     private Transform target;
 
+    float timer;
+    float setTime = 1.5f;
+    public bool canAttack;
+
     private void Awake()
     {
+        target = GameObject.FindGameObjectWithTag("Player").transform;
         rigidbody2D = GetComponent<Rigidbody2D>();
         aimTransform = transform.Find("Aim");
         child = aimTransform.GetChild(0);
@@ -42,9 +48,19 @@ public class NPCController : MonoBehaviour
         heroStateMachine = new HeroStateMachine();
         idleState = new NPCIdleState(this,heroStateMachine);
         followState = new NPCFollowState(this, heroStateMachine);
+        attackState = new NPCAttackState(this, heroStateMachine);
     }
     private void Update()
     {
+        if(!canAttack)
+        {
+            timer += Time.deltaTime;
+            if(timer >= setTime)
+            {
+                canAttack = true;
+                timer = 0;
+            }
+        }
         heroStateMachine.currentState.FrameUpdate();
     }
     private void FixedUpdate()
@@ -60,11 +76,11 @@ public class NPCController : MonoBehaviour
             isTarget = true;
         }
     }
-
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.transform.parent != null && collision.transform.parent.tag == "Player")
         {
+            Debug.Log("siema");
             target = null;
             isTarget = false;
         }
@@ -75,8 +91,7 @@ public class NPCController : MonoBehaviour
     }
     public void Follow()
     {
-        rigidbody2D.velocity = target.position - transform.position;
-        Aim(target);
+        rigidbody2D.velocity = target.position - transform.position;    
     }
     public void StopFollow()
     {
@@ -86,7 +101,7 @@ public class NPCController : MonoBehaviour
     {
         return Vector3.Distance(transform.position, target.position);
     }
-    private void Aim(Transform target)
+    public void Aim()
     {
         Vector3 aimDir = (target.position - transform.position).normalized;
         float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
@@ -125,7 +140,7 @@ public class NPCController : MonoBehaviour
     private Vector3 attackAngle;
     private Vector3 attackVector;
     private Vector3 lastWeaponPosition;
-    bool back;
+    public bool back;
     public void SetAttackVector(Vector3 Angle, Vector3 position)
     {
         if (flip)
@@ -148,8 +163,8 @@ public class NPCController : MonoBehaviour
     {
         if (!back)
         {
-            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, attackAngle, Time.deltaTime * 20f);
-            child.localPosition = Vector3.Lerp(child.localPosition, attackVector, Time.deltaTime * 10f);
+            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, attackAngle, Time.deltaTime * 10f);
+            child.localPosition = Vector3.Lerp(child.localPosition, attackVector, Time.deltaTime * 12f);
 
             if (Vector3.Distance(child.localEulerAngles, attackAngle) < 0.5f)
             {
@@ -161,7 +176,7 @@ public class NPCController : MonoBehaviour
             child.localPosition = Vector3.Lerp(child.localPosition, lastWeaponPosition, Time.deltaTime * 15f);
             if (Vector3.Distance(child.localPosition, lastWeaponPosition) < 0.5)
             {
-                heroStateMachine.ChangeState(idleState);
+                heroStateMachine.ChangeState(followState);
                 child.localPosition = lastWeaponPosition;
             }
         }
