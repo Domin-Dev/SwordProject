@@ -4,14 +4,13 @@ using UnityEngine;
 public class NPCIdleState : HeroState
 {
     NPCController controller;
-
     public NPCIdleState(NPCController controller, HeroStateMachine heroStateMachine) : base(heroStateMachine)
     {
         this.controller = controller;
     }
     public override void EnterState() 
     { 
-
+        //
     }
     public override void ExitState() 
     { 

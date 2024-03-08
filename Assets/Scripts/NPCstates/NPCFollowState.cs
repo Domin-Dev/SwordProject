@@ -22,18 +22,22 @@ public class NPCFollowState : HeroState
 
         if (controller.isTarget)
         {
-            controller.Aim();
             controller.Follow();
-            if(controller.GetDistance() < 0.4f && controller.canAttack)
+            float distance = controller.GetDistance();
+            if (distance < 0.4f && controller.canAttack)
             {
+                controller.attackModule.Aim();
                 controller.canAttack = false;
-                heroStateMachine.ChangeState(controller.attackState);              
-            }
-
-            if (Input.GetMouseButtonDown(0))
-            {
                 heroStateMachine.ChangeState(controller.attackState);
-            }
+
+            }else
+            {
+                controller.attackModule.Aim();
+           }//else 
+           // {
+            //    controller.attackModule.UpdateShield();
+          //  }
+
         }
         else
         {

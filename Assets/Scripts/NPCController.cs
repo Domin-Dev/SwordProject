@@ -1,13 +1,11 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
 
-public class NPCController : MonoBehaviour
+
+public class NPCController : MonoBehaviour, ILifePoints,IUsesWeapons
 {
     public bool isTarget;
-
 
     [SerializeField] private int maxHP;
     [SerializeField] private int hp;
@@ -15,83 +13,83 @@ public class NPCController : MonoBehaviour
 
 
     private Rigidbody2D rigidbody2D;
-    private Transform aimTransform;
-    private Transform child;
 
-    public HeroStateMachine heroStateMachine;
-
-    public NPCIdleState idleState;
-    public NPCFollowState followState;
-    public NPCAttackState attackState;
+    public HeroStateMachine heroStateMachine {get; private set;}
+    public NPCIdleState idleState { get; private set; }
+    public NPCFollowState followState { get; private set; }
+    public NPCAttackState attackState { get; private set; }
+    public NPCRepulsedState repulsedState { get; private set; } 
 
     private Transform target;
 
     float timer;
-    float setTime = 1.5f;
+    float setTime = 1f;
     public bool canAttack;
 
+
+    public AttackModule attackModule { private set; get; }
     private void Awake()
     {
-        target = GameObject.FindGameObjectWithTag("Player").transform;
-        rigidbody2D = GetComponent<Rigidbody2D>();
-        aimTransform = transform.Find("Aim");
-        child = aimTransform.GetChild(0);
         hp = maxHP;
+        rigidbody2D = GetComponent<Rigidbody2D>();  
+        attackModule = GetComponent<AttackModule>();
+        attackModule.SetController(this,"Player");
         SetStateMachine();
     }
     private void Start()
     {
-       heroStateMachine.RunMachine(idleState);  
+       heroStateMachine.RunMachine(idleState);
     }
     private void SetStateMachine()
     {
         heroStateMachine = new HeroStateMachine();
+
         idleState = new NPCIdleState(this,heroStateMachine);
         followState = new NPCFollowState(this, heroStateMachine);
         attackState = new NPCAttackState(this, heroStateMachine);
+        repulsedState = new NPCRepulsedState(this, heroStateMachine);
     }
     private void Update()
     {
-        if(!canAttack)
-        {
-            timer += Time.deltaTime;
-            if(timer >= setTime)
-            {
-                canAttack = true;
-                timer = 0;
-            }
-        }
+        CoolDownUpdate();
         heroStateMachine.currentState.FrameUpdate();
+        if(target != null)attackModule.Updateflip(target.position);
     }
     private void FixedUpdate()
     {
         heroStateMachine.currentState.FrameFixedUpdate();
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+
+
+    private void CoolDownUpdate()
     {
-        if (collision.transform.parent != null && collision.transform.parent.tag == "Player")
+        if (!canAttack)
         {
-            target = collision.transform;
+            timer += Time.deltaTime;
+            if (timer >= setTime)
+            {
+                canAttack = true;
+                timer = 0;
+            }
+        }
+    }
+    public void SetTarget(Transform target)
+    {
+        if (target == null)
+        {
+            this.target = null;
+            isTarget = false;
+        }
+        else
+        {
+            this.target = target;
             isTarget = true;
         }
     }
-    private void OnTriggerExit2D(Collider2D collision)
-    {
-        if (collision.transform.parent != null && collision.transform.parent.tag == "Player")
-        {
-            Debug.Log("siema");
-            target = null;
-            isTarget = false;
-        }
-    }
-    public void Attack()
-    {
-
-    }
     public void Follow()
     {
-        rigidbody2D.velocity = target.position - transform.position;    
+       rigidbody2D.velocity = target.position - transform.position;    
     }
     public void StopFollow()
     {
@@ -101,84 +99,98 @@ public class NPCController : MonoBehaviour
     {
         return Vector3.Distance(transform.position, target.position);
     }
-    public void Aim()
-    {
-        Vector3 aimDir = (target.position - transform.position).normalized;
-        float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
 
-        if (angle < 0) angle = 180 + (180 + angle);
-        if (aimTransform.eulerAngles.z - angle > 180)
-        {
-            angle = 360 + angle;
-        }
-        else if (aimTransform.eulerAngles.z - angle < -180)
-        {
-            angle = -(360 - angle);
-        }
-        aimTransform.eulerAngles = Vector3.Lerp(aimTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 4f);
-        flip = target.position.x < aimTransform.position.x;
-
-
-        if (flip)
-        {
-            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, new Vector3(0, child.localEulerAngles.y, 180), Time.deltaTime * 10f);
-        }
-        else
-        {
-            //  child.localEulerAngles = new Vector3(0, 180, child.localEulerAngles.z);
-            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, new Vector3(0, child.localEulerAngles.y, 0), Time.deltaTime * 10);
-        }
-    }
-    public void Hit(int damage)
+    private Vector3 hitDir;
+    public void Hit(int damage,Vector2 dir)
     {
         hp = Mathf.Clamp(hp - damage, 0, maxHP);
         if(hp == 0) Destroy(gameObject);
         hpBar.localScale = new Vector3((float)hp / maxHP, 1, 1);
-    }
-   
-    private bool flip;
-    private Vector3 attackAngle;
-    private Vector3 attackVector;
-    private Vector3 lastWeaponPosition;
-    public bool back;
-    public void SetAttackVector(Vector3 Angle, Vector3 position)
-    {
-        if (flip)
+
+        if (heroStateMachine.currentState != repulsedState)
         {
-            child.localEulerAngles = new Vector3(0, 180, 180);
-            attackAngle = child.localEulerAngles - Angle;
+            hitDir = dir;
+            heroStateMachine.ChangeState(repulsedState);
+            rigidbody2D.AddForce(2 * ((Vector2)transform.position - dir).normalized, ForceMode2D.Impulse);
+        }
+    }
+    public void Kill()
+    {
+        throw new System.NotImplementedException();
+    }
+    void IUsesWeapons.Block()
+    {
+        StartCoroutine(BlockTime());
+    }
+    IEnumerator BlockTime()
+    {
+        yield return new WaitForSeconds(.005f);
+        attackModule.back = true;
+    }
+    IEnumerator Repulse()
+    {
+        yield return new WaitForSeconds(.2f);
+        heroStateMachine.ChangeState(idleState);
+    }
+
+
+    private bool isRepulse;
+    private bool standUp = false;
+    private float repulseRotation;
+    private float lastRotation;
+    public void SetRepulse(float angle)
+    {
+        attackModule.ResetAttack();
+        if (UnityEngine.Random.Range(0,5) == 0)
+        {
+            isRepulse = true;
+            Debug.Log(hitDir + " " + transform.position);
+            if (hitDir.x < transform.position.x )
+            {
+                angle = -angle;
+            }
+
+            Debug.Log(angle);
+            repulseRotation = angle;
+            lastRotation = transform.rotation.z;
+            standUp = false;
         }
         else
         {
-            child.localEulerAngles = new Vector3(0, 180, child.localEulerAngles.z);
-            attackAngle = child.localEulerAngles + Angle;
+            StartCoroutine(Repulse());
+            isRepulse = false;            
         }
-
-        lastWeaponPosition = child.localPosition;
-        attackVector = position + child.localPosition;
-        back = false;
     }
-
-    public void UpdateAttack()
+    public void UpdateRepulse()
     {
-        if (!back)
+        if (isRepulse)
         {
-            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, attackAngle, Time.deltaTime * 10f);
-            child.localPosition = Vector3.Lerp(child.localPosition, attackVector, Time.deltaTime * 12f);
+            if (!standUp)
+            {
+                float value = Mathf.LerpAngle(transform.localEulerAngles.z, repulseRotation, Time.deltaTime * 12f);
+                transform.eulerAngles = new Vector3(0, 0, value);
 
-            if (Vector3.Distance(child.localEulerAngles, attackAngle) < 0.5f)
-            {
-                back = true;
+                if (Math.Abs(Mathf.DeltaAngle(value, repulseRotation)) <= 2)
+                {
+                    standUp = true;
+                }
             }
-        }
-        else
-        {
-            child.localPosition = Vector3.Lerp(child.localPosition, lastWeaponPosition, Time.deltaTime * 15f);
-            if (Vector3.Distance(child.localPosition, lastWeaponPosition) < 0.5)
+            else
             {
-                heroStateMachine.ChangeState(followState);
-                child.localPosition = lastWeaponPosition;
+                float value = Mathf.LerpAngle(transform.localEulerAngles.z, lastRotation, Time.deltaTime * 7f);
+                transform.eulerAngles = new Vector3(0, 0, value);
+
+                if (Math.Abs(Mathf.DeltaAngle(value, lastRotation)) <= 2)
+                {
+                    transform.eulerAngles = new Vector3(0, 0, lastRotation);
+                    heroStateMachine.ChangeState(idleState);
+                }
             }
         }
     }
+    void IUsesWeapons.EndAttack()
+    {
+        heroStateMachine.ChangeState(idleState);       
+    }
+
 }

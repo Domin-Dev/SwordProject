@@ -1,45 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.IO.LowLevel.Unsafe;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR;
 
-public class CharacterController: MonoBehaviour
+public class CharacterController: MonoBehaviour, ILifePoints, IUsesWeapons
 {
-   
-    private Rigidbody2D rigidbody2D;
+
+    [SerializeField] private int maxHP;
+    [SerializeField] private int hp;
+    [SerializeField] private Transform hpBar;
+
+
     private Vector2 moveDir;
+    private Rigidbody2D rigidbody2D;
+
 
     private Transform weaponTransform;
     private Transform shieldTransform;
     private Transform child;
     private Transform shield;
 
+    public bool flip;
+    private bool isRepulsed = false;
+
+    public AttackModule attackModule { set; get; }
+
+    #region StateMachine
     public HeroStateMachine heroStateMachine { set; get; }
     public IdleState idleState { set; get; }
     public AttackState attackState { set; get; }
-
-    private void Awake()
-    {
-        rigidbody2D = GetComponent<Rigidbody2D>();
-        weaponTransform = transform.Find("Weapon");
-        shieldTransform = transform.Find("Shield");
-        child = weaponTransform.GetChild(0);
-        shield = shieldTransform.GetChild(0);
-        SetStateMachine();
-    }
-
-
-    private void Start()
-    {
-        heroStateMachine.RunMachine(idleState);
-    }
-    private void Update()
-    {
-        Updateflip();
-        heroStateMachine.currentState.FrameUpdate();
-
-    }
 
     private void SetStateMachine()
     {
@@ -48,148 +39,86 @@ public class CharacterController: MonoBehaviour
         attackState = new AttackState(this, heroStateMachine);
     }
 
+    #endregion
 
+    #region built-in functions
+    private void Awake()
+    {
+        rigidbody2D = GetComponent<Rigidbody2D>();
+        attackModule = GetComponent<AttackModule>();
+        attackModule.SetController(this,"Enemy");       
+        SetStateMachine();
+    }
+    private void Start()
+    {
+        heroStateMachine.RunMachine(idleState);
+    }
+    private void Update()
+    {
+        attackModule.Updateflip(MyTools.GetMouseWorldPosition());
+        heroStateMachine.currentState.FrameUpdate();
+    }
+    bool foolow = true;
     private void FixedUpdate()
     {
-        heroStateMachine.currentState.FrameFixedUpdate();
+      if(foolow)   heroStateMachine.currentState.FrameFixedUpdate();
     }
 
+    #endregion
 
+    #region Movement
     public void GetMovementInput()
     {
         float x = Input.GetAxisRaw("Horizontal");
         float y = Input.GetAxisRaw("Vertical");
         moveDir = new Vector2(x, y).normalized;
     }
-
     public void UpdateMovement()
     {
-        rigidbody2D.velocity = moveDir;
+       if(!isRepulsed) rigidbody2D.velocity = moveDir;
     }
+    #endregion
 
-    private Vector3 mousePos;
-    private bool flip;
-    private float GetAngle(Vector3 mousePos,Transform aimTransform,float addValue)
+    #region ILifePoints
+    void ILifePoints.Hit(int damage, Vector2 dir)
     {
-        Vector3 aimDir = (mousePos - transform.position).normalized;
-        float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
-        angle += addValue;
-        if (angle < 0) angle = 180 + (180 + angle);
-        if (aimTransform.eulerAngles.z - angle > 180)
-        {
-            angle = 360 + angle;
-        }
-        else if (aimTransform.eulerAngles.z - angle < -180)
-        {
-            angle = -(360 - angle);
-        }
-        return angle;
+        StartCoroutine(HitForce(((Vector2)transform.position - dir).normalized));
+        hp = Mathf.Clamp(hp - damage, 0, maxHP);
+        if (hp == 0) Destroy(gameObject);
+        hpBar.localScale = new Vector3((float)hp / maxHP, 1, 1);
     }
-    public void Aim()
+
+    void ILifePoints.Kill()
     {
-        float angle = GetAngle(mousePos,weaponTransform,0);
-        float angle1 = GetAngle(mousePos,shieldTransform,0);
 
-        weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
-        shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1 ), Time.deltaTime * 2f);
-
-        if (flip)
-        {
-            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, new Vector3(0, child.localEulerAngles.y, 180), Time.deltaTime * 10f);
-        }
-        else
-        {
-          //  child.localEulerAngles = new Vector3(0, 180, child.localEulerAngles.z);
-            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, new Vector3(0, child.localEulerAngles.y, 0), Time.deltaTime * 10);
-        }
-      //  Debug.Log(child.localPosition);
     }
-    private void Updateflip()
+    #endregion
+
+    #region IUsesWeapons
+    void IUsesWeapons.Block()
     {
-        mousePos = MyTools.GetMouseWorldPosition();
-        flip = mousePos.x < weaponTransform.position.x;
+        StartCoroutine(BlockTime());
     }
 
-    private Vector3 attackAngle;
-    private Vector3 attackVector; 
-    private Vector3 lastWeaponPosition;
-    private Transform attackItem;
-    public void SetAttackVector(Vector3 Angle,Vector3 position,bool firstHand)
-    {  
-        if(firstHand)
-        {
-            attackItem = child;
-        }
-        else
-        {
-            attackItem = shield;
-        }
-
-        if(flip)
-        {
-            attackItem.localEulerAngles = new Vector3(0 ,180, 180);
-            attackAngle = attackItem.localEulerAngles - Angle;
-        }
-        else
-        {
-            attackItem.localEulerAngles = new Vector3(0, 180, child.localEulerAngles.z);
-            attackAngle = attackItem.localEulerAngles + Angle;
-        }
-
-        lastWeaponPosition = attackItem.localPosition;
-        attackVector = position + attackItem.localPosition;
-        back = false;
-    }
-    public bool  back;
-    public void UpdateShield()
+    IEnumerator BlockTime()
     {
-        Vector3 mousePos = MyTools.GetMouseWorldPosition();
-        float angle;
-        if (flip) angle = GetAngle(mousePos, weaponTransform, -60);
-        else angle = GetAngle(mousePos, weaponTransform, 60);
-
-
-        child.localEulerAngles = new Vector3(child.localEulerAngles.x,0,child.localEulerAngles.z);
-        if (flip)
-        {
-            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, new Vector3(0, child.localEulerAngles.y, 180), Time.deltaTime * 10f);
-        }
-        else
-        {
-            //  child.localEulerAngles = new Vector3(0, 180, child.localEulerAngles.z);
-            child.localEulerAngles = Vector3.Lerp(child.localEulerAngles, new Vector3(0, child.localEulerAngles.y, 0), Time.deltaTime * 10);
-        }
-
-
-        float angle1 = GetAngle(mousePos, shieldTransform, 180);
-
-        weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
-        shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 8f);
+        yield return new WaitForSeconds(.005f);
+        attackModule.back = true;
     }
-    public void UpdateAttack()
+    void IUsesWeapons.EndAttack()
     {
-        if(!back)
-        {
-            attackItem.localEulerAngles = Vector3.Lerp(attackItem.localEulerAngles, attackAngle, Time.deltaTime * 20f);
-            attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, attackVector, Time.deltaTime * 10f);
-
-            if (Vector3.Distance(attackItem.localEulerAngles, attackAngle) < 0.05f && Vector3.Distance(attackItem.localPosition, attackVector) < 0.001f)
-            {
-                back = true;
-            }
-        }
-        else
-        {
-            attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, lastWeaponPosition, Time.deltaTime * 15f);
-            if (Vector3.Distance(attackItem.localPosition, lastWeaponPosition) < 0.5)
-            {
-                heroStateMachine.ChangeState(idleState);
-                attackItem.localPosition = lastWeaponPosition;
-            }
-        }
+        heroStateMachine.ChangeState(idleState);
     }
 
-
+    public IEnumerator HitForce(Vector2 dir)
+    {
+        isRepulsed = true;
+        rigidbody2D.AddForce(2 * dir.normalized, ForceMode2D.Impulse);
+        attackModule.ResetAttack(); 
+        yield return new WaitForSeconds(0.1f);
+        isRepulsed = false;
+    }
+    #endregion
 
 }
 

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public static class MyTools
+public static class MyTools 
 {
     public static Vector3 GetMouseWorldPosition()
     {

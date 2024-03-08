@@ -20,11 +20,11 @@ public class IdleState : HeroState
     {
         if (Input.GetMouseButton(1))
         {
-             controller.UpdateShield();
+             controller.attackModule.UpdateShield();
         }else
-             controller.Aim();
+             controller.attackModule.Aim();
 
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButtonDown(0) && controller.attackModule.canAttack)
         {
             heroStateMachine.ChangeState(controller.attackState);
         }
