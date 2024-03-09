@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public static class MyTools 
@@ -8,5 +9,20 @@ public static class MyTools
         pos.z = 0;
         pos = Camera.main.ScreenToWorldPoint(pos);
         return pos;
+    }
+
+   
+    public static TextMesh CreateText(string text,int fontSize,Vector2 pos,Transform parent,Color color)
+    {
+        TextMesh textMesh = new GameObject("Text",typeof(TextMesh)).GetComponent<TextMesh>();
+        textMesh.transform.position = pos;
+        textMesh.transform.parent = parent;
+        textMesh.text = text;
+        textMesh.characterSize = 0.05f;
+        textMesh.fontSize = fontSize;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.color = color;
+        return textMesh;
     }
 }

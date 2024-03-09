@@ -20,12 +20,12 @@ public class NPCAttackState : HeroState
     }
     public override void FrameUpdate()
     {
-       controller.Follow();
+
        controller.attackModule.UpdateAttack();
     }
     public override void FrameFixedUpdate()
     {
-        base.FrameFixedUpdate();
+        controller.Follow();
     }
 
 

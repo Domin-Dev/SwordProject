@@ -22,7 +22,6 @@ public class NPCFollowState : HeroState
 
         if (controller.isTarget)
         {
-            controller.Follow();
             float distance = controller.GetDistance();
             if (distance < 0.4f && controller.canAttack)
             {
@@ -47,7 +46,7 @@ public class NPCFollowState : HeroState
     }
     public override void FrameFixedUpdate()
     {
-        base.FrameFixedUpdate();
+        controller.Follow();
     }
 
 }
