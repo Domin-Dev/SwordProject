@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tiles:
   - tile: 0
-    uv00: {x: 0, y: 0}
-    uv11: {x: 25, y: 25}
+    uv00: {x: 25, y: 0}
+    uv11: {x: 50, y: 25}
   - tile: 2
     uv00: {x: 0, y: 0}
     uv11: {x: 25, y: 25}
