@@ -64,19 +64,11 @@ public class MapGenerator : MonoBehaviour
                 float value = Generate(x, y);
                 if (value > 0.65)
                 {
-                    grid.GetValue(x, y).tile = GridTile.TileType.Water;
-                }
-                else if(value > 0.6)
-                {
                     grid.GetValue(x, y).tile = GridTile.TileType.Sand;
                 }
                 else if (value > 0.3)
                 {
                     grid.GetValue(x, y).tile = GridTile.TileType.Grass;
-                }
-                else
-                {
-                    grid.GetValue(x, y).tile = GridTile.TileType.Mud;
                 }
 
             }

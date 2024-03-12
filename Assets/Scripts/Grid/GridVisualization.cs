@@ -1,7 +1,8 @@
 
-using System;
+
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.UIElements.ToolbarMenu;
 
 public class GridVisualization: MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class GridVisualization: MonoBehaviour
         textureWidth = GetComponent<MeshRenderer>().material.mainTexture.width;
         textureHeight = GetComponent<MeshRenderer>().material.mainTexture.height;
         this.grid = grid;
-        CreateMesh(grid);
+        CreateMesh();
         grid.OnTObjectChanged += UpdatedGrid;
     }
 
@@ -43,30 +44,69 @@ public class GridVisualization: MonoBehaviour
         Vector2[] uv = mesh.uv;
         int index = x + y * grid.width;
         GridTile.TileType tile = grid.GetValue(x, y).tile;
-        Tile tileUV =  GetUVTile(tile);
-        uv[index * 4] = new Vector2((tileUV.uv00.x + 0.01f) / textureWidth, tileUV.uv00.y / textureHeight);
-        uv[index * 4 + 1] = new Vector2((tileUV.uv00.x + 0.01f) / textureWidth, tileUV.uv11.y / textureHeight);
-        uv[index * 4 + 2] = new Vector2(tileUV.uv11.x / textureWidth, tileUV.uv11.y / textureHeight);
-        uv[index * 4 + 3] = new Vector2(tileUV.uv11.x / textureWidth, tileUV.uv00.y / textureHeight);
+
+        Vector2 uv11, uv00;
+        int borders = 0;
+        if (tile == GridTile.TileType.Sand) borders = CalculateBorders(x, y);
+
+        GetUVTile(tile,borders,out uv00, out uv11);
+
+        uv[index * 4] = new Vector2((uv00.x + 0.01f) / textureWidth, (uv00.y + 0.01f) / textureHeight);
+        uv[index * 4 + 1] = new Vector2((uv00.x + 0.01f) / textureWidth, uv11.y / textureHeight);
+        uv[index * 4 + 2] = new Vector2(uv11.x / textureWidth, uv11.y / textureHeight);
+        uv[index * 4 + 3] = new Vector2(uv11.x / textureWidth, (uv00.y + 0.01f) / textureHeight);
         mesh.uv = uv;
     }
 
 
 
-    private Tile GetUVTile(GridTile.TileType tile)
+    private void GetUVTile(GridTile.TileType tile,int borders,out Vector2 uv00, out Vector2 uv11)
     {
+        Tile tileK;
+        uv00 = Vector2.zero;
+        uv11 = Vector2.zero;
+
         for (int k = 0; k < tileStats.tiles.Count; k++)
         {
-            if (tileStats.tiles[k].tile == tile)
+            tileK = tileStats.tiles[k];
+            if (tileK.tile == tile)
             {
-                Debug.Log("s");
-                return tileStats.tiles[k];
+                if (borders == 0)
+                {
+                    if (Random.Range(1, 101) > tileK.chance)
+                    {
+                        uv11 = tileK.uv00 + new Vector2(25, 25);
+                        uv00 = tileK.uv00;
+                    }
+                    else
+                    {
+                        int variant = Random.Range(1, tileK.variants);
+                        Debug.Log(variant);
+                        uv00 = tileK.uv00 + (new Vector2(25, 0) * variant);
+                        uv11 = (tileK.uv00 + new Vector2(25, 25)) + (new Vector2(25, 0) * variant);
+                    }
+                }
+                else
+                {
+                    borders--;
+                    uv00 = tileK.uv00 + new Vector2(0, 25) + (new Vector2(25, 0) * borders);
+                    uv11 = tileK.uv00 + new Vector2(25, 50) + (new Vector2(25, 0) * borders);
+                }              
             }
         }
-
-        return default(Tile);
     }
-    public void CreateMesh(Grid<GridTile> grid)
+
+    private int CalculateBorders(int x,int y)
+    {
+        int value = 0;
+        if (grid.GetValue(x , y + 1)?.tile == GridTile.TileType.Grass) value += 1;
+        if (grid.GetValue(x + 1, y )?.tile == GridTile.TileType.Grass) value += 2;
+        if (grid.GetValue(x , y - 1)?.tile == GridTile.TileType.Grass) value += 4;
+        if (grid.GetValue(x - 1, y)?.tile == GridTile.TileType.Grass) value += 8;
+        return value;
+    }
+
+    public void CreateMesh()
     {
         int width = grid.width;
         int height = grid.height;
@@ -98,13 +138,18 @@ public class GridVisualization: MonoBehaviour
                 triangles[index * 6 + 5] = index * 4 + 3;
 
 
+             
                 GridTile.TileType tile = grid.GetValue(x, y).tile;
-                Tile tileUV = GetUVTile(tile);
 
-                uv[index * 4] = new Vector2((tileUV.uv00.x + 0.01f) / textureWidth, tileUV.uv00.y / textureHeight);
-                uv[index * 4 + 1] = new Vector2((tileUV.uv00.x + 0.01f) / textureWidth, tileUV.uv11.y / textureHeight);
-                uv[index * 4 + 2] = new Vector2(tileUV.uv11.x / textureWidth, tileUV.uv11.y / textureHeight);
-                uv[index * 4 + 3] = new Vector2(tileUV.uv11.x / textureWidth, tileUV.uv00.y / textureHeight);
+                int borders = 0;
+                if(tile == GridTile.TileType.Sand) borders = CalculateBorders(x, y);
+                Vector2 uv11, uv00;
+                GetUVTile(tile,borders, out uv00, out uv11);
+
+                uv[index * 4] = new Vector2((uv00.x + 0.01f) / textureWidth, (uv00.y + 0.01f) / textureHeight);
+                uv[index * 4 + 1] = new Vector2((uv00.x + 0.01f) / textureWidth, uv11.y / textureHeight);
+                uv[index * 4 + 2] = new Vector2(uv11.x / textureWidth, uv11.y / textureHeight);
+                uv[index * 4 + 3] = new Vector2(uv11.x / textureWidth, (uv00.y + 0.01f) / textureHeight);
             }
         }
 

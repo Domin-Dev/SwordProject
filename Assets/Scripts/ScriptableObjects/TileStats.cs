@@ -6,7 +6,8 @@ public struct Tile
 {
     public GridTile.TileType tile;
     public Vector2 uv00;
-    public Vector2 uv11;
+    public int variants;
+    public int chance;
 }
 
 [CreateAssetMenu(fileName = "Tiles", menuName = "GameAsset/Tiles")]

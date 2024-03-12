@@ -14,14 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tiles:
   - tile: 0
-    uv00: {x: 25, y: 0}
-    uv11: {x: 50, y: 25}
-  - tile: 2
-    uv00: {x: 0, y: 0}
-    uv11: {x: 25, y: 25}
+    uv00: {x: 0, y: 50}
+    variants: 8
+    chance: 70
   - tile: 1
     uv00: {x: 0, y: 0}
-    uv11: {x: 25, y: 25}
-  - tile: 3
-    uv00: {x: 0, y: 0}
-    uv11: {x: 25, y: 25}
+    variants: 8
+    chance: 30
