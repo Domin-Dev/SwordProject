@@ -1,6 +1,7 @@
 
 
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEditor.UIElements.ToolbarMenu;
 
@@ -27,35 +28,54 @@ public class GridVisualization: MonoBehaviour
 
     private void UpdatedGrid(object sender, Grid<GridTile>.OnTObjectChangedArgs e)
     {
-        UpdateMesh(e.x, e.y);
+       UpdateMesh(e.x, e.y,true);
     }
 
     private void Update()
     {
         if(Input.GetMouseButtonDown(0))
         {
-          Debug.Log(grid.GetValue(MyTools.GetMouseWorldPosition())?.ToString());
+            grid.GetValue(MyTools.GetMouseWorldPosition()).ChangeValue(GridTile.TileType.Sand);
         }
     }
 
-    private void UpdateMesh(int x,int y)
+    private void UpdateMesh(int x,int y,bool repeat)
     {
-        Mesh mesh = this.GetComponent<MeshFilter>().mesh;
-        Vector2[] uv = mesh.uv;
-        int index = x + y * grid.width;
-        GridTile.TileType tile = grid.GetValue(x, y).tile;
+        if (x > 0 && y > 0 && x < grid.width && y < grid.height)
+        {
+            Mesh mesh = this.GetComponent<MeshFilter>().mesh;
+            Vector2[] uv = mesh.uv;
+            int index = x + y * grid.width;
+            GridTile.TileType tile = grid.GetValue(x, y).tile;
 
-        Vector2 uv11, uv00;
-        int borders = 0;
-        if (tile == GridTile.TileType.Sand) borders = CalculateBorders(x, y);
+            Vector2 uv11, uv00;
+            int borders = 0;
+            if (tile == GridTile.TileType.Sand)
+            {
+                borders = CalculateBorders(x, y);
 
-        GetUVTile(tile,borders,out uv00, out uv11);
+                GetUVTile(tile, borders, out uv00, out uv11);
+                uv[index * 4] = new Vector2((uv00.x + 0.01f) / textureWidth, (uv00.y + 0.01f) / textureHeight);
+                uv[index * 4 + 1] = new Vector2((uv00.x + 0.01f) / textureWidth, uv11.y / textureHeight);
+                uv[index * 4 + 2] = new Vector2(uv11.x / textureWidth, uv11.y / textureHeight);
+                uv[index * 4 + 3] = new Vector2(uv11.x / textureWidth, (uv00.y + 0.01f) / textureHeight);
+                mesh.uv = uv;
 
-        uv[index * 4] = new Vector2((uv00.x + 0.01f) / textureWidth, (uv00.y + 0.01f) / textureHeight);
-        uv[index * 4 + 1] = new Vector2((uv00.x + 0.01f) / textureWidth, uv11.y / textureHeight);
-        uv[index * 4 + 2] = new Vector2(uv11.x / textureWidth, uv11.y / textureHeight);
-        uv[index * 4 + 3] = new Vector2(uv11.x / textureWidth, (uv00.y + 0.01f) / textureHeight);
-        mesh.uv = uv;
+            }
+
+            if (repeat)
+            {
+                UpdateMesh(x + 1, y,false);
+                UpdateMesh(x - 1, y,false);
+                UpdateMesh(x, y + 1,false);
+                UpdateMesh(x, y - 1,false);
+
+                UpdateMesh(x + 1, y + 1,false);
+                UpdateMesh(x - 1, y + 1,false);
+                UpdateMesh(x - 1, y - 1,false);
+                UpdateMesh(x + 1, y - 1,false);
+            }
+        }
     }
 
 
@@ -81,14 +101,15 @@ public class GridVisualization: MonoBehaviour
                     else
                     {
                         int variant = Random.Range(1, tileK.variants);
-                        Debug.Log(variant);
                         uv00 = tileK.uv00 + (new Vector2(25, 0) * variant);
                         uv11 = (tileK.uv00 + new Vector2(25, 25)) + (new Vector2(25, 0) * variant);
                     }
                 }
                 else
                 {
+                    if(borders < 0) borders = 15 - borders;
                     borders--;
+
                     uv00 = tileK.uv00 + new Vector2(0, 25) + (new Vector2(25, 0) * borders);
                     uv11 = tileK.uv00 + new Vector2(25, 50) + (new Vector2(25, 0) * borders);
                 }              
@@ -99,10 +120,67 @@ public class GridVisualization: MonoBehaviour
     private int CalculateBorders(int x,int y)
     {
         int value = 0;
-        if (grid.GetValue(x , y + 1)?.tile == GridTile.TileType.Grass) value += 1;
-        if (grid.GetValue(x + 1, y )?.tile == GridTile.TileType.Grass) value += 2;
-        if (grid.GetValue(x , y - 1)?.tile == GridTile.TileType.Grass) value += 4;
-        if (grid.GetValue(x - 1, y)?.tile == GridTile.TileType.Grass) value += 8;
+        int number = 0;
+
+        if (grid.GetValue(x, y + 1)?.tile  == GridTile.TileType.Grass) { value += 1; number++; }
+        if (grid.GetValue(x + 1, y )?.tile == GridTile.TileType.Grass) { value += 2; number++; }
+        if (grid.GetValue(x , y - 1)?.tile == GridTile.TileType.Grass) { value += 4; number++; }
+        if (grid.GetValue(x - 1, y )?.tile == GridTile.TileType.Grass) { value += 8; number++; }
+
+        if (value == 0)
+        {
+            if (grid.GetValue(x + 1, y + 1)?.tile == GridTile.TileType.Grass) value -= 1;
+            if (grid.GetValue(x + 1, y - 1)?.tile == GridTile.TileType.Grass) value -= 2;
+            if (grid.GetValue(x - 1, y - 1)?.tile == GridTile.TileType.Grass) value -= 4;
+            if (grid.GetValue(x - 1, y + 1)?.tile == GridTile.TileType.Grass) value -= 8;
+        }
+        else if(number == 1)
+        {
+            int k = 0;
+            switch (value)
+            {
+                case 1:
+                    if (grid.GetValue(x - 1, y - 1)?.tile == GridTile.TileType.Grass) k += 1;
+                    if (grid.GetValue(x + 1, y - 1)?.tile == GridTile.TileType.Grass) k += 2;
+                    break;
+                case 2:
+                    if (grid.GetValue(x - 1, y - 1)?.tile == GridTile.TileType.Grass) k += 1;
+                    if (grid.GetValue(x - 1, y + 1)?.tile == GridTile.TileType.Grass) k += 2;
+                    break;
+                case 4:
+                    if (grid.GetValue(x - 1, y + 1)?.tile == GridTile.TileType.Grass) k += 1;
+                    if (grid.GetValue(x + 1, y + 1)?.tile == GridTile.TileType.Grass) k += 2;
+                    break;
+                case 8:
+                    if (grid.GetValue(x + 1, y - 1)?.tile == GridTile.TileType.Grass) k += 1;
+                    if (grid.GetValue(x + 1, y + 1)?.tile == GridTile.TileType.Grass) k += 2;
+                    break;
+            }
+            if (k > 0)
+            {
+                if(value != 8) value = 30 + ((value / 2) * 3) + k;
+                else value = 39 + k;
+            }
+        }
+        else if (number == 2)
+        {      
+            switch (value)
+            {
+                case 3:
+                    if (grid.GetValue(x - 1, y - 1)?.tile == GridTile.TileType.Grass) value = 43;
+                    break;
+                case 6:
+                    if (grid.GetValue(x - 1, y + 1)?.tile == GridTile.TileType.Grass) value = 44;
+                    break;
+                case 9:
+                    if (grid.GetValue(x + 1, y - 1)?.tile == GridTile.TileType.Grass) value = 45;
+                    break;
+                case 12:
+                    if (grid.GetValue(x + 1, y + 1)?.tile == GridTile.TileType.Grass) value = 46;
+                    break;
+            }
+        }
+
         return value;
     }
 

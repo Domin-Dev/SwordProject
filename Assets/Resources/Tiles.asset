@@ -15,9 +15,9 @@ MonoBehaviour:
   tiles:
   - tile: 0
     uv00: {x: 0, y: 50}
-    variants: 8
-    chance: 70
+    variants: 15
+    chance: 60
   - tile: 1
     uv00: {x: 0, y: 0}
-    variants: 8
-    chance: 30
+    variants: 15
+    chance: 40
