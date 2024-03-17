@@ -70,6 +70,10 @@ public class MapGenerator : MonoBehaviour
                 {
                     grid.GetValue(x, y).tile = GridTile.TileType.Grass;
                 }
+                else if (value > 0.2)
+                {
+                    grid.GetValue(x, y).tile = GridTile.TileType.Mud;
+                }
 
             }
         }

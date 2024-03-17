@@ -57,6 +57,13 @@ public class FirstHand : MonoBehaviour
                         Sounds.instance.Shield();
                         break;
                     }
+                    else if(collider.tag == "Tree")
+                    {
+                        Block();
+                        collider.transform.parent.GetComponent<ILifePoints>().Hit(10, controllerTransform.position);
+                        Sounds.instance.Shield();
+                        break;
+                    }
                 }
                 colliders.Clear();
             }

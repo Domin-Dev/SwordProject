@@ -28,6 +28,7 @@ public class NPCController : MonoBehaviour, ILifePoints,IUsesWeapons
 
 
     public AttackModule attackModule { private set; get; }
+
     private void Awake()
     {
         hp = maxHP;

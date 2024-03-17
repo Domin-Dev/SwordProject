@@ -165,7 +165,6 @@ public class AttackModule : MonoBehaviour
         weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
         shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 4f);
     }
-
     public void ResetAttack()
     {
         if(attackItem != null)

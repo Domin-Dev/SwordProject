@@ -35,7 +35,7 @@ public class GridVisualization: MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            grid.GetValue(MyTools.GetMouseWorldPosition()).ChangeValue(GridTile.TileType.Sand);
+            grid.GetValue(MyTools.GetMouseWorldPosition()).ChangeValue(GridTile.TileType.Mud);
         }
     }
 
@@ -50,7 +50,7 @@ public class GridVisualization: MonoBehaviour
 
             Vector2 uv11, uv00;
             int borders = 0;
-            if (tile == GridTile.TileType.Sand)
+            if (tile == GridTile.TileType.Sand || tile == GridTile.TileType.Mud)
             {
                 borders = CalculateBorders(x, y);
 
@@ -220,7 +220,7 @@ public class GridVisualization: MonoBehaviour
                 GridTile.TileType tile = grid.GetValue(x, y).tile;
 
                 int borders = 0;
-                if(tile == GridTile.TileType.Sand) borders = CalculateBorders(x, y);
+                if(tile == GridTile.TileType.Sand || GridTile.TileType.Mud == tile) borders = CalculateBorders(x, y);
                 Vector2 uv11, uv00;
                 GetUVTile(tile,borders, out uv00, out uv11);
 
