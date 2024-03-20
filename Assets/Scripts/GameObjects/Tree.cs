@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.VisualScripting;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
@@ -7,13 +8,18 @@ using UnityEngine;
 public class Tree : MonoBehaviour, ILifePoints,ITransparent
 {
     SpriteRenderer renderer;
-    [SerializeField] private ParticleSystem particleSystem;
-    [SerializeField] private ParticleSystem smoke;
     [SerializeField] private int maxLifePoints;
     private int lifePoints;
 
     bool isFall;
     bool isDisappear;
+    bool isHit;
+    bool isFell;
+
+    float repulseRotation;
+    float lastRotation;
+    bool standUp;
+
     private void Awake()
     {
         renderer = GetComponent<SpriteRenderer>();
@@ -38,7 +44,8 @@ public class Tree : MonoBehaviour, ILifePoints,ITransparent
     {
 
         lifePoints = Math.Clamp(lifePoints - damage,0, maxLifePoints);
-        if(lifePoints == 0 )
+        if(isFall) return;
+        if(lifePoints == 0)
         {
             isFall = true;
             SetHit(90, dir);
@@ -47,7 +54,7 @@ public class Tree : MonoBehaviour, ILifePoints,ITransparent
         {
             SetHit(25, dir);
         }
-        particleSystem.Play();
+        Instantiate(ParticleAssets.instance.leaves, transform.position + (Vector3)new Vector2(0,0.35f), Quaternion.identity);
     }
     void ILifePoints.Kill()
     {
@@ -62,13 +69,6 @@ public class Tree : MonoBehaviour, ILifePoints,ITransparent
         if(!isDisappear)renderer.color = new Color(1, 1, 1, 1f);
     }
 
-
-    bool isHit;
-    float repulseRotation;
-    float lastRotation;
-    bool standUp;
-
-
     public void SetHit(float angle,Vector2 hitDir)
     {
             isHit = true;
@@ -80,6 +80,8 @@ public class Tree : MonoBehaviour, ILifePoints,ITransparent
             repulseRotation = angle;
             lastRotation = transform.rotation.z;
             standUp = false;
+
+            
     }
     private void UpdateHit()
     {
@@ -94,25 +96,26 @@ public class Tree : MonoBehaviour, ILifePoints,ITransparent
 
             if (isFall && Math.Abs(Mathf.DeltaAngle(value, repulseRotation)) <= 10)
             {
-                if (smoke != null && !smoke.isPlaying)
+                if(!isFell)
                 {
-                    smoke.Play();
+                    transform.Find("HitBox").AddComponent<DamgeBox>();
+                    Instantiate(ParticleAssets.instance.smoke,new Vector3(0,-0.08f,0) + transform.localPosition + transform.up * 0.25f, Quaternion.identity);
                     Sounds.instance.Shield();
+                    isFell = true;
                 }
             }
 
             if (Math.Abs(Mathf.DeltaAngle(value, repulseRotation)) <= 2)
             {
-                if (isFall)
+                if (!isFall) standUp = true;
+                else
                 {
-                    isDisappear = true;
-                    if (smoke != null &&!smoke.isPlaying)
+                    if(!isDisappear)
                     {
-                        smoke.Play();
-                        Sounds.instance.Shield();
+                        transform.Find("Collider").gameObject.SetActive(false);
                     }
+                    isDisappear = true;             
                 }
-                else standUp = true;
             }
         }
         else

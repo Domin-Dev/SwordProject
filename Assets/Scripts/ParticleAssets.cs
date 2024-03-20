@@ -1,20 +1,24 @@
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
 public class ParticleAssets : MonoBehaviour
 {
+
+    private static ParticleAssets i;
+
     public static ParticleAssets instance 
     {
-        private set { instance = value; }
         get
         {
-            if (instance == null)
+            if (i == null)
             {
-                instance = Instantiate(Resources.Load("ParticleAssets") as GameObject).GetComponent<ParticleAssets>();
+                i = Instantiate(Resources.Load("ParticleAssets") as GameObject).GetComponent<ParticleAssets>();
             }
-            return instance;
+            return i;
         }
     }
 
-    public GameObject Smoke;
+    public GameObject smoke;
+    public GameObject leaves;
 }

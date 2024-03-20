@@ -23,7 +23,6 @@ public class FirstHand : MonoBehaviour
         this.enemyTag = enemyTag;
         this.usesWeapons = usesWeapons;
         this.controllerTransform = controllerTransform;
-
     }
 
     public void AttackSwitch(bool value)
@@ -39,8 +38,7 @@ public class FirstHand : MonoBehaviour
             if(isAttacking)
             {
                 foreach (Collider2D collider in colliders)
-                {
-               
+                {              
                     if (collider.tag == "Head" || collider.tag == "Body")
                     {
                         if (collider.transform.parent.tag == enemyTag)
