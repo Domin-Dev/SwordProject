@@ -6,8 +6,6 @@ using UnityEngine.EventSystems;
 
 public class GameManager : MonoBehaviour
 {
-
-
     public event EventHandler<ValueArgs> onValueChange;
     public class ValueArgs : EventArgs
     {
