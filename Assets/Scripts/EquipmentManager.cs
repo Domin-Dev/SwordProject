@@ -25,12 +25,12 @@ public class EquipmentManager : MonoBehaviour
 
     private void Start()
     {
-        UIManager.instance.SetUp(this);
+        UIManager.instance.SetUpUIEquipment(this);
         ChangeSelectedSlot(0);
     }
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.al))
+        if(Input.GetKeyDown(KeyCode.Alpha2))
         {
             ChangeSelectedSlot(1);
         }
