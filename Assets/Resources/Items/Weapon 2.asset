@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b999aea9fb03d7f4ea250a166970f98a, type: 3}
-  m_Name: Weapon
+  m_Name: Weapon 2
   m_EditorClassIdentifier: 
-  name: i
+  name: 
   description: 
-  ID: 1
+  ID: 3
   icon: {fileID: 0}
   damage: 5
-  cooldown: -4376674
+  cooldown: -4377344

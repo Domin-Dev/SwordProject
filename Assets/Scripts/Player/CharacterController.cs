@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.IO.LowLevel.Unsafe;
+using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR;
 
-public class CharacterController: MonoBehaviour, ILifePoints, IUsesWeapons
+public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 {
 
     [SerializeField] private int maxHP;
@@ -55,6 +56,7 @@ public class CharacterController: MonoBehaviour, ILifePoints, IUsesWeapons
     }
     private void Update()
     {
+        if (!IsOwner) return;
         attackModule.Updateflip(MyTools.GetMouseWorldPosition());
         heroStateMachine.currentState.FrameUpdate();
     }

@@ -1,7 +1,10 @@
 
+using Unity.VisualScripting;
 using UnityEngine;
-[CreateAssetMenu(fileName = "Weapon", menuName = "GameAsset/Item/Weapon")]
+[CreateAssetMenu(fileName = "Weapon", menuName = "GameAsset/Items/Weapon")]
 public class Weapon : Item
 {
-    public int damage;
+    [Header("Weapon Stats")]
+    public int damage = 5;
+    public int cooldown;
 }

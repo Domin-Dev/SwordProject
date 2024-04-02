@@ -15,19 +15,31 @@ public class UpdateSelectedSlotInBarArgs : EventArgs
         this.currentSlot = currentSlot;
     }
 }
+public class OpenEquipmentUIArgs : EventArgs
+{
+    public bool open;
+    public OpenEquipmentUIArgs(bool open)
+    {
+        this.open = open;
+    }
+}
+
 
 public class EquipmentManager : MonoBehaviour
 {
     public event EventHandler<UpdateSelectedSlotInBarArgs> UpdateSelectedSlotInBar;
+    public event EventHandler<OpenEquipmentUIArgs> OpenEquipmentUI;
 
     private int lastSelectedSlot = 0;
+    private bool equipmentIsOpen = false;
     private const int MaxSlot = 9;
+
 
     private void Start()
     {
         UIManager.instance.SetUpUIEquipment(this);
         ChangeSelectedSlot(0);
-    }
+    } 
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.Alpha2))
@@ -37,6 +49,13 @@ public class EquipmentManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha0))
         {
             ChangeSelectedSlot(9);
+        }
+
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            equipmentIsOpen = !equipmentIsOpen;
+            OpenEquipmentUIArgs args = new OpenEquipmentUIArgs(equipmentIsOpen);
+            OpenEquipmentUI(this, args);
         }
 
         if (Input.mouseScrollDelta.y > 0)
@@ -60,7 +79,6 @@ public class EquipmentManager : MonoBehaviour
             ChangeSelectedSlot(lastSelectedSlot + 1);
         }
     }
-
     private void BackSlot()
     {
         if (lastSelectedSlot == 0)

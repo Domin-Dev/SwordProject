@@ -1,18 +1,12 @@
-using System.Xml.Schema;
+
 using UnityEngine;
-
-public enum ItemType
+public abstract class Item : ScriptableObject
 {
-    Weapon,
-
-}
-
-[CreateAssetMenu(fileName = "Item", menuName = "GameAsset/Item")]
-public class Item : ScriptableObject
-{
+    [Header("Item Stats")]
     public string name;
     public string description;
-    public int ID { set; get; }
+    public int ID;
 
-    public Sprite icon; 
+    [Header("Item graphic")]
+    public Sprite icon;
 }
