@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b999aea9fb03d7f4ea250a166970f98a, type: 3}
   m_Name: Weapon 2
   m_EditorClassIdentifier: 
-  name: 
-  description: 
+  name: kok
+  description: okkk
   ID: 3
-  icon: {fileID: 0}
+  icon: {fileID: -1828702530, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   damage: 5
-  cooldown: -4377344
+  cooldown: 1

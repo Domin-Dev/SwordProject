@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -32,8 +31,10 @@ public class EquipmentManager : MonoBehaviour
 
     private int lastSelectedSlot = 0;
     private bool equipmentIsOpen = false;
-    private const int MaxSlot = 9;
+    private const int BarSlotCount = 10;
+    private const int SlotCount = 30;
 
+    private ItemSlot[] equipment = new ItemSlot[SlotCount];
 
     private void Start()
     {
@@ -70,7 +71,7 @@ public class EquipmentManager : MonoBehaviour
 
     private void NextSlot()
     {
-        if(lastSelectedSlot == MaxSlot)
+        if(lastSelectedSlot == BarSlotCount - 1)
         {
             ChangeSelectedSlot(0);
         }
@@ -83,7 +84,7 @@ public class EquipmentManager : MonoBehaviour
     {
         if (lastSelectedSlot == 0)
         {
-            ChangeSelectedSlot(MaxSlot);
+            ChangeSelectedSlot(BarSlotCount - 1);
         }
         else
         {
@@ -92,7 +93,7 @@ public class EquipmentManager : MonoBehaviour
     }
     private void ChangeSelectedSlot(int newSlot)
     {
-        newSlot = math.clamp(newSlot, 0, MaxSlot);
+        newSlot = math.clamp(newSlot, 0, BarSlotCount -1);
         UpdateSelectedSlotInBarArgs args = new UpdateSelectedSlotInBarArgs(lastSelectedSlot,newSlot);
         UpdateSelectedSlotInBar(this,args);
         lastSelectedSlot = newSlot;

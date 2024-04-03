@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Weapon
   m_EditorClassIdentifier: 
   name: i
-  description: 
+  description: rtr
   ID: 1
-  icon: {fileID: 0}
+  icon: {fileID: -1828702530, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   damage: 5
   cooldown: -4376674
