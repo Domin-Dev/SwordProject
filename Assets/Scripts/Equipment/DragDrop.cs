@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 public class DragDrop : MonoBehaviour, IPointerDownHandler,IBeginDragHandler,IEndDragHandler,IDragHandler
 {
     private RectTransform rectTransform;
+    private Transform parent;
     private CanvasGroup canvasGroup;
 
     private bool isInSlot;
@@ -22,12 +23,14 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler,IBeginDragHandler,IEn
     public void IsInSlot()
     {
         isInSlot = true;
+        parent = transform.parent;
     }
     public void OnBeginDrag(PointerEventData eventData)
     {
         canvasGroup.alpha = 0.7f;
         canvasGroup.blocksRaycasts = false;
         rectTransform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        transform.SetParent(EquipmentManager.itemParent);
         isInSlot = false;
         lastPosition = rectTransform.anchoredPosition;
     }
@@ -45,6 +48,7 @@ public class DragDrop : MonoBehaviour, IPointerDownHandler,IBeginDragHandler,IEn
         if(!isInSlot)
         {
             rectTransform.anchoredPosition = lastPosition;
+            if(parent != null) transform.SetParent(parent);
         }
     }
 

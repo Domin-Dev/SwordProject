@@ -7,9 +7,11 @@ public class DropSlot : MonoBehaviour, IDropHandler
     {
         if(eventData.pointerDrag != null)
         {
-            eventData.pointerDrag.GetComponent<RectTransform>().SetParent(transform.parent, false);
+            eventData.pointerDrag.transform.SetParent(transform.parent);
             eventData.pointerDrag.GetComponent<RectTransform>().anchoredPosition = this.GetComponent<RectTransform>().anchoredPosition;
             eventData.pointerDrag.GetComponent<DragDrop>().IsInSlot();
+            Sounds.instance.Shield();
+
         }
     }
 }

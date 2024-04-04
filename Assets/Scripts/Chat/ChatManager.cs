@@ -26,8 +26,8 @@ public class ChatManager : MonoBehaviour
     //
 
     //History
-    public List<string> history = new List<string>();
-    public int LastHistory;
+    private List<string> history = new List<string>();
+    private int LastHistory;
     private int currentLastHistory = -1;
     private const int maxHistory = 10;
     //

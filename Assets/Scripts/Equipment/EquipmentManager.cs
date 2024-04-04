@@ -29,13 +29,20 @@ public class EquipmentManager : MonoBehaviour
     public event EventHandler<UpdateSelectedSlotInBarArgs> UpdateSelectedSlotInBar;
     public event EventHandler<OpenEquipmentUIArgs> OpenEquipmentUI;
 
-    private int lastSelectedSlot = 0;
+    private int lastSelectedSlot { get; set; } = 2;
     private bool equipmentIsOpen = false;
-    private const int BarSlotCount = 10;
-    private const int SlotCount = 30;
 
+    public static readonly int BarSlotCount = 10;
+    public static readonly int SlotCount = 30;
+   
     private ItemSlot[] equipment = new ItemSlot[SlotCount];
 
+    public static Transform itemParent { private set; get; }
+
+    private void Awake()
+    {
+        itemParent = GameObject.FindWithTag("Items").transform;
+    }
     private void Start()
     {
         UIManager.instance.SetUpUIEquipment(this);
@@ -98,6 +105,5 @@ public class EquipmentManager : MonoBehaviour
         UpdateSelectedSlotInBar(this,args);
         lastSelectedSlot = newSlot;
     }
-
 
 }

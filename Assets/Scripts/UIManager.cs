@@ -6,10 +6,22 @@ using System.Drawing;
 
 public class UIManager : MonoBehaviour
 {
-
+    //black background
     [SerializeField] private Transform background;
+   
+    [Space(30f)]
+
+    //equipment
     [SerializeField] private Transform itemBar;
     [SerializeField] private Transform equipment;
+    [SerializeField] private GameObject itemSlot;
+    [Space]
+    [SerializeField] private Transform itemEquipmentSlots;
+    [SerializeField] private Transform itemEquipmentBar;
+    //
+
+    [Space(30f)]
+
 
     //temporary
     [SerializeField] private Button ServerButton;
@@ -59,10 +71,13 @@ public class UIManager : MonoBehaviour
         });
     }
 
+
     public void SetUpUIEquipment(EquipmentManager eqManager)
     {
         eqManager.UpdateSelectedSlotInBar += UpdateSelectedSlot;
         eqManager.OpenEquipmentUI += OpenEquipment;
+        LoadSlots(itemEquipmentSlots,EquipmentManager.SlotCount, false);
+        LoadSlots(itemEquipmentBar,EquipmentManager.BarSlotCount, true);
     }
 
     private void OpenEquipment(object sender, OpenEquipmentUIArgs e)
@@ -100,6 +115,24 @@ public class UIManager : MonoBehaviour
         {
             float scale = math.lerp(currentSlotUI.localScale.x, selectedButtonScale, Time.deltaTime * speedSelecting);
             currentSlotUI.localScale = new Vector3(scale, scale,1);
+        }
+    }
+
+    private void LoadSlots(Transform parent,int number,bool numbering)
+    {
+        if (numbering)
+        {
+            for (int i = 0; i < number; i++)
+            {
+                Instantiate(itemSlot, parent);
+            }
+        }
+        else
+        {
+            for (int i = 0; i < number; i++)
+            {
+                Instantiate(itemSlot, parent);
+            }
         }
     }
 }
