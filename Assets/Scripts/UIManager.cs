@@ -2,7 +2,22 @@ using UnityEngine.UI;
 using UnityEngine;
 using Unity.Netcode;
 using Unity.Mathematics;
-using System.Drawing;
+using TMPro;
+
+
+
+public class EquipmentGrid
+{
+    public Transform gridTransform { private set; get; }
+    public int gridIndex {private set; get; }
+
+    public EquipmentGrid(Transform gridTransform, int gridIndex)
+    {
+        this.gridTransform = gridTransform;
+        this.gridIndex = gridIndex;
+    }
+}
+
 
 public class UIManager : MonoBehaviour
 {
@@ -12,14 +27,18 @@ public class UIManager : MonoBehaviour
     [Space(30f)]
 
     //equipment
+    [SerializeField] private Canvas mainCanvas;
+    [Space]
     [SerializeField] private Transform itemBar;
     [SerializeField] private Transform equipment;
+    [Space]
     [SerializeField] private GameObject itemSlot;
+    [SerializeField] private GameObject slotIndex;
+    [SerializeField] private GameObject item;
     [Space]
     [SerializeField] private Transform itemEquipmentSlots;
     [SerializeField] private Transform itemEquipmentBar;
-    //
-
+    [SerializeField] private Transform items;
     [Space(30f)]
 
 
@@ -39,14 +58,21 @@ public class UIManager : MonoBehaviour
     private const float speedUnselecting = 15f;
 
 
+
+    public Transform itemParent { get { return items; } }
     public static UIManager instance { private set; get; }
 
 
+    private EquipmentGrid barGrid;
+    private EquipmentGrid equipmentBarGrid;
+    private EquipmentGrid mainEquipmentGrid;
     private void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
 
+
+        SetGrids();
         SetUpNetworkUI();
     }
 
@@ -55,6 +81,14 @@ public class UIManager : MonoBehaviour
         UpdateButtonSize();
     }
 
+
+    private void SetGrids()
+    {
+        barGrid = new EquipmentGrid(itemBar, 0);
+        equipmentBarGrid = new EquipmentGrid(itemEquipmentBar, 0);
+
+        mainEquipmentGrid = new EquipmentGrid(itemEquipmentSlots, 1);
+    }
     private void SetUpNetworkUI()
     {
         ServerButton.onClick.AddListener(() =>
@@ -72,14 +106,74 @@ public class UIManager : MonoBehaviour
     }
 
 
+
+
     public void SetUpUIEquipment(EquipmentManager eqManager)
     {
         eqManager.UpdateSelectedSlotInBar += UpdateSelectedSlot;
         eqManager.OpenEquipmentUI += OpenEquipment;
-        LoadSlots(itemEquipmentSlots,EquipmentManager.SlotCount, false);
-        LoadSlots(itemEquipmentBar,EquipmentManager.BarSlotCount, true);
+        eqManager.CreateItemUI += CreateItemUI;
+        eqManager.MoveItemUI += MoveItemUI;
+        eqManager.RemoveItemUI += RemoveItemUI;
+        eqManager.UpdateItemCount += UpdateItemCount;
+
+        LoadSlots(mainEquipmentGrid,EquipmentManager.SlotCount, false);
+        LoadSlots(equipmentBarGrid,EquipmentManager.BarSlotCount, true);
+        LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
     }
 
+    private void UpdateItemCount(object sender, UpdateItemCountArgs e)
+    {
+        Transform grid;
+        if (e.position.gridIndex == 0) grid = itemEquipmentBar;
+        else grid = itemEquipmentSlots;
+
+        Debug.Log($"{e.position.gridIndex} + {e.position.slotIndex}");
+
+        Transform slot = grid.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
+        slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = e.count.ToString();
+    }
+
+    private void RemoveItemUI(object sender, RemoveItemUIArgs e)
+    {
+        Debug.Log($"{e.position.gridIndex} + {e.position.slotIndex}");
+        Transform grid;
+        if (e.position.gridIndex == 0) grid = itemEquipmentBar;
+        else grid = itemEquipmentSlots;
+
+        Destroy(grid.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().gameObject);
+    }
+
+    private void MoveItemUI(object sender, MoveItemUIArgs e)
+    {
+        Transform gridFrom, gridTo;
+        if (e.from.gridIndex == 0) gridFrom = itemEquipmentBar;
+        else gridFrom = itemEquipmentSlots;
+
+        if (e.to.gridIndex == 0) gridTo = itemEquipmentBar;
+        else gridTo = itemEquipmentSlots;
+
+
+        Debug.Log($"form {e.from.slotIndex} to {e.to.slotIndex}");
+        DragDrop slot = gridFrom.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
+        slot.transform.SetParent(gridTo.GetChild(e.to.slotIndex));
+        slot.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        slot.IsInSlot();
+    }
+
+    private void CreateItemUI(object sender, CreateItemUIArgs e)
+    {
+        Transform gridUI;
+        if (e.position.gridIndex == 0) gridUI = itemEquipmentBar;
+        else gridUI = itemEquipmentSlots;
+
+        RectTransform transform = Instantiate(item, gridUI.GetChild(e.position.slotIndex)).GetComponent<RectTransform>();
+        transform.anchoredPosition = Vector2.zero;
+        transform.GetComponent<Image>().sprite = e.sprite;
+        transform.GetComponentInChildren<TextMeshProUGUI>().text = e.itemCount.ToString();
+        transform.GetComponent<DragDrop>().SetCanvas(mainCanvas);
+        transform.GetComponent<DragDrop>().IsInSlot();
+    }
     private void OpenEquipment(object sender, OpenEquipmentUIArgs e)
     {
         if (e.open)
@@ -118,20 +212,26 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void LoadSlots(Transform parent,int number,bool numbering)
+    private void LoadSlots(EquipmentGrid equipmentGrid,int number,bool numbering)
     {
         if (numbering)
         {
+            int index;
             for (int i = 0; i < number; i++)
             {
-                Instantiate(itemSlot, parent);
+                index = i + 1;
+                Transform slot = Instantiate(itemSlot, equipmentGrid.gridTransform).transform;
+                slot.GetComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
+                if (index > 9) index = 0;
+                Instantiate(slotIndex,slot).GetComponent<TextMeshProUGUI>().text = index.ToString();
             }
         }
         else
         {
             for (int i = 0; i < number; i++)
             {
-                Instantiate(itemSlot, parent);
+                Transform slot = Instantiate(itemSlot, equipmentGrid.gridTransform).transform;
+                slot.GetComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
             }
         }
     }

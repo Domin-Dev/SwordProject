@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: i
   description: rtr
-  ID: 1
+  ID: 0
+  stackMax: 50
   icon: {fileID: -1828702530, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   damage: 5
   cooldown: -4376674

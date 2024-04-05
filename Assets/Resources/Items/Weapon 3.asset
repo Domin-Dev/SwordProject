@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b999aea9fb03d7f4ea250a166970f98a, type: 3}
-  m_Name: Weapon 2
+  m_Name: Weapon 3
   m_EditorClassIdentifier: 
   name: kok
   description: okkk
-  ID: 2
+  ID: 3
   stackMax: 50
-  icon: {fileID: 2076849020, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  icon: {fileID: -1887936484, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   damage: 5
   cooldown: 1

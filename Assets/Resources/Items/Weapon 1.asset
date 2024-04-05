@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: uhuh
   description: 
-  ID: 2
-  icon: {fileID: 1520338733, guid: 6bc33a34478c38e458c5c7888808e998, type: 3}
+  ID: 1
+  stackMax: 50
+  icon: {fileID: 752939284, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   damage: 5
   cooldown: -4376884
