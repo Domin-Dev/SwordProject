@@ -29,22 +29,36 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
         parent = transform.parent;
     }
 
+
+
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (eventData.button != PointerEventData.InputButton.Middle && EquipmentManager.instance.IsNotSelected())
         {
-            if(parent != null) EquipmentManager.instance.selectedSlotInEQ = parent.GetComponent<DropSlot>().GetSlotPosition();
             canvasGroup.alpha = 0.7f;
             canvasGroup.blocksRaycasts = false;
             rectTransform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
             transform.SetParent(UIManager.instance.itemParent);
             isInSlot = false;
+            EquipmentManager.instance.input = eventData.button;
+
+            if (parent != null)
+            {
+                if (eventData.button == PointerEventData.InputButton.Left)
+                {
+                    EquipmentManager.instance.SelectedSlotTakeAll(parent.GetComponent<DropSlot>().GetSlotPosition());
+                }
+                else
+                {
+                    EquipmentManager.instance.SelectedSlotTakeHalf(parent.GetComponent<DropSlot>().GetSlotPosition());
+                }
+            }
         }
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (EquipmentManager.instance.input == eventData.button)
         {
             rectTransform.anchoredPosition += eventData.delta / canvas.scaleFactor;
         }
@@ -52,17 +66,22 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left)
+        if (EquipmentManager.instance.input == eventData.button)
         {
-            EquipmentManager.instance.selectedSlotInEQ = new SlotPosition(-1, -1);
             rectTransform.localScale = Vector3.one;
             canvasGroup.alpha = 1f;
             canvasGroup.blocksRaycasts = true;
+
             if (!isInSlot)
             {
+                EquipmentManager.instance.UnselectedSlot();
                 if (parent != null) transform.SetParent(parent);
                 rectTransform.anchoredPosition = Vector2.zero;
             }
+            else
+            {
+                EquipmentManager.instance.ClearSelectedSlot();
+            }                            
         }
     }
 }

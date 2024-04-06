@@ -9,7 +9,7 @@ public class GameItem : MonoBehaviour
 
     private void Awake()
     {
-        itemStats = new ItemStats(Random.Range(0,4), Random.Range(1,60));
+        itemStats = new ItemStats(Random.Range(0,4), Random.Range(30,200));
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

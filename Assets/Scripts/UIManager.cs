@@ -116,10 +116,25 @@ public class UIManager : MonoBehaviour
         eqManager.MoveItemUI += MoveItemUI;
         eqManager.RemoveItemUI += RemoveItemUI;
         eqManager.UpdateItemCount += UpdateItemCount;
+        eqManager.UpdateDragItemCount += UpdateDragItemCount;
+        eqManager.RemoveDragItemUI += RemoveDragItemUI;
 
         LoadSlots(mainEquipmentGrid,EquipmentManager.SlotCount, false);
         LoadSlots(equipmentBarGrid,EquipmentManager.BarSlotCount, true);
         LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
+    }
+
+    private void RemoveDragItemUI(object sender, System.EventArgs e)
+    {
+        Transform slot = itemParent.GetComponentInChildren<DragDrop>().transform;
+        slot.gameObject.SetActive(false);
+        Destroy(slot.gameObject);
+    }
+    private void UpdateDragItemCount(object sender, UpdateDragItemCountArgs e)
+    {
+        Transform slot = itemParent.GetComponentInChildren<DragDrop>().transform;
+        if (e.count != 1) slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = e.count.ToString();
+        else slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
     }
 
     private void UpdateItemCount(object sender, UpdateItemCountArgs e)
@@ -128,20 +143,20 @@ public class UIManager : MonoBehaviour
         if (e.position.gridIndex == 0) grid = itemEquipmentBar;
         else grid = itemEquipmentSlots;
 
-        Debug.Log($"{e.position.gridIndex} + {e.position.slotIndex}");
-
         Transform slot = grid.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
-        slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = e.count.ToString();
+        if (e.count != 1) slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = e.count.ToString();
+        else slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
     }
 
     private void RemoveItemUI(object sender, RemoveItemUIArgs e)
     {
-        Debug.Log($"{e.position.gridIndex} + {e.position.slotIndex}");
         Transform grid;
         if (e.position.gridIndex == 0) grid = itemEquipmentBar;
         else grid = itemEquipmentSlots;
 
-        Destroy(grid.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().gameObject);
+        Transform slot = grid.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
+        slot.gameObject.SetActive(false);
+        Destroy(slot.gameObject);
     }
 
     private void MoveItemUI(object sender, MoveItemUIArgs e)
