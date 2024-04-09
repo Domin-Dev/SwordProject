@@ -35,5 +35,10 @@ public class ItemsAsset : MonoBehaviour
     {
         return items[itemID].icon;
     }
+
+    public int GetStackMax(int itemID)
+    {
+        return items[itemID].stackMax;
+    }
     
 }

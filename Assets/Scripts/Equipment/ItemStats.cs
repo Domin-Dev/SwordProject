@@ -5,35 +5,41 @@ using System;
 
 public class ItemStats
 {
-    public int ItemID = -1;
-    public int ItemCount;
+    public int itemID = -1;
+    public int itemCount;
     public ItemLife itemLife;
 
+    public ItemStats(ItemStats itemStats)
+    {
+        this.itemID = itemStats.itemID;
+        this.itemCount = itemStats.itemCount;
+        if(itemStats.itemLife != null) this.itemLife = new ItemLife(itemStats.itemLife);
+    }
 
     public ItemStats(int itemID, int itemCount,ItemLife itemLife)
     {
-        this.ItemID = itemID;
-        this.ItemCount = itemCount;
+        this.itemID = itemID;
+        this.itemCount = itemCount;
         this.itemLife = itemLife; 
     }
     public ItemStats(int itemID, int itemCount)
     {
-        this.ItemID = itemID;
-        this.ItemCount = itemCount;
+        this.itemID = itemID;
+        this.itemCount = itemCount;
         this.itemLife = null;
     }
 
     public ItemStats(int itemID)
     {
-        this.ItemID = itemID;
-        this.ItemCount = 1;
+        this.itemID = itemID;
+        this.itemCount = 1;
         this.itemLife = null;
 
     }
 
     public bool isNull()
     {
-        if (ItemID != -1) return false;
+        if (itemID != -1) return false;
         else return true;
     }
 }
@@ -41,13 +47,19 @@ public class ItemStats
 [Serializable]
 public class ItemLife
 {
-    private float maxLifePoints;
+    public float maxLifePoints;
     public float currentLifePoints;
 
     public ItemLife(float maxLifePoints,float currentLifePoints)
     {
         this.maxLifePoints = maxLifePoints;
         this.currentLifePoints = currentLifePoints;
+    }
+
+    public ItemLife(ItemLife itemLife)
+    {
+        this.maxLifePoints = itemLife.maxLifePoints;
+        this.currentLifePoints = itemLife.currentLifePoints;
     }
 }
 

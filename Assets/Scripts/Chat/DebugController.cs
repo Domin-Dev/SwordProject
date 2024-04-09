@@ -24,6 +24,11 @@ public class DebugController : MonoBehaviour
             Debug.Log("spawn" + x);
         }));
 
+        commandList.Add(new DebugCommand<int,int>("give", "Adds item to player equipment", "[ID] [Count]", (ID, count) =>
+        {
+            Debug.Log(ID + " "+ count);
+            EquipmentManager.instance.AddNewItem(new ItemStats(ID,count));
+        }));
 
 
         commandList.Add(new DebugCommand("help", "command list", "", () =>

@@ -9,6 +9,7 @@ using Unity.Netcode;
 using System.IO;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.SocialPlatforms;
+using SerializableCallback;
 
 public class ChatManager : MonoBehaviour
 {
@@ -251,11 +252,10 @@ public class ChatManager : MonoBehaviour
         foreach (var item in commandList)
         {        
             CommandBase commandBase = item as CommandBase;
-            if (command.Contains(commandBase.commandId))
+            if (command.Contains(commandBase.commandId,StringComparison.OrdinalIgnoreCase))
             {
                 if (item is DebugCommand)
                 {
-                    Debug.Log("2jest!");
                     (item as DebugCommand).Invoke();
                 }
                 else if (item is DebugCommand<int>)
@@ -265,13 +265,27 @@ public class ChatManager : MonoBehaviour
                     {      
                         (item as DebugCommand<int>).Invoke(arg);
                     }
-                    else ChatPrint($"/{commandBase.commandId} {commandBase.commandFormat}");
-                } 
+                    else PrintHint(commandBase);
+                }
+                else if (item is DebugCommand<int,int>)
+                {
+                    int arg1,arg2;
+                    if (properties.Length > 2 && int.TryParse(properties[1], out arg1) && int.TryParse(properties[2], out arg2))
+                    {
+                        (item as DebugCommand<int, int>).Invoke(arg1, arg2);
+                    }
+                    else PrintHint(commandBase);
+                }
             }
         }
 
   
 
+    }
+
+    private void PrintHint(CommandBase commandBase)
+    {
+        ChatPrint($"/{commandBase.commandId} {commandBase.commandFormat}");
     }
     private void SetUp()
     {

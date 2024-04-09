@@ -46,7 +46,7 @@ public class DropSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
             }
             else
             {
-                EquipmentManager.instance.PutItem(slotPosition);
+                EquipmentManager.instance.PutOneItem(slotPosition);
                 Sounds.instance.Shield();
             }            
             

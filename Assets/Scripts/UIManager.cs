@@ -3,8 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Unity.Mathematics;
 using TMPro;
-
-
+using System;
 
 public class EquipmentGrid
 {
@@ -17,6 +16,7 @@ public class EquipmentGrid
         this.gridIndex = gridIndex;
     }
 }
+
 
 
 public class UIManager : MonoBehaviour
@@ -66,6 +66,8 @@ public class UIManager : MonoBehaviour
     private EquipmentGrid barGrid;
     private EquipmentGrid equipmentBarGrid;
     private EquipmentGrid mainEquipmentGrid;
+
+
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -118,13 +120,50 @@ public class UIManager : MonoBehaviour
         eqManager.UpdateItemCount += UpdateItemCount;
         eqManager.UpdateDragItemCount += UpdateDragItemCount;
         eqManager.RemoveDragItemUI += RemoveDragItemUI;
+        eqManager.MoveMainBarItem += MoveMainBarItem;
+        eqManager.CreateMainBarItem += CreateMainBarItem;
+        eqManager.RemoveMainBarItem += RemoveMainBarItem;
+        eqManager.UpdateMainBarItemCount += UpdateMainBarItemCount;
 
         LoadSlots(mainEquipmentGrid,EquipmentManager.SlotCount, false);
         LoadSlots(equipmentBarGrid,EquipmentManager.BarSlotCount, true);
         LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
     }
 
-    private void RemoveDragItemUI(object sender, System.EventArgs e)
+    private void UpdateMainBarItemCount(object sender, UpdateItemCountArgs e)
+    {
+        UpdateCount(itemBar, e);
+    }
+
+    private void RemoveMainBarItem(object sender, RemoveItemUIArgs e)
+    {
+        RemoveItem(itemBar, e);
+    }
+
+    private void CreateMainBarItem(object sender, CreateItemUIArgs e)
+    {
+        NewItemUI(itemBar, e);
+    }
+
+    private void MoveMainBarItem(object sender, MoveMainBarItemArgs e)
+    {
+        if(e.from.gridIndex == 0 && e.to.gridIndex == 0)
+        {
+            DragDrop slot = itemBar.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
+            slot.transform.SetParent(itemBar.GetChild(e.to.slotIndex));
+            slot.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        }
+        else if(e.from.gridIndex == 0)
+        {
+            RemoveItem(itemBar, new RemoveItemUIArgs(e.from));
+        }
+        else if (e.to.gridIndex == 0)
+        {
+            ItemStats item = EquipmentManager.instance.GetItemStatsValue(e.to);
+            NewItemUI(itemBar, new CreateItemUIArgs(ItemsAsset.instance.GetIcon(item.itemID),item.itemCount,e.to,false));
+        }   
+    }
+    private void RemoveDragItemUI(object sender, EventArgs e)
     {
         Transform slot = itemParent.GetComponentInChildren<DragDrop>().transform;
         slot.gameObject.SetActive(false);
@@ -142,8 +181,17 @@ public class UIManager : MonoBehaviour
         Transform grid;
         if (e.position.gridIndex == 0) grid = itemEquipmentBar;
         else grid = itemEquipmentSlots;
+        UpdateCount(grid, e);
+        if(e.position.gridIndex == 0)
+        {
+            UpdateCount(itemBar,e);
+        }    
+        
+    }
 
-        Transform slot = grid.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
+    private void UpdateCount(Transform gridUI, UpdateItemCountArgs e)
+    {
+        Transform slot = gridUI.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
         if (e.count != 1) slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = e.count.ToString();
         else slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
     }
@@ -154,7 +202,16 @@ public class UIManager : MonoBehaviour
         if (e.position.gridIndex == 0) grid = itemEquipmentBar;
         else grid = itemEquipmentSlots;
 
-        Transform slot = grid.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
+        RemoveItem(grid, e);
+        if(e.position.gridIndex == 0)
+        {
+            RemoveItem(itemBar, e);
+        }
+    }
+
+    private void RemoveItem(Transform gridUI, RemoveItemUIArgs e)
+    {
+        Transform slot = gridUI.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
         slot.gameObject.SetActive(false);
         Destroy(slot.gameObject);
     }
@@ -168,8 +225,19 @@ public class UIManager : MonoBehaviour
         if (e.to.gridIndex == 0) gridTo = itemEquipmentBar;
         else gridTo = itemEquipmentSlots;
 
+        if (e.to.gridIndex == 0 || e.from.gridIndex == 0) MoveMainBarItem(this, new MoveMainBarItemArgs(e.from, e.to));
 
-        Debug.Log($"form {e.from.slotIndex} to {e.to.slotIndex}");
+
+        DragDrop slot = gridFrom.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
+        slot.transform.SetParent(gridTo.GetChild(e.to.slotIndex));
+        slot.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        slot.IsInSlot();
+        
+      
+    }
+
+    private void MoveItem(Transform gridFrom,Transform gridTo, MoveItemUIArgs e)
+    {
         DragDrop slot = gridFrom.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
         slot.transform.SetParent(gridTo.GetChild(e.to.slotIndex));
         slot.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
@@ -182,13 +250,31 @@ public class UIManager : MonoBehaviour
         if (e.position.gridIndex == 0) gridUI = itemEquipmentBar;
         else gridUI = itemEquipmentSlots;
 
+        NewItemUI(gridUI, e);
+        if(e.position.gridIndex == 0 && !e.isDrag)
+        {
+            NewItemUI(itemBar, e);
+        }
+    }
+
+    private void NewItemUI(Transform gridUI,CreateItemUIArgs e)
+    {
         RectTransform transform = Instantiate(item, gridUI.GetChild(e.position.slotIndex)).GetComponent<RectTransform>();
         transform.anchoredPosition = Vector2.zero;
         transform.GetComponent<Image>().sprite = e.sprite;
-        transform.GetComponentInChildren<TextMeshProUGUI>().text = e.itemCount.ToString();
-        transform.GetComponent<DragDrop>().SetCanvas(mainCanvas);
-        transform.GetComponent<DragDrop>().IsInSlot();
+        if (e.itemCount != 1) transform.GetComponentInChildren<TextMeshProUGUI>().text = e.itemCount.ToString();
+        else transform.GetComponentInChildren<TextMeshProUGUI>().text = "";
+
+        if (gridUI != itemBar)
+        {
+            transform.GetComponent<DragDrop>().SetCanvas(mainCanvas);
+            transform.GetComponent<DragDrop>().IsInSlot();
+        }else
+        {
+            transform.GetComponent<DragDrop>().enabled = false;
+        }
     }
+
     private void OpenEquipment(object sender, OpenEquipmentUIArgs e)
     {
         if (e.open)
@@ -226,9 +312,9 @@ public class UIManager : MonoBehaviour
             currentSlotUI.localScale = new Vector3(scale, scale,1);
         }
     }
-
     private void LoadSlots(EquipmentGrid equipmentGrid,int number,bool numbering)
     {
+        bool isMainBar = equipmentGrid == barGrid;
         if (numbering)
         {
             int index;
@@ -236,7 +322,11 @@ public class UIManager : MonoBehaviour
             {
                 index = i + 1;
                 Transform slot = Instantiate(itemSlot, equipmentGrid.gridTransform).transform;
-                slot.GetComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
+                if (isMainBar)
+                    slot.GetComponent<DropSlot>().enabled = false;        
+                else 
+                    slot.GetComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
+                
                 if (index > 9) index = 0;
                 Instantiate(slotIndex,slot).GetComponent<TextMeshProUGUI>().text = index.ToString();
             }

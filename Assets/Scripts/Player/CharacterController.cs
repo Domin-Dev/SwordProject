@@ -13,6 +13,19 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private int hp;
     [SerializeField] private Transform hpBar;
 
+    [SerializeField] private Sprite bottom;
+    [SerializeField] private Sprite top;
+    [SerializeField] private Sprite left;
+    [SerializeField] private Sprite rigth;
+    [SerializeField] private SpriteRenderer head;
+    [SerializeField] private Sprite bbottom;
+    [SerializeField] private Sprite btop;
+    [SerializeField] private Sprite bleft;
+    [SerializeField] private Sprite brigth;
+    [SerializeField] private SpriteRenderer body;
+
+
+
 
     private Vector2 moveDir;
     private Rigidbody2D rigidbody2D;
@@ -122,5 +135,33 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     }
     #endregion
 
+    public void UpdateHead(Vector2 pos)
+    {
+        if (pos.y > 0)
+        {
+            head.sprite = top;
+            if(pos.x > 0)
+            {
+                if(pos.x > pos.y)
+                {
+                    head.sprite = rigth;
+                    body.sprite = brigth;
+                }
+            }
+            else
+            {
+                if (Mathf.Abs(pos.x) > pos.y)
+                {
+                    head.sprite = left;
+                    body.sprite = bleft;
+                }
+            }
+        }
+        else
+        {
+            head.sprite = bottom;
+            body.sprite = bbottom;
+        }
+    }
 }
 

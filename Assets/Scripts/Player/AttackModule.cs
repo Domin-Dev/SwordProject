@@ -31,6 +31,13 @@ public class AttackModule : MonoBehaviour
     public bool canAttack { get; private set; }
     public float timer;
     private const float setTime = 0.45f;
+
+    private CharacterController characterController;
+
+    private void Start()
+    {
+        characterController = GetComponent<CharacterController>();
+    }
     private void Update()
     {
         if (!canAttack)
@@ -45,8 +52,11 @@ public class AttackModule : MonoBehaviour
     }
     public void Aim()
     {
+
         float angle = GetAngle(targetPos, weaponTransform, 0);
         float angle1 = GetAngle(targetPos, shieldTransform, 0);
+
+        characterController.UpdateHead(targetPos);
 
         weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
         shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
@@ -175,4 +185,6 @@ public class AttackModule : MonoBehaviour
             usesWeapons.EndAttack();
         }
     }
+
+
 }
