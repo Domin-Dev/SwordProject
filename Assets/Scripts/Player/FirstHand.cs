@@ -29,7 +29,6 @@ public class FirstHand : MonoBehaviour
     {
         isAttacking = value;
     }
-
     IEnumerator CheckColliders()
     {
         while (true)

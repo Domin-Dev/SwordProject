@@ -80,16 +80,6 @@ MonoBehaviour:
   maxHP: 300
   hp: 300
   hpBar: {fileID: 8197275923863278976}
-  bottom: {fileID: -1090664287, guid: 4f690217dbf8b3349891912876abff16, type: 3}
-  top: {fileID: -1260459268, guid: 4f690217dbf8b3349891912876abff16, type: 3}
-  left: {fileID: -233868556, guid: 4f690217dbf8b3349891912876abff16, type: 3}
-  rigth: {fileID: 7690431, guid: 4f690217dbf8b3349891912876abff16, type: 3}
-  head: {fileID: 6516438454985899349}
-  bbottom: {fileID: -1503905435, guid: 4f690217dbf8b3349891912876abff16, type: 3}
-  btop: {fileID: -2036514952, guid: 4f690217dbf8b3349891912876abff16, type: 3}
-  bleft: {fileID: 238542061, guid: 4f690217dbf8b3349891912876abff16, type: 3}
-  brigth: {fileID: -502915771, guid: 4f690217dbf8b3349891912876abff16, type: 3}
-  body: {fileID: 4106200072131727611}
   flip: 0
 --- !u!114 &3595371003976940843
 MonoBehaviour:
@@ -919,7 +909,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.00049877167, y: -0.07599275}
+  m_Offset: {x: -0.00014802068, y: -0.0802017}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -930,7 +920,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.09181881, y: 0.060902804}
+  m_Size: {x: 0.09018199, y: 0.050146602}
   m_EdgeRadius: 0
 --- !u!1 &6601084887093299357
 GameObject:

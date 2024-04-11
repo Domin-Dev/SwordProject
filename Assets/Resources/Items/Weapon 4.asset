@@ -10,12 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b999aea9fb03d7f4ea250a166970f98a, type: 3}
-  m_Name: Weapon 3
+  m_Name: Weapon 4
   m_EditorClassIdentifier: 
-  name: kok
-  description: okkk
-  ID: 3
+  name: 
+  description: 
+  ID: 10
   stackMax: 50
-  icon: {fileID: -1887936484, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  icon: {fileID: 866442174, guid: 59c72a0771dd7a043a02a6626b207c98, type: 3}
+  weaponImage: {fileID: 866442174, guid: 59c72a0771dd7a043a02a6626b207c98, type: 3}
+  hitBoxPoints:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  gripPoint: {x: 0.005, y: -0.035}
   damage: 5
-  cooldown: 1
+  cooldown: 0

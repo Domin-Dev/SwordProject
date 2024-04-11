@@ -1,5 +1,6 @@
 using UnityEngine;
-public abstract class Item : ScriptableObject
+[CreateAssetMenu(fileName = "Item", menuName = "GameAsset/Items/Item")]
+public class Item : ScriptableObject
 {
     [Header("Item Stats")]
     public string name;

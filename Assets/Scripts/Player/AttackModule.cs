@@ -56,8 +56,6 @@ public class AttackModule : MonoBehaviour
         float angle = GetAngle(targetPos, weaponTransform, 0);
         float angle1 = GetAngle(targetPos, shieldTransform, 0);
 
-        characterController.UpdateHead(targetPos);
-
         weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
         shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
 

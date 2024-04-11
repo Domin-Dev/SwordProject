@@ -40,5 +40,10 @@ public class ItemsAsset : MonoBehaviour
     {
         return items[itemID].stackMax;
     }
+
+    public Sprite[] GetGarmentSprites(int itemID)
+    {
+        return (items[itemID] as Garment).GetArray();
+    }
     
 }
