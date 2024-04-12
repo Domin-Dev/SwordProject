@@ -9,11 +9,9 @@ public class WeaponEditor : Editor
     Sprite hitbox;
     int width;
     float pixelSize;
+    Vector2 middle;
 
     Color[] texture;
-    bool [] checkedArray;
-    List<Point> points;
-    int index = 0;
     public override void OnInspectorGUI()
     {
         Weapon weapon = target as Weapon;
@@ -40,7 +38,7 @@ public class WeaponEditor : Editor
         pixelSize = 1.0f/sprite.pixelsPerUnit;
         width = (int)sprite.rect.width;
 
-        Vector2 middle = new Vector2((sprite.rect.width - 1)/2, (sprite.rect.height- 1)/2);
+        middle = new Vector2((sprite.rect.width - 1)/2, (sprite.rect.height- 1)/2);
         texture = sprite.texture.GetPixels((int)sprite.rect.x, (int)sprite.rect.y, (int)sprite.rect.width,(int)sprite.rect.height);
         for (int i = 0; i < texture.Length; i++)
         {
@@ -59,125 +57,110 @@ public class WeaponEditor : Editor
             }
         }
     }
-
     private Vector2 GetVector(int i)
     {
         return new Vector2(i % width, i / width);
     }
-
     private int GetInt(Vector2 position)
     { 
         return (int)position.x + (int)position.y * width;
     }
-
-    public class Point
-    {
-        public  Vector2 position;
-        public bool[] neighbors;
-        public bool toRemove;
-
-        public Point(Vector2 position)
-        {
-            this.position = position;
-            toRemove = false;
-            neighbors = new bool[8];
-        }
-    }
-
     private Vector2[] GetPoints(int i)
-    {
-        points = new List<Point>();
-        checkedArray = new bool[texture.Length];
+    {   
+        List<Vector2> pointsToReturn = new List<Vector2>();
 
-        CheckPoint(i);
-        for (int j = 0; j < points.Count; j++)
+        Vector2 startPosition = GetVector(i);
+        Vector2 position = startPosition;
+
+        pointsToReturn.Add(pixelSize * (startPosition - middle));
+
+        while (true)
         {
-            bool[] neighbors = points[j].neighbors;
-            Vector2 pos = points[j].position;
-            neighbors[0] = IsPoint(pos + new Vector2(0, 1));
-            neighbors[1] = IsPoint(pos + new Vector2(0, -1));
-            neighbors[2] = IsPoint(pos + new Vector2(1, 0));
-            neighbors[3] = IsPoint(pos + new Vector2(-1,0));
-
-            neighbors[4] = IsPoint(pos + new Vector2(1, 1));
-            neighbors[5] = IsPoint(pos + new Vector2(1, -1));
-            neighbors[6] = IsPoint(pos + new Vector2(-1,1));
-            neighbors[7] = IsPoint(pos + new Vector2(-1,-1));
+            position = DrawLine(position);
+            if (position == startPosition)
+            {
+                break;
+            }
+            else
+            {
+                pointsToReturn.Add(pixelSize * (position - middle));
+            }
         }
 
-        for (int k = 2; k < points.Count; k++)
-        {
-            Vector2 position = points[k].position;
-            ReducePoints(k, position,new Vector2(0,1),0);
-            ReducePoints(k, position,new Vector2(0,-1),1);
-            ReducePoints(k, position,new Vector2(1,0),2);
-            ReducePoints(k, position,new Vector2(-1,0),3);
-
-            ReducePoints(k, position,new Vector2(1,1),4);
-            ReducePoints(k, position,new Vector2(1,-1),5);
-            ReducePoints(k, position,new Vector2(-1,1),6);
-            ReducePoints(k, position,new Vector2(-1,-1),7);
-        }
-
-        points.RemoveAll(match => match.toRemove);
-
-        Vector2[] array = new Vector2[points.Count];
-        for (int k = 0; k < points.Count; k++)
-        {
-            array[k] = points[k].position;
-        }
-
-        return array;
+        return pointsToReturn.ToArray();
     }
-
-    private void ReducePoints(int index, Vector2 position,Vector2 offset,int neighborIndex)
+    private Vector2 DrawLine(Vector2 position)
     {
-        int j = PointIndex(index, position + offset);
-        if (j >= 0 && points[j].neighbors[neighborIndex])
+        Vector2 last, current = new Vector2(-1,-1);
+
+        int dir = GetDirection(GetNeighbors(position));
+        int k;   
+        if(dir == 0) k = 7; else k = dir - 1;
+        last = position;
+
+        while(true) 
         {
-            points[j].toRemove = true;
+
+            Vector2 pos = last + MyTools.Directions[dir];
+            if(IsHitBox(pos))
+            {
+                current = pos;
+                if((dir % 2 == 1 && IsHitBox(current + MyTools.Directions[k])) || (IsHitBox(last + MyTools.Directions[k]) && IsHitBox(current + MyTools.Directions[k])))
+                {
+                    break;
+                } 
+            }
+            else
+            {
+                break;
+            }
+            last = pos;
+        }
+
+        if(current.x < 0f) 
+        {       
+            return last;
+        }
+        else
+        {
+            return current;
         }
     }
-    private int PointIndex(int j,Vector2 position)
+    private bool IsHitBox(Vector2 vector2)
     {
-        for (int i = 0; i < j; i++)
+        int i = GetInt(vector2);
+        if (i < texture.Length && i > 0 && texture[i].a == 1f && texture[i].g == 1f)
+            return true;  
+        else
+            return false;
+    }
+    private int GetDirection(bool[] neighbors)
+    {
+        bool last = neighbors[0];
+        for (int i = 1; i < 8; i++)
         {
-            if (points[i].position.y == position.y && points[i].position.x == position.x)
+            if (!last && neighbors[i])
             {
                 return i;
             }
+            last = neighbors[i];
         }
+
+        if (neighbors[0] && !neighbors[7]) 
+        {
+            return 0;
+        }
+
         return -1;
     }
-
-    private bool IsPoint(Vector2 position)
+    private bool[] GetNeighbors(Vector2 pos)
     {
-        for (int i = 0; i < points.Count; i++)
+        bool[] neighbors = new bool[8];
+        for (int i = 0; i < 8; i++)
         {
-            if (points[i].position.y == position.y && points[i].position.x == position.x)
-            {
-                return true;
-            }
+            neighbors[i] = IsHitBox(pos + MyTools.Directions[i]);
         }
-        return false;
+        return neighbors;
     }
-    private void CheckPoint(int i)
-    {
-        if (!checkedArray[i] && i < texture.Length && i > 0 && texture[i].a == 1f && texture[i].g == 1f)
-        {
-            Point point = new Point(GetVector(i));
-            checkedArray[i] = true;
-
-            
-            points.Add(point);
-
-            CheckPoint(i + 1);
-            CheckPoint(i - 1);
-            CheckPoint(i + width);
-            CheckPoint(i - width);
-        }
-    }
-
-
 
 }
