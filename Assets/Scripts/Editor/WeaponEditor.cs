@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -37,25 +38,36 @@ public class WeaponEditor : Editor
         hitbox = null;
         pixelSize = 1.0f/sprite.pixelsPerUnit;
         width = (int)sprite.rect.width;
+        bool hitBoxIsCut = false;
+        weapon.gripPoint2 = new Vector2(-100, -100);
+        
 
         middle = new Vector2((sprite.rect.width - 1)/2, (sprite.rect.height- 1)/2);
         texture = sprite.texture.GetPixels((int)sprite.rect.x, (int)sprite.rect.y, (int)sprite.rect.width,(int)sprite.rect.height);
+        
         for (int i = 0; i < texture.Length; i++)
         {
             Color color = texture[i];
             if (color.a == 1) 
             {
-                if(color.g == 1)
+                if(color.g == 1 && !hitBoxIsCut)
                 {
                     weapon.hitBoxPoints = GetPoints(i);
+                    hitBoxIsCut = true;
                     break;
                 }
-                if (color.r == 1)
+                else if (color.r == 1)
                 {
-                    weapon.gripPoint = pixelSize *(GetVector(i) - middle);
+                    weapon.gripPoint1 = pixelSize *(GetVector(i) - middle);
+                }
+                else if(color.b == 1)
+                {
+                    weapon.gripPoint2 = pixelSize * (GetVector(i) - middle);
                 }
             }
         }
+
+        
     }
     private Vector2 GetVector(int i)
     {

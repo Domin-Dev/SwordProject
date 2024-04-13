@@ -18,11 +18,7 @@ public class IdleState : HeroState
     }
     public override void FrameUpdate()
     {
-        if (Input.GetMouseButton(1))
-        {
-             controller.attackModule.UpdateShield();
-        }else
-             controller.attackModule.Aim();
+        controller.attackModule.Aim();
 
         if(Input.GetMouseButtonDown(0) && controller.attackModule.canAttack)
         {

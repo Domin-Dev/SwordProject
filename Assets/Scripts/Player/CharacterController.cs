@@ -5,6 +5,7 @@ using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR;
+using static UnityEditor.Progress;
 
 public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 {
@@ -14,14 +15,13 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private Transform hpBar;
 
 
+    [SerializeField] private Transform secondHand;
+    Vector3 secondHandStartPosition;
+    [SerializeField] private Transform secondHandParent;
+    [SerializeField] private SpriteRenderer itemInHand;
+
     private Vector2 moveDir;
     private Rigidbody2D rigidbody2D;
-
-
-    private Transform weaponTransform;
-    private Transform shieldTransform;
-    private Transform child;
-    private Transform shield;
 
     public bool flip;
     private bool isRepulsed = false;
@@ -42,34 +42,80 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 
     #endregion
 
-    #region built-in functions
     private void Awake()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
         attackModule = GetComponent<AttackModule>();
-        attackModule.SetController(this,"Enemy");       
+        attackModule.SetController(this,"Enemy");  
+        secondHandStartPosition = secondHand.localPosition;
+
         SetStateMachine();
     }
     private void Start()
     {
         heroStateMachine.RunMachine(idleState);
-
-
-
+        SetUpEvents();
     }
     private void Update()
     {
-        if (!IsOwner) return;
+      //  if (!IsOwner) return;
         attackModule.Updateflip(MyTools.GetMouseWorldPosition());
         heroStateMachine.currentState.FrameUpdate();
     }
-    bool foolow = true;
     private void FixedUpdate()
     {
-      if(foolow)   heroStateMachine.currentState.FrameFixedUpdate();
+        heroStateMachine.currentState.FrameFixedUpdate();
     }
 
-    #endregion
+    private void SetUpEvents()
+    {
+        EquipmentManager.instance.UpdateItemInHand += UpdateItemInHand;
+    }
+
+    private void UpdateItemInHand(object sender, ItemStatsArgs e)
+    {
+        itemInHand.transform.localPosition = Vector3.zero;
+        if (e.item != null)
+        {
+            Item item = ItemsAsset.instance.GetItem(e.item.itemID);
+            itemInHand.sprite = item.icon;
+            itemInHand.sortingOrder = 20;
+            if (item as Weapon != null)
+            {
+                Weapon weapon = (Weapon)item;
+                itemInHand.GetComponent<PolygonCollider2D>().points = weapon.hitBoxPoints;
+                itemInHand.sortingOrder = 10;
+                itemInHand.transform.localPosition = -weapon.gripPoint1;
+                if (weapon.gripPoint2.x != -100)
+                {
+                    secondHand.parent = itemInHand.transform;
+                    secondHand.localEulerAngles = Vector3.zero;
+                    secondHand.localPosition = weapon.gripPoint2;
+                }
+                else
+                {
+                    SecondHandReset();
+                }
+            }
+        }
+        else
+        {
+            itemInHand.sprite = null;
+            SecondHandReset();
+        }
+
+        
+    }
+
+    private void SecondHandReset()
+    {
+        if (secondHand.parent != secondHandParent)
+        {
+            secondHand.parent = secondHandParent;
+            secondHand.localPosition = secondHandStartPosition;
+            secondHand.localEulerAngles = Vector3.zero;
+        }
+    }
 
     #region Movement
     public void GetMovementInput()

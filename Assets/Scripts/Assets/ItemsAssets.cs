@@ -46,4 +46,8 @@ public class ItemsAsset : MonoBehaviour
         return (items[itemID] as Garment).GetArray();
     }
     
+    public Item GetItem(int itemID)
+    {
+        return items[itemID];
+    }
 }

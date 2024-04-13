@@ -7,7 +7,7 @@ using UnityEngine;
 public class AttackModule : MonoBehaviour
 {
     // Transforms
-    private Transform weaponTransform;
+    private Transform mainHand;
     private Transform shieldTransform;
     private Transform weapon;
     private Transform shield;
@@ -52,37 +52,44 @@ public class AttackModule : MonoBehaviour
     }
     public void Aim()
     {
-
-        float angle = GetAngle(targetPos, weaponTransform, 0);
-        float angle1 = GetAngle(targetPos, shieldTransform, 0);
-
-        weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
-        shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
+        float angle = GetAngle(targetPos, mainHand, 0);
+        float angle1; 
 
         if (flip)
         {
             weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 180), Time.deltaTime * 10f);
+            angle1 = GetAngle(targetPos, shieldTransform, -100);
         }
         else
         {
             weapon.localEulerAngles = new Vector3(0, 180, weapon.localEulerAngles.z);
             weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 0), Time.deltaTime * 10);
+            angle1 = GetAngle(targetPos, shieldTransform, 100);
         }
+
+
+        mainHand.eulerAngles = Vector3.Lerp(mainHand.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
+        shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
+
+        weapon.GetChild(0).GetComponent<SpriteRenderer>().flipX = !flip;
+        weapon.GetComponent<SpriteRenderer>().flipX = !flip;
+
     }
     public void SetController(IUsesWeapons usesWeapons,string enemyTag)
     {
         this.usesWeapons = usesWeapons;
-       // Transform hero = transform.Find("Hero");
-        weaponTransform = transform.Find("Weapon");
+        // Transform hero = transform.Find("Hero");
+        mainHand = transform.Find("MainHand");
         shieldTransform = transform.Find("Shield");
-        weapon = weaponTransform.GetChild(0);
+        weapon = mainHand.GetChild(0);
         shield = shieldTransform.GetChild(0);
-        firstHand = transform.Find("Weapon").GetChild(0).GetChild(0).GetComponent<FirstHand>();
+
+        firstHand = transform.Find("MainHand").GetChild(0).GetChild(0).GetComponent<FirstHand>();
         firstHand.SetController(usesWeapons,enemyTag,transform);
     }
     private float GetAngle(Vector3 mousePos, Transform aimTransform, float addValue)
     {
-        Vector3 aimDir = (mousePos - transform.position).normalized;
+        Vector3 aimDir = (mousePos - aimTransform.position).normalized;
         float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
         angle += addValue;
         if (angle < 0) angle = 180 + (180 + angle);
@@ -127,7 +134,7 @@ public class AttackModule : MonoBehaviour
     public void Updateflip(Vector3 targetPos)
     {
         this.targetPos = targetPos;
-        flip = this.targetPos.x < weaponTransform.position.x;
+        flip = this.targetPos.x < mainHand.position.x;
     }
     public void UpdateAttack()
     {
@@ -150,29 +157,30 @@ public class AttackModule : MonoBehaviour
             }
         }
     }
-    public void UpdateShield()
-    {
-        float angle;
-        if (flip) angle = GetAngle(targetPos, weaponTransform, -60);
-        else angle = GetAngle(targetPos, weaponTransform, 60);
+
+    //public void UpdateShield()
+    //{
+    //    float angle;
+    //    if (flip) angle = GetAngle(targetPos, weaponTransform, -20);
+    //    else angle = GetAngle(targetPos, weaponTransform, 20);
 
 
-        weapon.localEulerAngles = new Vector3(weapon.localEulerAngles.x, 0, weapon.localEulerAngles.z);
-        if (flip)
-        {
-            weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 180), Time.deltaTime * 10f);
-        }
-        else
-        {
-            weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 0), Time.deltaTime * 10);
-        }
+    //    weapon.localEulerAngles = new Vector3(weapon.localEulerAngles.x, 0, weapon.localEulerAngles.z);
+    //    if (flip)
+    //    {
+    //        weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 180), Time.deltaTime * 10f);
+    //    }
+    //    else
+    //    {
+    //        weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 0), Time.deltaTime * 10);
+    //    }
 
 
-        float angle1 = GetAngle(targetPos, shieldTransform, 180);
+    //    float angle1 = GetAngle(targetPos, shieldTransform, 180);
 
-        weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
-        shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 4f);
-    }
+    //    weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
+    //    shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 4f);
+    //}
     public void ResetAttack()
     {
         if(attackItem != null)

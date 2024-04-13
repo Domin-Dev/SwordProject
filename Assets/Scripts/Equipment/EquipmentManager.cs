@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using static UnityEngine.GraphicsBuffer;
+
 
 public struct SlotPosition
 {
@@ -64,7 +63,6 @@ public class CreateItemUIArgs : EventArgs
        this.position = slotPosition;
     }
 }
-
 public class MoveItemUIArgs : EventArgs
 {
     public SlotPosition from;
@@ -76,7 +74,6 @@ public class MoveItemUIArgs : EventArgs
         this.to = to;
     }
 }
-
 public class RemoveItemUIArgs : EventArgs
 {
     public SlotPosition position;
@@ -86,7 +83,6 @@ public class RemoveItemUIArgs : EventArgs
         this.position = position;
     } 
 }
-
 public class UpdateItemCountArgs : EventArgs
 {
     public SlotPosition position;
@@ -98,7 +94,6 @@ public class UpdateItemCountArgs : EventArgs
         this.count = count;
     }
 }
-
 public class UpdateDragItemCountArgs : EventArgs
 {
     public int count;
@@ -107,7 +102,6 @@ public class UpdateDragItemCountArgs : EventArgs
         this.count = count;
     }
 }
-
 public class MoveMainBarItemArgs : EventArgs
 {
     public SlotPosition from;
@@ -118,18 +112,21 @@ public class MoveMainBarItemArgs : EventArgs
         this.to = to;   
     }
 }
-
-public class RemoveMainBarItemArgs : EventArgs
+public class ItemStatsArgs : EventArgs
 {
-    public SlotPosition position;
+    public ItemStats item;
     
-    public RemoveMainBarItemArgs(SlotPosition position)
+    public ItemStatsArgs(ItemStats item)
     {
-        this.position = position;
+        this.item = item;
     }
 }
+
+
+
 public class EquipmentManager : MonoBehaviour
 {
+    //UI
     public event EventHandler<UpdateSelectedSlotInBarArgs> UpdateSelectedSlotInBar;
     public event EventHandler<OpenEquipmentUIArgs> OpenEquipmentUI;
 
@@ -145,7 +142,11 @@ public class EquipmentManager : MonoBehaviour
     public event EventHandler<CreateItemUIArgs> CreateMainBarItem;
     public event EventHandler<RemoveItemUIArgs> RemoveMainBarItem;
     public event EventHandler<UpdateItemCountArgs> UpdateMainBarItemCount;
-   
+    //
+
+    //Character Controller
+    public event EventHandler<ItemStatsArgs> UpdateItemInHand;
+
 
     private int lastSelectedSlot { get; set; } = 2;
     private bool equipmentIsOpen = false;
@@ -184,14 +185,25 @@ public class EquipmentManager : MonoBehaviour
     }
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            ChangeSelectedSlot(1);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha0))
-        {
-            ChangeSelectedSlot(9);
-        }
+        if(Input.GetKeyDown(KeyCode.Alpha1))ChangeSelectedSlot(0);
+        else if(Input.GetKeyDown(KeyCode.Alpha2))ChangeSelectedSlot(1);
+        else if(Input.GetKeyDown(KeyCode.Alpha3))ChangeSelectedSlot(2);
+        else if(Input.GetKeyDown(KeyCode.Alpha4))ChangeSelectedSlot(3);
+        else if(Input.GetKeyDown(KeyCode.Alpha5))ChangeSelectedSlot(4);
+        else if(Input.GetKeyDown(KeyCode.Alpha6))ChangeSelectedSlot(5);
+        else if(Input.GetKeyDown(KeyCode.Alpha7))ChangeSelectedSlot(6);
+        else if(Input.GetKeyDown(KeyCode.Alpha8))ChangeSelectedSlot(7);
+        else if(Input.GetKeyDown(KeyCode.Alpha9))ChangeSelectedSlot(8);
+        else if (Input.GetKeyDown(KeyCode.Alpha0))ChangeSelectedSlot(9);
+        
+
+
+
+
+
+
+
+
 
         if (Input.GetKeyDown(KeyCode.I))
         {
@@ -291,9 +303,13 @@ public class EquipmentManager : MonoBehaviour
     private void ChangeSelectedSlot(int newSlot)
     {
         newSlot = math.clamp(newSlot, 0, BarSlotCount -1);
-        UpdateSelectedSlotInBarArgs args = new UpdateSelectedSlotInBarArgs(lastSelectedSlot,newSlot);
-        UpdateSelectedSlotInBar(this,args);
-        lastSelectedSlot = newSlot;
+        if (lastSelectedSlot != newSlot)
+        {
+            UpdateSelectedSlotInBarArgs args = new UpdateSelectedSlotInBarArgs(lastSelectedSlot, newSlot);
+            UpdateSelectedSlotInBar(this, args);
+            lastSelectedSlot = newSlot;
+            UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[newSlot]));    
+        }
     }
     public bool AddNewItem(ItemStats itemStats)
     {
