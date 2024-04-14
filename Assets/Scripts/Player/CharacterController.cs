@@ -1,11 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.IO.LowLevel.Unsafe;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.XR;
-using static UnityEditor.Progress;
 
 public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 {
@@ -15,15 +12,17 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private Transform hpBar;
 
 
+
     [SerializeField] private Transform secondHand;
     Vector3 secondHandStartPosition;
     [SerializeField] private Transform secondHandParent;
     [SerializeField] private SpriteRenderer itemInHand;
+    [SerializeField] private PolygonCollider2D hitBox;
+    [SerializeField] private Transform mainHand;
 
     private Vector2 moveDir;
     private Rigidbody2D rigidbody2D;
 
-    public bool flip;
     private bool isRepulsed = false;
 
     public AttackModule attackModule { set; get; }
@@ -48,13 +47,12 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
         attackModule = GetComponent<AttackModule>();
         attackModule.SetController(this,"Enemy");  
         secondHandStartPosition = secondHand.localPosition;
-
+        SetUpEvents();
         SetStateMachine();
     }
     private void Start()
     {
         heroStateMachine.RunMachine(idleState);
-        SetUpEvents();
     }
     private void Update()
     {
@@ -75,15 +73,16 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     private void UpdateItemInHand(object sender, ItemStatsArgs e)
     {
         itemInHand.transform.localPosition = Vector3.zero;
+        attackModule.isGun = false;
         if (e.item != null)
         {
             Item item = ItemsAsset.instance.GetItem(e.item.itemID);
-            itemInHand.sprite = item.icon;
-            itemInHand.sortingOrder = 20;
             if (item as Weapon != null)
             {
                 Weapon weapon = (Weapon)item;
-                itemInHand.GetComponent<PolygonCollider2D>().points = weapon.hitBoxPoints;
+                itemInHand.sprite = weapon.weaponImage;
+                hitBox.points = weapon.hitBoxPoints;
+                hitBox.transform.localPosition = -weapon.gripPoint1;
                 itemInHand.sortingOrder = 10;
                 itemInHand.transform.localPosition = -weapon.gripPoint1;
                 if (weapon.gripPoint2.x != -100)
@@ -96,6 +95,25 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
                 {
                     SecondHandReset();
                 }
+
+                if(weapon as RangedWeapon != null)
+                {
+                    attackModule.isGun = true;
+                    RangedWeapon rangedWeapon = (RangedWeapon)weapon;
+                    float posY = Mathf.Abs(rangedWeapon.aimPoint.y - rangedWeapon.gripPoint1.y);
+                    attackModule.SetTransformHand(posY);
+
+                }
+                else
+                {
+
+                }
+            }
+            else
+            {
+                itemInHand.sprite = item.icon;
+                itemInHand.sortingOrder = 20;
+                SecondHandReset();
             }
         }
         else
@@ -116,6 +134,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
             secondHand.localEulerAngles = Vector3.zero;
         }
     }
+
 
     #region Movement
     public void GetMovementInput()

@@ -6,4 +6,5 @@ public class RangedWeapon: Weapon
 {
     [Header("Weapon Stats")]
     public float timeToReload;
+    public Vector2 aimPoint;
 }

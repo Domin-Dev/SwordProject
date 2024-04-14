@@ -30,6 +30,11 @@ public class DebugController : MonoBehaviour
             EquipmentManager.instance.AddNewItem(new ItemStats(ID,count));
         }));
 
+        commandList.Add(new DebugCommand<int, int>("giveone", "Adds item to player equipment", "[ID]", (ID, count) =>
+        {
+            EquipmentManager.instance.AddNewItem(new ItemStats(ID, 1));
+        }));
+
 
         commandList.Add(new DebugCommand("help", "command list", "", () =>
         {

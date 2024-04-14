@@ -1,6 +1,7 @@
 
 using UnityEngine;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 public class ItemsAsset : MonoBehaviour
 {
@@ -38,7 +39,8 @@ public class ItemsAsset : MonoBehaviour
 
     public int GetStackMax(int itemID)
     {
-        return items[itemID].stackMax;
+         if(items.ContainsKey(itemID)) return items[itemID].stackMax;
+         else return 0;
     }
 
     public Sprite[] GetGarmentSprites(int itemID)

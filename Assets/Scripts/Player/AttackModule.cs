@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class AttackModule : MonoBehaviour
 {
@@ -28,11 +29,14 @@ public class AttackModule : MonoBehaviour
     private FirstHand firstHand;
     private IUsesWeapons usesWeapons;
 
+    public bool isGun = false;
     public bool canAttack { get; private set; }
     public float timer;
     private const float setTime = 0.45f;
 
     private CharacterController characterController;
+
+    public GameObject bullet;
 
     private void Start()
     {
@@ -59,19 +63,21 @@ public class AttackModule : MonoBehaviour
         {
             weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 180), Time.deltaTime * 10f);
             angle1 = GetAngle(targetPos, shieldTransform, -100);
+            weapon.GetChild(0).localEulerAngles = Vector3.zero;
         }
         else
         {
             weapon.localEulerAngles = new Vector3(0, 180, weapon.localEulerAngles.z);
             weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 0), Time.deltaTime * 10);
             angle1 = GetAngle(targetPos, shieldTransform, 100);
+            weapon.GetChild(0).localEulerAngles = new Vector3(0, 180,0);
         }
 
 
         mainHand.eulerAngles = Vector3.Lerp(mainHand.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
         shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
 
-        weapon.GetChild(0).GetComponent<SpriteRenderer>().flipX = !flip;
+     
         weapon.GetComponent<SpriteRenderer>().flipX = !flip;
 
     }
@@ -84,7 +90,7 @@ public class AttackModule : MonoBehaviour
         weapon = mainHand.GetChild(0);
         shield = shieldTransform.GetChild(0);
 
-        firstHand = transform.Find("MainHand").GetChild(0).GetChild(0).GetComponent<FirstHand>();
+        firstHand = transform.Find("MainHand").GetChild(0).GetChild(0).GetChild(0).GetComponent<FirstHand>();
         firstHand.SetController(usesWeapons,enemyTag,transform);
     }
     private float GetAngle(Vector3 mousePos, Transform aimTransform, float addValue)
@@ -104,7 +110,7 @@ public class AttackModule : MonoBehaviour
         return angle;
     }
     public void SetAttackVector(Vector3 Angle, Vector3 position, bool firstHand)
-    {
+    {       
         canAttack = false;
         if (firstHand)
         {
@@ -130,11 +136,25 @@ public class AttackModule : MonoBehaviour
         lastWeaponPosition = attackItem.localPosition;
         attackVector = position + attackItem.localPosition;
         back = false;
+        
     }
     public void Updateflip(Vector3 targetPos)
     {
         this.targetPos = targetPos;
+        if(flip != this.targetPos.x < mainHand.position.x)
+        {
+            weapon.localPosition = new Vector3(weapon.localPosition.x, -weapon.localPosition.y, 0);
+        }
         flip = this.targetPos.x < mainHand.position.x;
+    }
+
+    public void Shot()
+    {
+        Vector3 aimDir = (MyTools.GetMouseWorldPosition() - mainHand.position).normalized;
+        float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
+        if (angle < 0) angle = 180 + (180 + angle);
+        Instantiate(bullet, mainHand.position, Quaternion.identity).transform.localEulerAngles = new Vector3(0, 0, angle + Random.Range(-5,5));
+        Sounds.instance.Shot();
     }
     public void UpdateAttack()
     {
@@ -189,6 +209,18 @@ public class AttackModule : MonoBehaviour
             attackItem = null;
             firstHand.AttackSwitch(false);
             usesWeapons.EndAttack();
+        }
+    }
+
+    public void SetTransformHand(float posY)
+    {
+        if (flip)
+        {
+            weapon.transform.localPosition = new Vector3(weapon.transform.localPosition.x, posY, 0);
+        }
+        else
+        {
+            weapon.transform.localPosition = new Vector3(weapon.transform.localPosition.x, -posY, 0);
         }
     }
 

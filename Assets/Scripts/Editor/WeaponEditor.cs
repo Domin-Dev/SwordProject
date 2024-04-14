@@ -11,8 +11,14 @@ public class WeaponEditor : Editor
     int width;
     float pixelSize;
     Vector2 middle;
-
     Color[] texture;
+
+    static readonly Color hitboxColor = new Color(0, 1, 0, 1);
+    static readonly Color gripPoint1Color = new Color(1, 0, 0, 1);
+    static readonly Color gripPoint2Color = new Color(0, 0, 1, 1);
+    static readonly Color aimPointColor = new Color(1, 1, 0, 1);
+
+
     public override void OnInspectorGUI()
     {
         Weapon weapon = target as Weapon;
@@ -35,6 +41,7 @@ public class WeaponEditor : Editor
     }
     private void CutHitBox(Sprite sprite,Weapon weapon)
     {
+        Debug.Log("cuting");
         hitbox = null;
         pixelSize = 1.0f/sprite.pixelsPerUnit;
         width = (int)sprite.rect.width;
@@ -50,20 +57,25 @@ public class WeaponEditor : Editor
             Color color = texture[i];
             if (color.a == 1) 
             {
-                if(color.g == 1 && !hitBoxIsCut)
+                if(color == hitboxColor && !hitBoxIsCut)
                 {
                     weapon.hitBoxPoints = GetPoints(i);
                     hitBoxIsCut = true;
-                    break;
-                }
-                else if (color.r == 1)
+                } 
+                else if (color == gripPoint1Color)
                 {
                     weapon.gripPoint1 = pixelSize *(GetVector(i) - middle);
                 }
-                else if(color.b == 1)
+                else if (color == gripPoint2Color)
                 {
                     weapon.gripPoint2 = pixelSize * (GetVector(i) - middle);
                 }
+                else if (color == aimPointColor)
+                {
+                    Debug.Log("siea");
+                    if(weapon as RangedWeapon != null) (weapon as RangedWeapon).aimPoint = pixelSize * (GetVector(i) - middle);
+                }
+                Debug.Log(color);
             }
         }
 

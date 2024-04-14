@@ -10,7 +10,7 @@ public class Sounds : MonoBehaviour
     [SerializeField] List<AudioClip> swordSounds;
     [SerializeField] List<AudioClip> hitSounds;
     [SerializeField] List<AudioClip> ShieldSounds;
-
+    [SerializeField] AudioClip shot;
     private void Awake()
     {
         if(instance == null )
@@ -41,6 +41,12 @@ public class Sounds : MonoBehaviour
     public void Shield() 
     {
         audioSource.PlayOneShot(ShieldSounds[Random.Range(0, 1)]);
+    }
+
+    public void Shot()
+    {
+        audioSource.PlayOneShot(shot);
+
     }
 }
 

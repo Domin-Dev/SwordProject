@@ -5,11 +5,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using System;
-using Unity.Netcode;
-using System.IO;
-using UnityEngine.SocialPlatforms.Impl;
-using UnityEngine.SocialPlatforms;
-using SerializableCallback;
 
 public class ChatManager : MonoBehaviour
 {
