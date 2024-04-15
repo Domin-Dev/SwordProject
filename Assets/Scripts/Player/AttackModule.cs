@@ -16,6 +16,7 @@ public class AttackModule : MonoBehaviour
     //Attack
     private Vector3 attackAngle;
     private Vector3 attackVector;
+
     private Vector3 lastWeaponPosition;
 
     private Transform attackItem;
@@ -77,9 +78,7 @@ public class AttackModule : MonoBehaviour
         mainHand.eulerAngles = Vector3.Lerp(mainHand.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
         shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
 
-     
         weapon.GetComponent<SpriteRenderer>().flipX = !flip;
-
     }
     public void SetController(IUsesWeapons usesWeapons,string enemyTag)
     {
@@ -158,12 +157,18 @@ public class AttackModule : MonoBehaviour
     }
     public void UpdateAttack()
     {
+          UpdateMeleeWeapon(); 
+    }
+
+    private void UpdateMeleeWeapon()
+    {
         if (!back)
-        {
-            attackItem.localEulerAngles = Vector3.Lerp(attackItem.localEulerAngles, attackAngle, Time.deltaTime * 30);
+        {           
+            attackItem.localEulerAngles = GetEulerAnglesLerp(attackAngle,30);
             attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, attackVector, Time.deltaTime * 10f);
 
-            if (Vector3.Distance(attackItem.localEulerAngles, attackAngle) < 0.2f && Vector3.Distance(attackItem.localPosition, attackVector) < 0.1f)
+            
+            if (CheckAngle(attackAngle,1f) && Vector3.Distance(attackItem.localPosition, attackVector) < 0.1f)
             {
                 back = true;
             }
@@ -171,12 +176,31 @@ public class AttackModule : MonoBehaviour
         else
         {
             attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, lastWeaponPosition, Time.deltaTime * 25f);
-            if (Vector3.Distance(attackItem.localPosition, lastWeaponPosition) < 0.0015)
+            if (Vector3.Distance(attackItem.localPosition, lastWeaponPosition) < 0.0015 )
             {
                 ResetAttack();
             }
         }
     }
+
+    private Vector3 GetEulerAnglesLerp(Vector3 target,float speed)
+    {
+        Vector3 angle = attackItem.localEulerAngles;
+        Debug.Log(angle);
+        if(target.z < 0 && angle.z > 180) angle = new Vector3(angle.x, angle.y, angle.z - 360);
+
+
+        Debug.Log(angle + " " + target);
+        return  Vector3.Lerp(angle, target, Time.deltaTime * speed);
+    }
+    private bool CheckAngle(Vector3 target,float border)
+    {
+        Vector3 angle = target;
+        if(angle.z < 0) angle = new Vector3(target.x, target.y,360 + target.z);
+        return Vector3.Distance(attackItem.localEulerAngles, angle) < border;
+    }
+
+
 
     //public void UpdateShield()
     //{
@@ -205,7 +229,8 @@ public class AttackModule : MonoBehaviour
     {
         if(attackItem != null)
         {
-            attackItem.localPosition = lastWeaponPosition;
+            weapon.transform.localPosition = lastWeaponPosition;
+            SetTransformHand(Mathf.Abs(lastWeaponPosition.y));
             attackItem = null;
             firstHand.AttackSwitch(false);
             usesWeapons.EndAttack();

@@ -29,7 +29,7 @@ public class IdleState : HeroState
             }
             else
             {
-                controller.attackModule.Shot();
+                heroStateMachine.ChangeState(controller.attackState);
             }
         }
 

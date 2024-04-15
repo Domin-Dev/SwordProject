@@ -9,7 +9,15 @@ public class AttackState : HeroState
 
     public override void EnterState() 
     {
-            controller.attackModule.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0), true);      
+        if (!controller.attackModule.isGun)
+        {
+            controller.attackModule.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0), true);
+        }
+        else
+        {
+            controller.attackModule.Shot();
+            controller.attackModule.SetAttackVector(new Vector3(0, 0, -70), new Vector3(-0.07f, 0, 0), true);
+        }
     }
     public override void ExitState() 
     {
