@@ -50,24 +50,48 @@ SpriteAtlas:
     isAtlasV2: 0
     cachedData: {fileID: 0}
     packedSpriteRenderDataKeys:
+    - 9525c1cd7e46db94488d73dc1c1cc100: -324388982
+    - 9525c1cd7e46db94488d73dc1c1cc100: -1471396653
     - 9525c1cd7e46db94488d73dc1c1cc100: -1913437591
     - 9525c1cd7e46db94488d73dc1c1cc100: -1924417815
     - 9525c1cd7e46db94488d73dc1c1cc100: 1353589903
     - 9525c1cd7e46db94488d73dc1c1cc100: -1651925642
+    - 9525c1cd7e46db94488d73dc1c1cc100: 637705594
+    - 9525c1cd7e46db94488d73dc1c1cc100: 580680961
+    - 9525c1cd7e46db94488d73dc1c1cc100: 35305056
     - 9525c1cd7e46db94488d73dc1c1cc100: -590367151
+    - 9525c1cd7e46db94488d73dc1c1cc100: -142581544
+    - 9525c1cd7e46db94488d73dc1c1cc100: -448323523
+    - 9525c1cd7e46db94488d73dc1c1cc100: 2093317869
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
+  - {fileID: -324388982, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
+  - {fileID: -1471396653, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
   - {fileID: -1913437591, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
   - {fileID: -1924417815, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
   - {fileID: 1353589903, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
   - {fileID: -1651925642, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
+  - {fileID: 637705594, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
+  - {fileID: 580680961, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
+  - {fileID: 35305056, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
   - {fileID: -590367151, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
+  - {fileID: -142581544, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
+  - {fileID: -448323523, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
+  - {fileID: 2093317869, guid: 9525c1cd7e46db94488d73dc1c1cc100, type: 3}
   m_PackedSpriteNamesToIndex:
+  - Smoke_9
+  - Smoke_8
   - Smoke_3
   - Smoke_2
   - Smoke_1
   - Smoke_0
+  - Smoke_7
+  - Smoke_6
+  - Smoke_5
   - Smoke_4
+  - Smoke_12
+  - Smoke_10
+  - Smoke_11
   m_RenderDataMap: {}
   m_Tag: Smoke
   m_IsVariant: 0
