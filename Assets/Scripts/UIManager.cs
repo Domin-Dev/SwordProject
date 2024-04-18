@@ -29,6 +29,7 @@ public class UIManager : MonoBehaviour
     //equipment
     [SerializeField] private Canvas mainCanvas;
     [Space]
+    [Header("Equipment UI")]
     [SerializeField] private Transform itemBar;
     [SerializeField] private Transform equipment;
     [Space]
@@ -40,6 +41,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform itemEquipmentBar;
     [SerializeField] private Transform items;
     [Space(30f)]
+    [Header("Stats UI")]
 
 
     //temporary

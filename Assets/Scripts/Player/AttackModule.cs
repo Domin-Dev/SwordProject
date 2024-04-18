@@ -13,15 +13,13 @@ public class AttackModule : MonoBehaviour
     private Transform shieldTransform;
     private Transform weapon;
     private Transform fliper;
+    private Transform aimPoint;
 
     private Transform shield;
 
-    //Attack
     private Vector3 attackAngle;
     private Vector3 attackVector;
-
     private Vector3 lastWeaponPosition;
-
     private Transform attackItem;
     public bool back;
 
@@ -64,32 +62,19 @@ public class AttackModule : MonoBehaviour
         float angle1; 
 
         if (flip)
-        {
-          //  weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 180), Time.deltaTime * 10f);
             angle1 = GetAngle(targetPos, shieldTransform, -100);
-           // weapon.GetChild(0).localEulerAngles = new Vector3(0, 180, 0);
-        }
         else
-        {
-          //  weapon.localEulerAngles = new Vector3(0, 180, weapon.localEulerAngles.z);  
+            angle1 = GetAngle(targetPos, shieldTransform, 100);        
+        
+        float z;
+        if (weapon.localEulerAngles.z > 180)
+             z = Mathf.Lerp(weapon.localEulerAngles.z - 360, 0, Time.deltaTime * 10);
+        else
+            z = Mathf.Lerp(weapon.localEulerAngles.z , 0, Time.deltaTime * 10);
 
-         //   weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 0), Time.deltaTime * 10);
-            
-            
-            angle1 = GetAngle(targetPos, shieldTransform, 100);
-
-         //   weapon.GetChild(0).localEulerAngles = Vector3.zero;
-        }
-
-
-        Debug.Log(weapon.localEulerAngles.z);
-        float z = Mathf.Lerp(weapon.localEulerAngles.z, 0, Time.deltaTime * 10);
-        weapon.localEulerAngles = new Vector3(weapon.localEulerAngles.x, weapon.localEulerAngles.y, z);//Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, 0, 0), Time.deltaTime * 10);
-
+        weapon.localEulerAngles = new Vector3(weapon.localEulerAngles.x, weapon.localEulerAngles.y, z);
         mainHand.eulerAngles = Vector3.Lerp(mainHand.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
         shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
-
-        weapon.GetComponent<SpriteRenderer>().flipX = !flip;
     }
     public void SetController(IUsesWeapons usesWeapons,string enemyTag)
     {
@@ -98,6 +83,7 @@ public class AttackModule : MonoBehaviour
         mainHand = transform.Find("MainHand");
         shieldTransform = transform.Find("Shield");
         weapon = mainHand.GetChild(0).GetChild(0);
+        aimPoint = weapon.GetChild(0).Find("AimPoint");
         fliper = mainHand.GetChild(0);
         shield = shieldTransform.GetChild(0);
 
@@ -133,17 +119,6 @@ public class AttackModule : MonoBehaviour
         }
 
         attackAngle = weapon.localEulerAngles - Angle;  
-        if (flip)
-        {
-        //   attackItem.localEulerAngles = new Vector3(0, 180, 180);
-         //  attackAngle = weapon.localEulerAngles - Angle;
-        }
-        else
-        {
-          //  attackItem.localEulerAngles = new Vector3(0, 180, attackItem.localEulerAngles.z);
-           // attackAngle = weapon.localEulerAngles + Angle;
-        }
-
         this.firstHand.AttackSwitch(true);
         lastWeaponPosition = attackItem.localPosition;
         attackVector = position + attackItem.localPosition;
@@ -169,12 +144,19 @@ public class AttackModule : MonoBehaviour
     }
 
     public void Shot()
-    {
+    {    
         Vector3 aimDir = (MyTools.GetMouseWorldPosition() - mainHand.position).normalized;
         float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
         if (angle < 0) angle = 180 + (180 + angle);
-        Instantiate(bullet, mainHand.position, Quaternion.identity).transform.localEulerAngles = new Vector3(0, 0, angle + Random.Range(-5,5));
+        Instantiate(bullet,aimPoint.position, Quaternion.identity).transform.localEulerAngles = new Vector3(0, 0, angle + Random.Range(-5,5));
         Sounds.instance.Shot();
+        ShotParticle(angle);
+    }
+
+    private void ShotParticle(float angle)
+    {
+        Instantiate(ParticleAssets.instance.shotSmoke, aimPoint.TransformPoint(aimPoint.localPosition + new Vector3(-0.05f, 0)), Quaternion.identity);
+        Instantiate(ParticleAssets.instance.shotFire, aimPoint.position , Quaternion.identity).transform.localEulerAngles = new Vector3(0,0,angle);
     }
     public void UpdateAttack()
     {

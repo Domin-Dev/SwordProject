@@ -419,15 +419,21 @@ public class EquipmentManager : MonoBehaviour
         else if(!target.Compare(selectedSlotInEQ))
         {
             ItemStats itemStatsTarget = GetItemStats(target);
-            if (selectedItemStats.itemID != itemStatsTarget.itemID )
+            int maxStack = ItemsAsset.instance.GetStackMax(itemStatsTarget.itemID);
+            if (selectedItemStats.itemID != itemStatsTarget.itemID || maxStack == itemStatsTarget.itemCount)
             {
+                Debug.Log("s");
                 if(IsFreeSlot(selectedSlotInEQ))
                 {
                     SetItemStats(target, selectedItemStats);
                     SetItemStats(selectedSlotInEQ, itemStatsTarget);
                     MoveItemUIArgs moveItemUIArgs = new MoveItemUIArgs(target, selectedSlotInEQ);
                     MoveItemUI(this, moveItemUIArgs);
-                    if(selectedSlotInEQ.gridIndex == 0) NewMainBarItemUI(selectedItemStats,target);                    
+                    if(selectedSlotInEQ.gridIndex == 0 || target.gridIndex == 0)
+                    {
+                        RemoveMainBarItemUI(target);
+                        NewMainBarItemUI(selectedItemStats, target);
+                    }
                 }
                 else
                 {
@@ -633,7 +639,6 @@ public class EquipmentManager : MonoBehaviour
     }
     public bool IsNotSelected()
     {
-        Debug.Log(selectedSlotInEQ.gridIndex.ToString() + " "+ selectedSlotInEQ.slotIndex.ToString());
         return selectedSlotInEQ.Compare(new SlotPosition(-1, -1));  
     }
     private List<SlotPosition> FindItems(int ItemId)

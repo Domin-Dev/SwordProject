@@ -19,6 +19,10 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private SpriteRenderer itemInHand;
     [SerializeField] private PolygonCollider2D hitBox;
     [SerializeField] private Transform mainHand;
+    [SerializeField] private Transform aimPoint;
+
+
+    private Animator animator;
 
     private Vector2 moveDir;
     private Rigidbody2D rigidbody2D;
@@ -31,7 +35,6 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     public HeroStateMachine heroStateMachine { set; get; }
     public IdleState idleState { set; get; }
     public AttackState attackState { set; get; }
-
     private void SetStateMachine()
     {
         heroStateMachine = new HeroStateMachine();
@@ -45,6 +48,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
         attackModule = GetComponent<AttackModule>();
+        animator = GetComponent<Animator>();  
         attackModule.SetController(this,"Enemy");  
         secondHandStartPosition = secondHand.localPosition;
         SetUpEvents();
@@ -102,7 +106,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
                     RangedWeapon rangedWeapon = (RangedWeapon)weapon;
                     float posY = Mathf.Abs(rangedWeapon.aimPoint.y - rangedWeapon.gripPoint1.y);
                     attackModule.SetTransformHand(posY);
-
+                    aimPoint.localPosition = (Vector2)itemInHand.transform.localPosition + rangedWeapon.aimPoint;
                 }
                 else
                 {
@@ -145,7 +149,19 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     }
     public void UpdateMovement()
     {
-       if(!isRepulsed) rigidbody2D.velocity = moveDir;
+        if (!isRepulsed)
+        {
+            Debug.Log(moveDir);
+            rigidbody2D.velocity = moveDir;
+            if(moveDir == new Vector2(0,0))
+            {
+                animator.SetBool("Idle", true);
+            }
+            else
+            {
+                animator.SetBool("Idle", false);
+            }
+        }
     }
     #endregion
 

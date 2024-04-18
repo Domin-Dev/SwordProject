@@ -16,7 +16,7 @@ public class AttackState : HeroState
         else
         {
             controller.attackModule.Shot();
-            controller.attackModule.SetAttackVector(new Vector3(0, 0, -70), new Vector3(-0.07f, 0, 0), true);
+            controller.attackModule.SetAttackVector(new Vector3(0, 0, -60), new Vector3(-0.08f, 0, 0), true);
         }
     }
     public override void ExitState() 

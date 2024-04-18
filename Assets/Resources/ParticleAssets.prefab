@@ -44,12 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e076267e28172d74c9e5a5dc88112748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Itms:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   smoke: {fileID: 1169229198073976629, guid: e3262dd1333c98c4293bdd13f5768a99, type: 3}
   leaves: {fileID: 8377258103205601058, guid: fb21eabfabc89c544a71fc84c24bc9f2, type: 3}
+  shotSmoke: {fileID: 6328287962746153788, guid: 00deb22ece09d4f4e99ed891dbc09bec, type: 3}
+  shotFire: {fileID: 2929994055924591819, guid: 6bc56e8498891144eb3354dd80e7ca31, type: 3}
