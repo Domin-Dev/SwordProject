@@ -2,7 +2,7 @@
 using Unity.VisualScripting;
 using UnityEngine;
 [CreateAssetMenu(fileName = "Weapon", menuName = "GameAsset/Items/Weapons/Weapon")]
-public class Weapon: Item
+public class Weapon : Destroyable
 {
     [Header("Weapon Stats")]
     public Sprite weaponImage;
@@ -15,4 +15,8 @@ public class Weapon: Item
     public int damage = 5;
     public int cooldown;
 
+    public override ItemStats GetItemStats()
+    {
+        return base.GetItemStats();
+    }
 }

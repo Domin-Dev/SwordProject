@@ -1,40 +1,33 @@
 
-using UnityEngine;
 using System;
-
+using UnityEngine;
 
 public class ItemStats
 {
-    public int itemID = -1;
-    public int itemCount;
-    public ItemLife itemLife;
+    public int itemID { private set; get; } = -1;
+    private int _itemCount;
+    public int itemCount
+    {
+        set
+        {
+            if (value >= 0) _itemCount = value;
+            else _itemCount = 1;
+        }
+        get 
+        { 
+            return _itemCount; 
+        }
+    }
 
     public ItemStats(ItemStats itemStats)
     {
         this.itemID = itemStats.itemID;
         this.itemCount = itemStats.itemCount;
-        if(itemStats.itemLife != null) this.itemLife = new ItemLife(itemStats.itemLife);
     }
-
-    public ItemStats(int itemID, int itemCount,ItemLife itemLife)
+    public ItemStats(int itemID, int itemCount = 1)
     {
         this.itemID = itemID;
         this.itemCount = itemCount;
-        this.itemLife = itemLife; 
-    }
-    public ItemStats(int itemID, int itemCount)
-    {
-        this.itemID = itemID;
-        this.itemCount = itemCount;
-        this.itemLife = null;
-    }
-
-    public ItemStats(int itemID)
-    {
-        this.itemID = itemID;
-        this.itemCount = 1;
-        this.itemLife = null;
-
     }
 
     public bool isNull()
@@ -42,24 +35,80 @@ public class ItemStats
         if (itemID != -1) return false;
         else return true;
     }
-}
 
-[Serializable]
-public class ItemLife
-{
-    public float maxLifePoints;
-    public float currentLifePoints;
-
-    public ItemLife(float maxLifePoints,float currentLifePoints)
+    public virtual ItemStats Clon()
     {
-        this.maxLifePoints = maxLifePoints;
+        return new ItemStats(this);
+    }
+}
+public class DestroyableItem : ItemStats
+{
+    public int maxLifePonits { private set; get; }
+    public int currentLifePoints {private set ; get; }
+
+    public DestroyableItem(int itemID, int maxLifePoints, int itemCount = 1) :base(itemID,itemCount) 
+    {
+        Debug.Log(maxLifePoints);
+        this.maxLifePonits = maxLifePoints;
+        currentLifePoints = this.maxLifePonits;      
+    }
+    public DestroyableItem(int itemID, int itemCount, int maxLifePoints,int currentLifePoints) : base(itemID, itemCount)
+    {
+        this.maxLifePonits = maxLifePoints;
         this.currentLifePoints = currentLifePoints;
     }
-
-    public ItemLife(ItemLife itemLife)
+    public DestroyableItem(DestroyableItem item) : base(item)
     {
-        this.maxLifePoints = itemLife.maxLifePoints;
-        this.currentLifePoints = itemLife.currentLifePoints;
+        this.maxLifePonits = item.maxLifePonits;
+        this.currentLifePoints = item.currentLifePoints;
     }
-}
+    public float GetLifePointsInPercent()
+    {
+        return currentLifePoints/(float)maxLifePonits;
+    }
 
+    public override ItemStats Clon()
+    {
+        return new DestroyableItem(this);
+    }
+
+    public void Use()
+    {
+        currentLifePoints--;
+        Debug.Log(currentLifePoints);
+    }
+    
+}
+public class GunMagazineItem : DestroyableItem
+{
+    public int magazineCapacity {private set; get; }
+    public int currentAmmoCount {private set; get; }
+
+    public GunMagazineItem(int itemID, int maxLifePoints, int currentLifePoints,int magazineCapacity, int itemCount = 1, int currentAmmoCount = 0) : base(itemID, itemCount, maxLifePoints,currentLifePoints)
+    {
+        this.magazineCapacity = magazineCapacity;
+        this.currentAmmoCount = currentAmmoCount;
+    }
+
+    public GunMagazineItem(int itemID, int maxLifePoints, int magazineCapacity, int itemCount = 1, int currentAmmoCount = 0) : base(itemID,maxLifePoints,itemCount)
+    {
+        this.magazineCapacity = magazineCapacity;
+        this.currentAmmoCount = currentAmmoCount;
+    }
+    public GunMagazineItem(GunMagazineItem item) : base(item)
+    {
+        this.magazineCapacity = item.magazineCapacity;
+        this.currentAmmoCount = item.currentAmmoCount;
+    }
+    public bool CanReload()
+    {
+        return currentAmmoCount < magazineCapacity;
+    }
+
+    public override ItemStats Clon()
+    {
+        return new GunMagazineItem(this);
+    }
+
+    
+}

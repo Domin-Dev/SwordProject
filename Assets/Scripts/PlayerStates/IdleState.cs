@@ -23,6 +23,7 @@ public class IdleState : HeroState
 
         if(Input.GetMouseButtonDown(0) && controller.attackModule.canAttack)
         {
+            controller.Use();
             if (!controller.attackModule.isGun)
             {
                 heroStateMachine.ChangeState(controller.attackState);

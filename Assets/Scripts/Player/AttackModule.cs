@@ -144,7 +144,7 @@ public class AttackModule : MonoBehaviour
     }
 
     public void Shot()
-    {    
+    {
         Vector3 aimDir = (MyTools.GetMouseWorldPosition() - mainHand.position).normalized;
         float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
         if (angle < 0) angle = 180 + (180 + angle);

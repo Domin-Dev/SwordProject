@@ -6,6 +6,13 @@ public class RangedWeapon: Weapon
     [Header("Weapon Stats")]
     public float timeToReload;
     public int magazineCapacity;
-    public int ammoID;
     public Vector2 aimPoint;
+    public AmmoType ammoType;
+
+
+    public override ItemStats GetItemStats()
+    {
+        Debug.Log(durability);
+        return new GunMagazineItem(ID,durability, magazineCapacity);
+    }
 }

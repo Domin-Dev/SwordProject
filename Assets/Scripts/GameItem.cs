@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 
 public class GameItem : MonoBehaviour
 {
@@ -9,7 +6,7 @@ public class GameItem : MonoBehaviour
 
     private void Awake()
     {
-        itemStats = new ItemStats(Random.Range(0,2), Random.Range(1,2));
+        itemStats = ItemsAsset.instance.GetItemStats(Random.Range(0, 2));
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {

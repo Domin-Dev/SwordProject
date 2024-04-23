@@ -4,6 +4,7 @@ using Unity.Netcode;
 using Unity.Mathematics;
 using TMPro;
 using System;
+using Unity.VisualScripting;
 
 public class EquipmentGrid
 {
@@ -36,6 +37,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject itemSlot;
     [SerializeField] private GameObject slotIndex;
     [SerializeField] private GameObject item;
+    [SerializeField] private GameObject lifePointsBar;
     [Space]
     [SerializeField] private Transform itemEquipmentSlots;
     [SerializeField] private Transform itemEquipmentBar;
@@ -126,10 +128,32 @@ public class UIManager : MonoBehaviour
         eqManager.CreateMainBarItem += CreateMainBarItem;
         eqManager.RemoveMainBarItem += RemoveMainBarItem;
         eqManager.UpdateMainBarItemCount += UpdateMainBarItemCount;
+        eqManager.UpdateItemLifeBar += UpdateItemLifeBar;
 
         LoadSlots(mainEquipmentGrid,EquipmentManager.SlotCount, false);
         LoadSlots(equipmentBarGrid,EquipmentManager.BarSlotCount, true);
         LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
+    }
+
+    private void UpdateItemLifeBar(object sender, LifeBarArgs e)
+    {
+        Transform slot = itemBar.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
+        Image bar = null;
+        for (int i = 0; i < slot.childCount; i++)
+        {
+            if(slot.GetChild(i).CompareTag("Bar"))
+            {
+                bar = slot.GetChild(i).transform.GetChild(0).GetComponent<Image>();
+            }
+        }
+        
+      
+
+        if (bar == null) return;
+
+
+        bar.transform.localScale = new Vector3(e.barValue, 1);
+        bar.color = new Color(bar.color.r, e.barValue, bar.color.b);
     }
 
     private void UpdateMainBarItemCount(object sender, UpdateItemCountArgs e)
@@ -137,17 +161,17 @@ public class UIManager : MonoBehaviour
         UpdateCount(itemBar, e);
     }
 
-    private void RemoveMainBarItem(object sender, RemoveItemUIArgs e)
+    private void RemoveMainBarItem(object sender, PositionArgs e)
     {
         RemoveItem(itemBar, e);
     }
 
-    private void CreateMainBarItem(object sender, CreateItemUIArgs e)
+    private void CreateMainBarItem(object sender, CreateItemArgs e)
     {
         NewItemUI(itemBar, e);
     }
 
-    private void MoveMainBarItem(object sender, MoveMainBarItemArgs e)
+    private void MoveMainBarItem(object sender, MoveItemArgs e)
     {
         if(e.from.gridIndex == 0 && e.to.gridIndex == 0)
         {
@@ -157,12 +181,12 @@ public class UIManager : MonoBehaviour
         }
         else if(e.from.gridIndex == 0)
         {
-            RemoveItem(itemBar, new RemoveItemUIArgs(e.from));
+            RemoveItem(itemBar, new PositionArgs(e.from));
         }
         else if (e.to.gridIndex == 0)
         {
             ItemStats item = EquipmentManager.instance.GetItemStatsValue(e.to);
-            NewItemUI(itemBar, new CreateItemUIArgs(ItemsAsset.instance.GetIcon(item.itemID),item.itemCount,e.to,false));
+            NewItemUI(itemBar, new CreateItemArgs(item,e.to,false));
         }   
     }
     private void RemoveDragItemUI(object sender, EventArgs e)
@@ -171,13 +195,12 @@ public class UIManager : MonoBehaviour
         slot.gameObject.SetActive(false);
         Destroy(slot.gameObject);
     }
-    private void UpdateDragItemCount(object sender, UpdateDragItemCountArgs e)
+    private void UpdateDragItemCount(object sender, ItemCountArgs e)
     {
         Transform slot = itemParent.GetComponentInChildren<DragDrop>().transform;
         if (e.count != 1) slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = e.count.ToString();
         else slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
     }
-
     private void UpdateItemCount(object sender, UpdateItemCountArgs e)
     {
         Transform grid;
@@ -198,7 +221,7 @@ public class UIManager : MonoBehaviour
         else slot.GetChild(0).GetComponent<TextMeshProUGUI>().text = "";
     }
 
-    private void RemoveItemUI(object sender, RemoveItemUIArgs e)
+    private void RemoveItemUI(object sender, PositionArgs e)
     {
         Transform grid;
         if (e.position.gridIndex == 0) grid = itemEquipmentBar;
@@ -211,7 +234,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void RemoveItem(Transform gridUI, RemoveItemUIArgs e)
+    private void RemoveItem(Transform gridUI, PositionArgs e)
     {
         Transform slot = gridUI.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
         slot.gameObject.SetActive(false);
@@ -227,15 +250,13 @@ public class UIManager : MonoBehaviour
         if (e.to.gridIndex == 0) gridTo = itemEquipmentBar;
         else gridTo = itemEquipmentSlots;
 
-        if (e.to.gridIndex == 0 || e.from.gridIndex == 0) MoveMainBarItem(this, new MoveMainBarItemArgs(e.from, e.to));
+        if (e.to.gridIndex == 0 || e.from.gridIndex == 0) MoveMainBarItem(this, new MoveItemArgs(e.from, e.to));
 
 
         DragDrop slot = gridFrom.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
         slot.transform.SetParent(gridTo.GetChild(e.to.slotIndex));
         slot.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
-        slot.IsInSlot();
-        
-      
+        slot.IsInSlot();           
     }
 
     private void MoveItem(Transform gridFrom,Transform gridTo, MoveItemUIArgs e)
@@ -246,7 +267,7 @@ public class UIManager : MonoBehaviour
         slot.IsInSlot();
     }
 
-    private void CreateItemUI(object sender, CreateItemUIArgs e)
+    private void CreateItemUI(object sender, CreateItemArgs e)
     {
         Transform gridUI;
         if (e.position.gridIndex == 0) gridUI = itemEquipmentBar;
@@ -259,22 +280,28 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    private void NewItemUI(Transform gridUI,CreateItemUIArgs e)
+    private void NewItemUI(Transform gridUI, CreateItemArgs e)
     {
         RectTransform transform = Instantiate(item, gridUI.GetChild(e.position.slotIndex)).GetComponent<RectTransform>();
+        if(e.itemStats as DestroyableItem != null) Instantiate(lifePointsBar, transform);
+        
         transform.anchoredPosition = Vector2.zero;
-        transform.GetComponent<Image>().sprite = e.sprite;
-        if (e.itemCount != 1) transform.GetComponentInChildren<TextMeshProUGUI>().text = e.itemCount.ToString();
+
+        transform.GetComponent<Image>().sprite = ItemsAsset.instance.GetIcon(e.itemStats.itemID);
+        if (e.itemStats.itemCount != 1) transform.GetComponentInChildren<TextMeshProUGUI>().text = e.itemStats.itemCount.ToString();
         else transform.GetComponentInChildren<TextMeshProUGUI>().text = "";
 
         if (gridUI != itemBar)
         {
             transform.GetComponent<DragDrop>().SetCanvas(mainCanvas);
             transform.GetComponent<DragDrop>().IsInSlot();
-        }else
+        }
+        else
         {
             transform.GetComponent<DragDrop>().enabled = false;
         }
+
+
     }
 
     private void OpenEquipment(object sender, OpenEquipmentUIArgs e)
@@ -286,6 +313,7 @@ public class UIManager : MonoBehaviour
         }
         else
         {
+            TooltipSystem.Hide();
             background.gameObject.SetActive(false);
             equipment.gameObject.SetActive(false);
         }
@@ -341,5 +369,22 @@ public class UIManager : MonoBehaviour
                 slot.GetComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
             }
         }
+    }
+
+    private Transform GetItem(SlotPosition position)
+    {
+        Transform parent = null;
+        if (position.gridIndex == 0) parent = itemEquipmentBar;
+        else if (position.gridIndex == 1) parent = itemEquipmentSlots;
+
+        if(parent != null)
+        {
+           return parent.GetComponentInChildren<DropSlot>().transform;
+        }
+        else
+        {
+            return null;
+        }
+
     }
 }

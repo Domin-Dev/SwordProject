@@ -12,11 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d9b1873d12d744448a3503317eafd98, type: 3}
   m_Name: Gun
   m_EditorClassIdentifier: 
-  name: 
-  description: 
+  name: Pistolet
+  description: 'obrazenia : 100
+
+    id : 1
+
+    stack max: 1'
   ID: 0
   stackMax: 1
   icon: {fileID: -2066496519, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  durability: 20
   weaponImage: {fileID: 866442174, guid: 59c72a0771dd7a043a02a6626b207c98, type: 3}
   hitBoxPoints:
   - {x: -0.024999999, y: -0.015}
@@ -32,4 +37,6 @@ MonoBehaviour:
   damage: 5
   cooldown: 0
   timeToReload: 0
+  magazineCapacity: 0
   aimPoint: {x: 0.044999998, y: 0.005}
+  ammoType: 0

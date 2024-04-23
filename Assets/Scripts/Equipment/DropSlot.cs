@@ -2,7 +2,7 @@ using UnityEngine.EventSystems;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class DropSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
+public class DropSlot : MonoBehaviour, IDropHandler, IPointerClickHandler,IPointerEnterHandler,IPointerExitHandler
 {
     private SlotPosition slotPosition;
 
@@ -10,13 +10,11 @@ public class DropSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
     {
         slotPosition = new SlotPosition(gridIndex, slotIndex);
     }
-
     public SlotPosition GetSlotPosition()
     {
         return slotPosition;
     }
-
-    void IDropHandler.OnDrop(PointerEventData eventData)
+    public void OnDrop(PointerEventData eventData)
     {
         if (EquipmentManager.instance.input == eventData.button)
         {
@@ -31,7 +29,20 @@ public class DropSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
         }
     }
 
-    void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        TooltipInfo tooltipInfo = EquipmentManager.instance.GetTooltipInfo(slotPosition);
+        if(tooltipInfo != null)
+        {
+            TooltipSystem.Show(tooltipInfo.content,tooltipInfo.header);
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        TooltipSystem.Hide();
+    }
+    public void OnPointerClick(PointerEventData eventData)
     {
         if (eventData.button != PointerEventData.InputButton.Middle)
         {
@@ -49,8 +60,6 @@ public class DropSlot : MonoBehaviour, IDropHandler, IPointerClickHandler
                 EquipmentManager.instance.PutOneItem(slotPosition);
                 Sounds.instance.Shield();
             }            
-            
-
         }
     }
 

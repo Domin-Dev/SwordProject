@@ -72,7 +72,6 @@ public class WeaponEditor : Editor
                 }
                 else if (color == aimPointColor)
                 {
-                    Debug.Log("siea");
                     if(weapon as RangedWeapon != null) (weapon as RangedWeapon).aimPoint = pixelSize * (GetVector(i) - middle);
                 }
                 Debug.Log(color);

@@ -65,9 +65,7 @@ public class ChatManager : MonoBehaviour
 
     float timer = 0;
     private void Update()
-    {
-       
-
+    {     
         if(isTimer)
         {
             timer += Time.deltaTime;
@@ -83,11 +81,8 @@ public class ChatManager : MonoBehaviour
             SwitchChat();
         }
 
-
-
         if(isChat)
         {
-
             if (Input.GetKeyDown(KeyCode.Return))
             {
                 SendMessage();
@@ -195,17 +190,15 @@ public class ChatManager : MonoBehaviour
     {
         if (chatInputField.text.Length > 0)
         {
-            ChatPrint(chatInputField.text);
+            Print(chatInputField.text);
+            SaveToHistory();
             CheckCommands();
         }
         SwitchChat();
     }
 
-    public void ChatPrint(string text)
+    private void SaveToHistory()
     {
-        Transform message = Instantiate(messagePrefab, content).transform;
-        message.GetChild(0).GetComponent<TextMeshProUGUI>().text = text;
-       
         if (history.Count < maxHistory)
         {
             history.Add(chatInputField.text);
@@ -221,9 +214,16 @@ public class ChatManager : MonoBehaviour
 
             history[LastHistory] = chatInputField.text;
         }
+    }
+
+    public void Print(string text)
+    {
+        Transform message = Instantiate(messagePrefab, content).transform;
+        message.GetChild(0).GetComponent<TextMeshProUGUI>().text = text;
         chatScrollbar.value = 0;
         SetTimerToDisappear();
     }
+
 
     private void CheckCommands()
     {
@@ -243,15 +243,18 @@ public class ChatManager : MonoBehaviour
         }
 
         string[] properties = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        properties[0] = properties[0].Remove(0,1);
+        List<CommandBase> hints = new List<CommandBase>();
 
         foreach (var item in commandList)
-        {        
+        {
             CommandBase commandBase = item as CommandBase;
-            if (command.Contains(commandBase.commandId,StringComparison.OrdinalIgnoreCase))
+            if (string.Compare(commandBase.commandId, properties[0], true) == 0)
             {
                 if (item is DebugCommand)
                 {
                     (item as DebugCommand).Invoke();
+                    return;
                 }
                 else if (item is DebugCommand<int>)
                 {
@@ -259,8 +262,9 @@ public class ChatManager : MonoBehaviour
                     if (properties.Length > 1 && int.TryParse(properties[1], out arg))
                     {      
                         (item as DebugCommand<int>).Invoke(arg);
+                        return;
                     }
-                    else PrintHint(commandBase);
+                    else hints.Add(commandBase);
                 }
                 else if (item is DebugCommand<int,int>)
                 {
@@ -268,19 +272,22 @@ public class ChatManager : MonoBehaviour
                     if (properties.Length > 2 && int.TryParse(properties[1], out arg1) && int.TryParse(properties[2], out arg2))
                     {
                         (item as DebugCommand<int, int>).Invoke(arg1, arg2);
+                        return;
                     }
-                    else PrintHint(commandBase);
+                    else hints.Add(commandBase);
                 }
             }
         }
 
-  
-
+        foreach (CommandBase item in hints)
+        {
+            PrintHint(item);
+        }
     }
 
     private void PrintHint(CommandBase commandBase)
     {
-        ChatPrint($"/{commandBase.commandId} {commandBase.commandFormat}");
+        Print($"/{commandBase.commandId} {commandBase.commandFormat}");
     }
     private void SetUp()
     {

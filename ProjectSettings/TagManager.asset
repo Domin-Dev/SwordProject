@@ -11,6 +11,7 @@ TagManager:
   - Shield
   - Tree
   - Items
+  - Bar
   layers:
   - Default
   - TransparentFX

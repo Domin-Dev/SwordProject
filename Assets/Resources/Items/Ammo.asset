@@ -14,9 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: 
   description: 
-  ID: 8
-  stackMax: 50
-  icon: {fileID: 0}
-  bullet: {fileID: 0}
-  UIbulletIcon: {fileID: 0}
-  damage: 0
+  ID: 10
+  stackMax: 20
+  icon: {fileID: 1603983635, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  bullet: {fileID: 907356828559875784, guid: 39d35432007d90f40b15bf375f8b9449, type: 3}
+  UIBulletIcon: {fileID: 950248845, guid: 6f6089b46f69a5d4d99bc7c3bcd304d1, type: 3}
+  damage: 10
+  type: 0

@@ -17,6 +17,7 @@ MonoBehaviour:
   ID: 15
   stackMax: 1
   icon: {fileID: -946185050, guid: f61881ba51203f94d9644cd4838d6f2b, type: 3}
+  durability: 66
   weaponImage: {fileID: -946185050, guid: f61881ba51203f94d9644cd4838d6f2b, type: 3}
   hitBoxPoints:
   - {x: -0.024999999, y: -0.015}
@@ -33,5 +34,5 @@ MonoBehaviour:
   cooldown: 0
   timeToReload: 0
   magazineCapacity: 0
-  ammoID: 0
   aimPoint: {x: 0.125, y: 0.005}
+  ammoType: 1

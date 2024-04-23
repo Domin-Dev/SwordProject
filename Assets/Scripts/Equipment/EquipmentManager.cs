@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static UnityEngine.Rendering.DebugUI;
 
 
 public struct SlotPosition
@@ -30,7 +31,22 @@ public struct SlotPosition
     }
 
 }
+public class TooltipInfo
+{
+    public string content;
+    public string header;
+    public TooltipInfo(string content,string header)
+    {
+        this.content = content;
+        this.header = header;
+    }
 
+    public TooltipInfo(string content)
+    {
+        this.content = content;
+        this.header = "";
+    }
+}
 public class UpdateSelectedSlotInBarArgs : EventArgs
 {
     public int lastSlot;
@@ -49,17 +65,15 @@ public class OpenEquipmentUIArgs : EventArgs
         this.open = open;
     }
 }
-public class CreateItemUIArgs : EventArgs
+public class CreateItemArgs : EventArgs
 {
-    public Sprite sprite;
-    public int itemCount;
+    public ItemStats itemStats;
     public SlotPosition position;
     public bool isDrag;
-    public CreateItemUIArgs(Sprite sprite,int itemCount,SlotPosition slotPosition,bool isDrag)
+    public CreateItemArgs(ItemStats itemStats,SlotPosition slotPosition,bool isDrag)
     {
        this.isDrag = isDrag;
-       this.sprite = sprite;
-       this.itemCount = itemCount;
+       this.itemStats = itemStats;
        this.position = slotPosition;
     }
 }
@@ -74,39 +88,37 @@ public class MoveItemUIArgs : EventArgs
         this.to = to;
     }
 }
-public class RemoveItemUIArgs : EventArgs
+public class PositionArgs : EventArgs
 {
     public SlotPosition position;
 
-    public RemoveItemUIArgs(SlotPosition position)
+    public PositionArgs(SlotPosition position)
     {
         this.position = position;
     } 
 }
-public class UpdateItemCountArgs : EventArgs
+public class UpdateItemCountArgs : PositionArgs
 {
-    public SlotPosition position;
     public int count;
 
-    public UpdateItemCountArgs(SlotPosition position, int count)
+    public UpdateItemCountArgs(SlotPosition position, int count):base(position)
     {
-        this.position = position;
         this.count = count;
     }
 }
-public class UpdateDragItemCountArgs : EventArgs
+public class ItemCountArgs : EventArgs
 {
     public int count;
-    public UpdateDragItemCountArgs(int count)
+    public ItemCountArgs(int count)
     {
         this.count = count;
     }
 }
-public class MoveMainBarItemArgs : EventArgs
+public class MoveItemArgs : EventArgs
 {
     public SlotPosition from;
     public SlotPosition to;
-    public MoveMainBarItemArgs(SlotPosition from, SlotPosition to)
+    public MoveItemArgs(SlotPosition from, SlotPosition to)
     {
         this.from = from;
         this.to = to;   
@@ -121,8 +133,14 @@ public class ItemStatsArgs : EventArgs
         this.item = item;
     }
 }
-
-
+public class LifeBarArgs : PositionArgs
+{
+   public float barValue;
+    public LifeBarArgs(SlotPosition slotPosition, float barValue) : base(slotPosition)
+    {
+        this.barValue = barValue;
+    }
+}
 
 public class EquipmentManager : MonoBehaviour
 {
@@ -130,25 +148,27 @@ public class EquipmentManager : MonoBehaviour
     public event EventHandler<UpdateSelectedSlotInBarArgs> UpdateSelectedSlotInBar;
     public event EventHandler<OpenEquipmentUIArgs> OpenEquipmentUI;
 
-    public event EventHandler<CreateItemUIArgs> CreateItemUI;
+    public event EventHandler<CreateItemArgs> CreateItemUI;
     public event EventHandler<MoveItemUIArgs> MoveItemUI;   
-    public event EventHandler<RemoveItemUIArgs> RemoveItemUI;  
+    public event EventHandler<PositionArgs> RemoveItemUI;  
     public event EventHandler<UpdateItemCountArgs> UpdateItemCount;
 
-    public event EventHandler<UpdateDragItemCountArgs> UpdateDragItemCount;
+    public event EventHandler<ItemCountArgs> UpdateDragItemCount;
     public event EventHandler RemoveDragItemUI;
 
-    public event EventHandler<MoveMainBarItemArgs> MoveMainBarItem;
-    public event EventHandler<CreateItemUIArgs> CreateMainBarItem;
-    public event EventHandler<RemoveItemUIArgs> RemoveMainBarItem;
+    public event EventHandler<MoveItemArgs> MoveMainBarItem;
+    public event EventHandler<CreateItemArgs> CreateMainBarItem;
+    public event EventHandler<PositionArgs> RemoveMainBarItem;
     public event EventHandler<UpdateItemCountArgs> UpdateMainBarItemCount;
+
+    public event EventHandler<LifeBarArgs> UpdateItemLifeBar;
     //
 
     //Character Controller
     public event EventHandler<ItemStatsArgs> UpdateItemInHand;
 
 
-    private int lastSelectedSlot { get; set; } = 2;
+    private int slotInHand { get; set; } = 1;
     private bool equipmentIsOpen = false;
 
     public static readonly int BarSlotCount = 10;
@@ -179,10 +199,11 @@ public class EquipmentManager : MonoBehaviour
     }
     private void Start()
     {
-        UIManager.instance.SetUpUIEquipment(this);
+        UIManager.instance.SetUpUIEquipment(this);     
         ChangeSelectedSlot(0);
         selectedSlotInEQ = new SlotPosition(-1,-1);
     }
+
     private void Update()
     {
         if(Input.GetKeyDown(KeyCode.Alpha1))ChangeSelectedSlot(0);
@@ -195,14 +216,6 @@ public class EquipmentManager : MonoBehaviour
         else if(Input.GetKeyDown(KeyCode.Alpha8))ChangeSelectedSlot(7);
         else if(Input.GetKeyDown(KeyCode.Alpha9))ChangeSelectedSlot(8);
         else if (Input.GetKeyDown(KeyCode.Alpha0))ChangeSelectedSlot(9);
-        
-
-
-
-
-
-
-
 
 
         if (Input.GetKeyDown(KeyCode.I))
@@ -221,6 +234,24 @@ public class EquipmentManager : MonoBehaviour
             BackSlot();
         }
     }
+
+    public void SetUpEvent(CharacterController characterController)
+    {
+        characterController.UseItem += UseSelectedItem;
+    }
+
+    private void UseSelectedItem(object sender, EventArgs e)
+    {
+        DestroyableItem item = equipmentBar[slotInHand] as DestroyableItem;
+        if (item != null)
+        {
+            item.Use();
+            UpdateItemLifeBar(this, new LifeBarArgs(new SlotPosition(0,slotInHand), item.GetLifePointsInPercent()));
+        } 
+    }
+
+
+
     public void UnselectedSlot()
     {
         ItemStats itemStats = GetItemStats(selectedSlotInEQ);
@@ -280,39 +311,45 @@ public class EquipmentManager : MonoBehaviour
     }
     private void NextSlot()
     {
-        if(lastSelectedSlot == BarSlotCount - 1)
+        if(slotInHand == BarSlotCount - 1)
         {
             ChangeSelectedSlot(0);
         }
         else
         {
-            ChangeSelectedSlot(lastSelectedSlot + 1);
+            ChangeSelectedSlot(slotInHand + 1);
         }
     }
     private void BackSlot()
     {
-        if (lastSelectedSlot == 0)
+        if (slotInHand == 0)
         {
             ChangeSelectedSlot(BarSlotCount - 1);
         }
         else
         {
-            ChangeSelectedSlot(lastSelectedSlot - 1);
+            ChangeSelectedSlot(slotInHand - 1);
         }
     }
     private void ChangeSelectedSlot(int newSlot)
     {
         newSlot = math.clamp(newSlot, 0, BarSlotCount -1);
-        if (lastSelectedSlot != newSlot)
+        if (slotInHand != newSlot)
         {
-            UpdateSelectedSlotInBarArgs args = new UpdateSelectedSlotInBarArgs(lastSelectedSlot, newSlot);
+            UpdateSelectedSlotInBarArgs args = new UpdateSelectedSlotInBarArgs(slotInHand, newSlot);
             UpdateSelectedSlotInBar(this, args);
-            lastSelectedSlot = newSlot;
+            slotInHand = newSlot;
             UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[newSlot]));    
         }
     }
+
     public bool AddNewItem(ItemStats itemStats)
     {
+        if(itemStats as DestroyableItem != null)
+        {
+            (itemStats as DestroyableItem).Use();
+        }
+
         if (itemStats.itemCount > 0)
         {
             List<SlotPosition> itemList = FindItems(itemStats.itemID);
@@ -348,7 +385,9 @@ public class EquipmentManager : MonoBehaviour
                     if (itemStats.itemCount > stackMax)
                     {
                         itemStats.itemCount -= stackMax;
-                        ItemStats newItem = new ItemStats(itemStats.itemID, stackMax);
+                        ItemStats newItem = itemStats.Clon();
+                        newItem.itemCount = stackMax;
+
                         equipmentBar[i] = newItem;
                         NewItemUI(newItem, new SlotPosition(0, i), false);
                     }
@@ -368,7 +407,9 @@ public class EquipmentManager : MonoBehaviour
                     if (itemStats.itemCount > stackMax)
                     {
                         itemStats.itemCount -= stackMax;
-                        ItemStats newItem = new ItemStats(itemStats.itemID, stackMax);
+                        ItemStats newItem = itemStats.Clon();
+                        newItem.itemCount = stackMax;
+                    
                         equipment[i] = newItem;
                         NewItemUI(newItem, new SlotPosition(1, i), false);
                     }
@@ -383,14 +424,20 @@ public class EquipmentManager : MonoBehaviour
         }
         return false;
     }
+
     public void NewItemUI(ItemStats itemStats,SlotPosition slotPosition,bool isDrag)
     {
-        CreateItemUIArgs args = new CreateItemUIArgs(ItemsAsset.instance.GetIcon(itemStats.itemID),itemStats.itemCount,slotPosition,isDrag);
+        if (slotPosition.Compare(new SlotPosition(0, slotInHand)))
+        {
+            UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[slotInHand]));
+        }
+
+        CreateItemArgs args = new CreateItemArgs(itemStats,slotPosition,isDrag);
         CreateItemUI(this,args);
     }
     public void NewMainBarItemUI(ItemStats itemStats, SlotPosition slotPosition)
     {
-        CreateItemUIArgs args = new CreateItemUIArgs(ItemsAsset.instance.GetIcon(itemStats.itemID), itemStats.itemCount, slotPosition, false);
+        CreateItemArgs args = new CreateItemArgs(itemStats, slotPosition, false);
         CreateMainBarItem(this, args);
     }
     public bool IsFreeSlot(SlotPosition position)
@@ -420,18 +467,16 @@ public class EquipmentManager : MonoBehaviour
         {
             ItemStats itemStatsTarget = GetItemStats(target);
             int maxStack = ItemsAsset.instance.GetStackMax(itemStatsTarget.itemID);
-            if (selectedItemStats.itemID != itemStatsTarget.itemID || maxStack == itemStatsTarget.itemCount)
-            {
-                Debug.Log("s");
+            if(selectedItemStats.itemID != itemStatsTarget.itemID)
+            {  
                 if(IsFreeSlot(selectedSlotInEQ))
-                {
+                {                   
                     SetItemStats(target, selectedItemStats);
                     SetItemStats(selectedSlotInEQ, itemStatsTarget);
                     MoveItemUIArgs moveItemUIArgs = new MoveItemUIArgs(target, selectedSlotInEQ);
-                    MoveItemUI(this, moveItemUIArgs);
-                    if(selectedSlotInEQ.gridIndex == 0 || target.gridIndex == 0)
+                    MoveItemUI(this, moveItemUIArgs); 
+                    if(target.gridIndex == 0)
                     {
-                        RemoveMainBarItemUI(target);
                         NewMainBarItemUI(selectedItemStats, target);
                     }
                 }
@@ -463,7 +508,7 @@ public class EquipmentManager : MonoBehaviour
     public void PutOneItem(SlotPosition position)
     {
         int stackMax = ItemsAsset.instance.GetStackMax(selectedItemStats.itemID);
-        if (selectedItemStats.itemCount >= 0)
+        if (selectedItemStats.itemCount > 0)
         {
             ItemStats itemStats;
             if (IsFreeSlot(position))
@@ -625,12 +670,12 @@ public class EquipmentManager : MonoBehaviour
     }
     private void UpdateDragCount(int count)
     {
-        UpdateDragItemCountArgs updateDragItemCountArgs = new UpdateDragItemCountArgs(count);
+        ItemCountArgs updateDragItemCountArgs = new ItemCountArgs(count);
         UpdateDragItemCount(this, updateDragItemCountArgs);
     }
     private void RemoveItem(SlotPosition position)
     {
-        RemoveItemUIArgs removeItemUIArgs = new RemoveItemUIArgs(position);
+        PositionArgs removeItemUIArgs = new PositionArgs(position);
         RemoveItemUI(this, removeItemUIArgs);
     }
     private void RemoveDragItem()
@@ -665,11 +710,20 @@ public class EquipmentManager : MonoBehaviour
     }
     private void RemoveMainBarItemUI(SlotPosition position)
     {
-        RemoveMainBarItem(this, new RemoveItemUIArgs(position));
+        RemoveMainBarItem(this, new PositionArgs(position));
     }
     private void IncreaseItemCount(SlotPosition position,int value) 
     {
         GetItemStats(position).itemCount += value;
         UpdateCount(position);
+    }
+    public TooltipInfo GetTooltipInfo(SlotPosition position)
+    {
+        ItemStats itemStats = GetItemStats(position);
+        if (itemStats == null) return null;
+        else
+        {
+            return ItemsAsset.instance.GetTooltipInfo(itemStats.itemID);
+        }
     }
 }

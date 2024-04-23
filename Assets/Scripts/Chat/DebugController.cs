@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEditor;
@@ -13,29 +14,24 @@ public class DebugController : MonoBehaviour
         {
             Debug.Log("time set to 10");
         }));
-
         commandList.Add(new DebugCommand("host", "start host", "", () =>
         {
             NetworkManager.Singleton.StartHost();
         }));
-
         commandList.Add(new DebugCommand<int>("spawn", "spawn", "[Number]", (x) =>
         {
             Debug.Log("spawn" + x);
         }));
-
         commandList.Add(new DebugCommand<int,int>("give", "Adds item to player equipment", "[ID] [Count]", (ID, count) =>
         {
-            Debug.Log(ID + " "+ count);
-            EquipmentManager.instance.AddNewItem(new ItemStats(ID,count));
+           if(ItemsAsset.instance.IsItem(ID)) EquipmentManager.instance.AddNewItem(ItemsAsset.instance.GetItemStats(ID,count));
+           else ChatManager.instance.Print("ID is't correct");
         }));
-
-        commandList.Add(new DebugCommand<int, int>("giveone", "Adds item to player equipment", "[ID]", (ID, count) =>
+        commandList.Add(new DebugCommand<int>("give", "Adds item to player equipment", "[ID]", (ID) =>
         {
-            EquipmentManager.instance.AddNewItem(new ItemStats(ID, 1));
+            if (ItemsAsset.instance.IsItem(ID)) EquipmentManager.instance.AddNewItem(ItemsAsset.instance.GetItemStats(ID));
+            else ChatManager.instance.Print("ID is't correct");
         }));
-
-
         commandList.Add(new DebugCommand("help", "command list", "", () =>
         {
             string text = "Command list:\n";
@@ -44,9 +40,8 @@ public class DebugController : MonoBehaviour
                 CommandBase commandBase = commandList[i] as CommandBase;
                 text += $"/{commandBase.commandId} {commandBase.commandFormat} - {commandBase.commandDescription}\n";
             }
-            ChatManager.instance.ChatPrint(text);
+            ChatManager.instance.Print(text);
         }));
-
         return commandList;
     }
 

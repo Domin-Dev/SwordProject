@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
@@ -12,9 +13,9 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private Transform hpBar;
 
 
-
     [SerializeField] private Transform secondHand;
     Vector3 secondHandStartPosition;
+    [SerializeField] private Transform center;
     [SerializeField] private Transform secondHandParent;
     [SerializeField] private SpriteRenderer itemInHand;
     [SerializeField] private PolygonCollider2D hitBox;
@@ -22,14 +23,17 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private Transform aimPoint;
 
 
+
     private Animator animator;
 
     private Vector2 moveDir;
+    private Vector2 sightDir;
     private Rigidbody2D rigidbody2D;
 
     private bool isRepulsed = false;
 
     public AttackModule attackModule { set; get; }
+
 
     #region StateMachine
     public HeroStateMachine heroStateMachine { set; get; }
@@ -44,11 +48,17 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 
     #endregion
 
+    private CharacterSpriteController characterSpriteController;
+
+    public event EventHandler UseItem;
+
     private void Awake()
     {
+        characterSpriteController = GetComponent<CharacterSpriteController>();
         rigidbody2D = GetComponent<Rigidbody2D>();
         attackModule = GetComponent<AttackModule>();
         animator = GetComponent<Animator>();  
+        
         attackModule.SetController(this,"Enemy");  
         secondHandStartPosition = secondHand.localPosition;
         SetUpEvents();
@@ -57,11 +67,13 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     private void Start()
     {
         heroStateMachine.RunMachine(idleState);
+        EquipmentManager.instance.SetUpEvent(this);
     }
     private void Update()
     {
-      //  if (!IsOwner) return;
-        attackModule.Updateflip(MyTools.GetMouseWorldPosition());
+        //  if (!IsOwner) return;
+        sightDir = MyTools.GetMouseWorldPosition();
+        attackModule.Updateflip(sightDir);
         heroStateMachine.currentState.FrameUpdate();
     }
     private void FixedUpdate()
@@ -71,7 +83,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 
     private void SetUpEvents()
     {
-        EquipmentManager.instance.UpdateItemInHand += UpdateItemInHand;
+        EquipmentManager.instance.UpdateItemInHand += UpdateItemInHand;   
     }
 
     private void UpdateItemInHand(object sender, ItemStatsArgs e)
@@ -151,7 +163,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     {
         if (!isRepulsed)
         {
-            Debug.Log(moveDir);
+            characterSpriteController.UpdateSprite(moveDir,(sightDir - (Vector2)center.position).normalized);
             rigidbody2D.velocity = moveDir;
             if(moveDir == new Vector2(0,0))
             {
@@ -206,6 +218,9 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     }
     #endregion
 
-  
+    public void Use()
+    {
+        UseItem(this,null);
+    }
 }
 
