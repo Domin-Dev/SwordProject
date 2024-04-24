@@ -29,9 +29,11 @@ public class UIManager : MonoBehaviour
 
     //equipment
     [SerializeField] private Canvas mainCanvas;
+    [Header("Gun Info UI")]
+    [SerializeField] private Transform ammoBar;
     [Space]
     [Header("Equipment UI")]
-    [SerializeField] private Transform itemBar;
+    [SerializeField] private Transform mainItemBar;
     [SerializeField] private Transform equipment;
     [Space]
     [SerializeField] private GameObject itemSlot;
@@ -39,13 +41,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject item;
     [SerializeField] private GameObject lifePointsBar;
     [Space]
-    [SerializeField] private Transform itemEquipmentSlots;
-    [SerializeField] private Transform itemEquipmentBar;
-    [SerializeField] private Transform items;
+    [SerializeField] private Transform equipmentItemSlots;
+    [SerializeField] private Transform equipmentItemBar;
+    [SerializeField] private Transform equipmentDragItems;
     [Space(30f)]
     [Header("Stats UI")]
-
-
     //temporary
     [SerializeField] private Button ServerButton;
     [SerializeField] private Button HostButton;
@@ -63,7 +63,7 @@ public class UIManager : MonoBehaviour
 
 
 
-    public Transform itemParent { get { return items; } }
+    public Transform itemParent { get { return equipmentDragItems; } }
     public static UIManager instance { private set; get; }
 
 
@@ -90,10 +90,10 @@ public class UIManager : MonoBehaviour
 
     private void SetGrids()
     {
-        barGrid = new EquipmentGrid(itemBar, 0);
-        equipmentBarGrid = new EquipmentGrid(itemEquipmentBar, 0);
+        barGrid = new EquipmentGrid(mainItemBar, 0);
+        equipmentBarGrid = new EquipmentGrid(equipmentItemBar, 0);
 
-        mainEquipmentGrid = new EquipmentGrid(itemEquipmentSlots, 1);
+        mainEquipmentGrid = new EquipmentGrid(equipmentItemSlots, 1);
     }
     private void SetUpNetworkUI()
     {
@@ -137,56 +137,69 @@ public class UIManager : MonoBehaviour
 
     private void UpdateItemLifeBar(object sender, LifeBarArgs e)
     {
-        Transform slot = itemBar.GetChild(e.position.slotIndex).GetComponentInChildren<DragDrop>().transform;
-        Image bar = null;
+        Transform slot = GetItem(e.position);
+        FindBar(e.barValue,slot);
+        if(e.position.gridIndex == 0)
+        {
+            slot = GetItemFromMainBar(e.position);
+            FindBar(e.barValue, slot);
+        }
+    }
+
+    private void FindBar(float value,Transform slot)
+    {
+        if (slot == null) return;
         for (int i = 0; i < slot.childCount; i++)
         {
-            if(slot.GetChild(i).CompareTag("Bar"))
+            if (slot.GetChild(i).CompareTag("Bar"))
             {
-                bar = slot.GetChild(i).transform.GetChild(0).GetComponent<Image>();
+                UpdateBar(value, slot.GetChild(i).transform.GetChild(0));
+                return;
             }
         }
-        
-      
-
-        if (bar == null) return;
-
-
-        bar.transform.localScale = new Vector3(e.barValue, 1);
-        bar.color = new Color(bar.color.r, e.barValue, bar.color.b);
     }
+
+    private void UpdateBar(float value, Transform barTransform)
+    {
+        Image bar = barTransform.GetComponent<Image>();
+        bar.transform.localScale = new Vector3(value, 1);
+        bar.color = new Color(bar.color.r, value, bar.color.b);
+    }
+
+
+
 
     private void UpdateMainBarItemCount(object sender, UpdateItemCountArgs e)
     {
-        UpdateCount(itemBar, e);
+        UpdateCount(mainItemBar, e);
     }
 
     private void RemoveMainBarItem(object sender, PositionArgs e)
     {
-        RemoveItem(itemBar, e);
+        RemoveItem(mainItemBar, e);
     }
 
     private void CreateMainBarItem(object sender, CreateItemArgs e)
     {
-        NewItemUI(itemBar, e);
+        NewItemUI(mainItemBar, e);
     }
 
     private void MoveMainBarItem(object sender, MoveItemArgs e)
     {
         if(e.from.gridIndex == 0 && e.to.gridIndex == 0)
         {
-            DragDrop slot = itemBar.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
-            slot.transform.SetParent(itemBar.GetChild(e.to.slotIndex));
+            DragDrop slot = mainItemBar.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
+            slot.transform.SetParent(mainItemBar.GetChild(e.to.slotIndex));
             slot.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         }
         else if(e.from.gridIndex == 0)
         {
-            RemoveItem(itemBar, new PositionArgs(e.from));
+            RemoveItem(mainItemBar, new PositionArgs(e.from));
         }
         else if (e.to.gridIndex == 0)
         {
             ItemStats item = EquipmentManager.instance.GetItemStatsValue(e.to);
-            NewItemUI(itemBar, new CreateItemArgs(item,e.to,false));
+            NewItemUI(mainItemBar, new CreateItemArgs(item,e.to,false));
         }   
     }
     private void RemoveDragItemUI(object sender, EventArgs e)
@@ -204,12 +217,12 @@ public class UIManager : MonoBehaviour
     private void UpdateItemCount(object sender, UpdateItemCountArgs e)
     {
         Transform grid;
-        if (e.position.gridIndex == 0) grid = itemEquipmentBar;
-        else grid = itemEquipmentSlots;
+        if (e.position.gridIndex == 0) grid = equipmentItemBar;
+        else grid = equipmentItemSlots;
         UpdateCount(grid, e);
         if(e.position.gridIndex == 0)
         {
-            UpdateCount(itemBar,e);
+            UpdateCount(mainItemBar,e);
         }    
         
     }
@@ -224,13 +237,13 @@ public class UIManager : MonoBehaviour
     private void RemoveItemUI(object sender, PositionArgs e)
     {
         Transform grid;
-        if (e.position.gridIndex == 0) grid = itemEquipmentBar;
-        else grid = itemEquipmentSlots;
+        if (e.position.gridIndex == 0) grid = equipmentItemBar;
+        else grid = equipmentItemSlots;
 
         RemoveItem(grid, e);
         if(e.position.gridIndex == 0)
         {
-            RemoveItem(itemBar, e);
+            RemoveItem(mainItemBar, e);
         }
     }
 
@@ -244,11 +257,11 @@ public class UIManager : MonoBehaviour
     private void MoveItemUI(object sender, MoveItemUIArgs e)
     {
         Transform gridFrom, gridTo;
-        if (e.from.gridIndex == 0) gridFrom = itemEquipmentBar;
-        else gridFrom = itemEquipmentSlots;
+        if (e.from.gridIndex == 0) gridFrom = equipmentItemBar;
+        else gridFrom = equipmentItemSlots;
 
-        if (e.to.gridIndex == 0) gridTo = itemEquipmentBar;
-        else gridTo = itemEquipmentSlots;
+        if (e.to.gridIndex == 0) gridTo = equipmentItemBar;
+        else gridTo = equipmentItemSlots;
 
         if (e.to.gridIndex == 0 || e.from.gridIndex == 0) MoveMainBarItem(this, new MoveItemArgs(e.from, e.to));
 
@@ -270,20 +283,27 @@ public class UIManager : MonoBehaviour
     private void CreateItemUI(object sender, CreateItemArgs e)
     {
         Transform gridUI;
-        if (e.position.gridIndex == 0) gridUI = itemEquipmentBar;
-        else gridUI = itemEquipmentSlots;
+        if (e.position.gridIndex == 0) gridUI = equipmentItemBar;
+        else gridUI = equipmentItemSlots;
 
         NewItemUI(gridUI, e);
         if(e.position.gridIndex == 0 && !e.isDrag)
         {
-            NewItemUI(itemBar, e);
+            NewItemUI(mainItemBar, e);
         }
     }
 
     private void NewItemUI(Transform gridUI, CreateItemArgs e)
     {
+        Debug.Log("git");
         RectTransform transform = Instantiate(item, gridUI.GetChild(e.position.slotIndex)).GetComponent<RectTransform>();
-        if(e.itemStats as DestroyableItem != null) Instantiate(lifePointsBar, transform);
+        if (e.itemStats as DestroyableItem != null)
+        {
+            Debug.Log("gfdfdit");
+
+            Transform bar = Instantiate(lifePointsBar, transform).transform.GetChild(0);
+            UpdateBar((e.itemStats as DestroyableItem).GetLifePointsInPercent(),bar);
+        }
         
         transform.anchoredPosition = Vector2.zero;
 
@@ -291,7 +311,7 @@ public class UIManager : MonoBehaviour
         if (e.itemStats.itemCount != 1) transform.GetComponentInChildren<TextMeshProUGUI>().text = e.itemStats.itemCount.ToString();
         else transform.GetComponentInChildren<TextMeshProUGUI>().text = "";
 
-        if (gridUI != itemBar)
+        if (gridUI != mainItemBar)
         {
             transform.GetComponent<DragDrop>().SetCanvas(mainCanvas);
             transform.GetComponent<DragDrop>().IsInSlot();
@@ -303,7 +323,6 @@ public class UIManager : MonoBehaviour
 
 
     }
-
     private void OpenEquipment(object sender, OpenEquipmentUIArgs e)
     {
         if (e.open)
@@ -320,11 +339,11 @@ public class UIManager : MonoBehaviour
     }
     private void UpdateSelectedSlot(object sender, UpdateSelectedSlotInBarArgs e)
     {
-        itemBar.GetChild(e.lastSlot).GetComponent<Image>().sprite = unSelected;
-        itemBar.GetChild(e.currentSlot).GetComponent<Image>().sprite = selected;
+        mainItemBar.GetChild(e.lastSlot).GetComponent<Image>().sprite = unSelected;
+        mainItemBar.GetChild(e.currentSlot).GetComponent<Image>().sprite = selected;
         if(lastSlotUI != null) lastSlotUI.localScale = new Vector3(buttonScale, buttonScale,1);
-        currentSlotUI = itemBar.GetChild(e.currentSlot).GetComponent<RectTransform>();
-        lastSlotUI = itemBar.GetChild(e.lastSlot).GetComponent<RectTransform>();
+        currentSlotUI = mainItemBar.GetChild(e.currentSlot).GetComponent<RectTransform>();
+        lastSlotUI = mainItemBar.GetChild(e.lastSlot).GetComponent<RectTransform>();
     }
     private RectTransform lastSlotUI;
     private RectTransform currentSlotUI;
@@ -370,16 +389,15 @@ public class UIManager : MonoBehaviour
             }
         }
     }
-
     private Transform GetItem(SlotPosition position)
     {
         Transform parent = null;
-        if (position.gridIndex == 0) parent = itemEquipmentBar;
-        else if (position.gridIndex == 1) parent = itemEquipmentSlots;
+        if (position.gridIndex == 0) parent = equipmentItemBar;
+        else if (position.gridIndex == 1) parent = equipmentItemSlots;
 
         if(parent != null)
         {
-           return parent.GetComponentInChildren<DropSlot>().transform;
+           return parent.GetChild(position.slotIndex).GetComponentInChildren<DragDrop>().transform;
         }
         else
         {
@@ -387,4 +405,11 @@ public class UIManager : MonoBehaviour
         }
 
     }
+
+    private Transform GetItemFromMainBar(SlotPosition position)
+    {
+        if (position.slotIndex < mainItemBar.childCount) return mainItemBar.GetChild(position.slotIndex).GetComponentInChildren<DragDrop>().transform;
+        else return null;
+    }
+
 }

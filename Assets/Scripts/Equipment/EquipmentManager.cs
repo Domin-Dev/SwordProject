@@ -142,6 +142,17 @@ public class LifeBarArgs : PositionArgs
     }
 }
 
+public class AmmoBarArgs : EventArgs
+{
+    public int count;
+    public AmmoType type;
+
+    public AmmoBarArgs(int count,AmmoType ammoType)
+    {
+        this.count = count;
+        this.type = ammoType;
+    }
+}
 public class EquipmentManager : MonoBehaviour
 {
     //UI
@@ -163,9 +174,11 @@ public class EquipmentManager : MonoBehaviour
 
     public event EventHandler<LifeBarArgs> UpdateItemLifeBar;
     //
-
     //Character Controller
     public event EventHandler<ItemStatsArgs> UpdateItemInHand;
+
+    //Ammo Info
+    public event EventHandler<AmmoBarArgs> SetAmmoBar;
 
 
     private int slotInHand { get; set; } = 1;
@@ -234,12 +247,10 @@ public class EquipmentManager : MonoBehaviour
             BackSlot();
         }
     }
-
     public void SetUpEvent(CharacterController characterController)
     {
         characterController.UseItem += UseSelectedItem;
     }
-
     private void UseSelectedItem(object sender, EventArgs e)
     {
         DestroyableItem item = equipmentBar[slotInHand] as DestroyableItem;
@@ -249,9 +260,6 @@ public class EquipmentManager : MonoBehaviour
             UpdateItemLifeBar(this, new LifeBarArgs(new SlotPosition(0,slotInHand), item.GetLifePointsInPercent()));
         } 
     }
-
-
-
     public void UnselectedSlot()
     {
         ItemStats itemStats = GetItemStats(selectedSlotInEQ);
@@ -342,7 +350,6 @@ public class EquipmentManager : MonoBehaviour
             UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[newSlot]));    
         }
     }
-
     public bool AddNewItem(ItemStats itemStats)
     {
         if(itemStats as DestroyableItem != null)
@@ -424,7 +431,6 @@ public class EquipmentManager : MonoBehaviour
         }
         return false;
     }
-
     public void NewItemUI(ItemStats itemStats,SlotPosition slotPosition,bool isDrag)
     {
         if (slotPosition.Compare(new SlotPosition(0, slotInHand)))
@@ -445,13 +451,17 @@ public class EquipmentManager : MonoBehaviour
         if (position.gridIndex == 0)
         {
             if(equipmentBar[position.slotIndex] == null) return true;
-            Debug.Log(equipmentBar[position.slotIndex].ToString());
         }
         else if(position.gridIndex == 1)
         {
             if(equipment[position.slotIndex] == null) return true;
         }
         return false;
+    }
+    
+    private bool IsSlotInHand(SlotPosition slotPosition)
+    {
+        return slotPosition.Compare(new SlotPosition(0, slotInHand));
     }
     public void MoveSelectedItem(SlotPosition target)
     {
@@ -467,7 +477,7 @@ public class EquipmentManager : MonoBehaviour
         {
             ItemStats itemStatsTarget = GetItemStats(target);
             int maxStack = ItemsAsset.instance.GetStackMax(itemStatsTarget.itemID);
-            if(selectedItemStats.itemID != itemStatsTarget.itemID)
+            if(selectedItemStats.itemID != itemStatsTarget.itemID || maxStack == 1)
             {  
                 if(IsFreeSlot(selectedSlotInEQ))
                 {                   
@@ -477,6 +487,7 @@ public class EquipmentManager : MonoBehaviour
                     MoveItemUI(this, moveItemUIArgs); 
                     if(target.gridIndex == 0)
                     {
+                        Debug.Log(selectedItemStats.ToString());
                         NewMainBarItemUI(selectedItemStats, target);
                     }
                 }
@@ -503,6 +514,13 @@ public class EquipmentManager : MonoBehaviour
 
             UpdateCount(target);
         }
+
+
+        if (IsSlotInHand(target) || IsSlotInHand(selectedSlotInEQ))
+        {
+            UpdateItemInHand(this, new ItemStatsArgs(GetItemStats(new SlotPosition(0, slotInHand))));
+        }
+
         ClearSelectedSlot();
     }
     public void PutOneItem(SlotPosition position)
@@ -513,7 +531,8 @@ public class EquipmentManager : MonoBehaviour
             ItemStats itemStats;
             if (IsFreeSlot(position))
             {
-                itemStats = new ItemStats(selectedItemStats.itemID, 1);
+                itemStats = selectedItemStats.Clon();
+                itemStats.itemCount = 1;
                 SetItemStats(position, itemStats);
                 NewItemUI(itemStats, position, false);
             }
@@ -650,7 +669,7 @@ public class EquipmentManager : MonoBehaviour
         if (position.slotIndex >= 0)
         {
             ItemStats itemStats = GetArray(position.gridIndex)[position.slotIndex];
-            return new ItemStats(itemStats);
+            return itemStats.Clon();
         }
         else return null;
     }

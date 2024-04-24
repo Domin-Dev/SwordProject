@@ -48,7 +48,6 @@ public class DestroyableItem : ItemStats
 
     public DestroyableItem(int itemID, int maxLifePoints, int itemCount = 1) :base(itemID,itemCount) 
     {
-        Debug.Log(maxLifePoints);
         this.maxLifePonits = maxLifePoints;
         currentLifePoints = this.maxLifePonits;      
     }
@@ -74,28 +73,27 @@ public class DestroyableItem : ItemStats
 
     public void Use()
     {
-        currentLifePoints--;
-        Debug.Log(currentLifePoints);
+       if(currentLifePoints > 0) currentLifePoints--;
     }
     
 }
-public class GunMagazineItem : DestroyableItem
+public class RangedWeaponItem : DestroyableItem
 {
     public int magazineCapacity {private set; get; }
     public int currentAmmoCount {private set; get; }
 
-    public GunMagazineItem(int itemID, int maxLifePoints, int currentLifePoints,int magazineCapacity, int itemCount = 1, int currentAmmoCount = 0) : base(itemID, itemCount, maxLifePoints,currentLifePoints)
+    public RangedWeaponItem(int itemID, int maxLifePoints, int currentLifePoints,int magazineCapacity, int itemCount = 1, int currentAmmoCount = 0) : base(itemID, itemCount, maxLifePoints,currentLifePoints)
     {
         this.magazineCapacity = magazineCapacity;
         this.currentAmmoCount = currentAmmoCount;
     }
 
-    public GunMagazineItem(int itemID, int maxLifePoints, int magazineCapacity, int itemCount = 1, int currentAmmoCount = 0) : base(itemID,maxLifePoints,itemCount)
+    public RangedWeaponItem(int itemID, int maxLifePoints, int magazineCapacity, int itemCount = 1, int currentAmmoCount = 0) : base(itemID,maxLifePoints,itemCount)
     {
         this.magazineCapacity = magazineCapacity;
         this.currentAmmoCount = currentAmmoCount;
     }
-    public GunMagazineItem(GunMagazineItem item) : base(item)
+    public RangedWeaponItem(RangedWeaponItem item) : base(item)
     {
         this.magazineCapacity = item.magazineCapacity;
         this.currentAmmoCount = item.currentAmmoCount;
@@ -104,10 +102,9 @@ public class GunMagazineItem : DestroyableItem
     {
         return currentAmmoCount < magazineCapacity;
     }
-
     public override ItemStats Clon()
     {
-        return new GunMagazineItem(this);
+        return new RangedWeaponItem(this);
     }
 
     

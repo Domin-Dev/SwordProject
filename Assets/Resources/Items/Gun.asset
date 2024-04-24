@@ -37,6 +37,6 @@ MonoBehaviour:
   damage: 5
   cooldown: 0
   timeToReload: 0
-  magazineCapacity: 0
+  magazineCapacity: 5
   aimPoint: {x: 0.044999998, y: 0.005}
   ammoType: 0

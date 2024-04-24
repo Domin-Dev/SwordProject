@@ -21,6 +21,7 @@ public class WeaponEditor : Editor
 
     public override void OnInspectorGUI()
     {
+
         Weapon weapon = target as Weapon;
         ItemEditor.IconField(weapon);
 
@@ -30,7 +31,6 @@ public class WeaponEditor : Editor
       
         EditorGUILayout.EndHorizontal();
 
-        
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PrefixLabel("Weapon HitBox to bake");
         hitbox = (Sprite)EditorGUILayout.ObjectField(hitbox, typeof(Sprite),false);

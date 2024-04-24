@@ -90,6 +90,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     {
         itemInHand.transform.localPosition = Vector3.zero;
         attackModule.isGun = false;
+        
         if (e.item != null)
         {
             Item item = ItemsAsset.instance.GetItem(e.item.itemID);
