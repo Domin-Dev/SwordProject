@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 {
@@ -21,8 +22,6 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private PolygonCollider2D hitBox;
     [SerializeField] private Transform mainHand;
     [SerializeField] private Transform aimPoint;
-
-
 
     private Animator animator;
 
@@ -50,7 +49,14 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 
     private CharacterSpriteController characterSpriteController;
 
+
+    //Item in hand
+    public ItemStats selectedItem;
     public event EventHandler UseItem;
+    public event EventHandler<SetAmmoBarArgs> SetAmmoBar;
+    public event EventHandler<UpdateAmmoBarArgs> UpdateAmmoBar;
+    public event EventHandler HideAmmoBar;
+
 
     private void Awake()
     {
@@ -63,6 +69,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
         secondHandStartPosition = secondHand.localPosition;
         SetUpEvents();
         SetStateMachine();
+        UIManager.instance.SetUpUIPlayer(this);
     }
     private void Start()
     {
@@ -89,57 +96,70 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     private void UpdateItemInHand(object sender, ItemStatsArgs e)
     {
         itemInHand.transform.localPosition = Vector3.zero;
-        attackModule.isGun = false;
         
         if (e.item != null)
         {
             Item item = ItemsAsset.instance.GetItem(e.item.itemID);
-            if (item as Weapon != null)
-            {
-                Weapon weapon = (Weapon)item;
-                itemInHand.sprite = weapon.weaponImage;
-                hitBox.points = weapon.hitBoxPoints;
-                hitBox.transform.localPosition = -weapon.gripPoint1;
-                itemInHand.sortingOrder = 10;
-                itemInHand.transform.localPosition = -weapon.gripPoint1;
-                if (weapon.gripPoint2.x != -100)
-                {
-                    secondHand.parent = itemInHand.transform;
-                    secondHand.localEulerAngles = Vector3.zero;
-                    secondHand.localPosition = weapon.gripPoint2;
-                }
-                else
-                {
-                    SecondHandReset();
-                }
+            selectedItem = e.item;
+            if (item as Weapon != null) 
+                ItemIsWepon(item,e.item);
+            else 
+                ItemIsNotWepon(item);
+        }
+        else 
+            ItemIsNull();
+    }
 
-                if(weapon as RangedWeapon != null)
-                {
-                    attackModule.isGun = true;
-                    RangedWeapon rangedWeapon = (RangedWeapon)weapon;
-                    float posY = Mathf.Abs(rangedWeapon.aimPoint.y - rangedWeapon.gripPoint1.y);
-                    attackModule.SetTransformHand(posY);
-                    aimPoint.localPosition = (Vector2)itemInHand.transform.localPosition + rangedWeapon.aimPoint;
-                }
-                else
-                {
+    private void ItemIsNull()
+    {
+        selectedItem = null;
+        itemInHand.sprite = null;
+        attackModule.isGun = false;
+        SecondHandReset();
+        HideAmmoBar(this, null);
+    }
 
-                }
-            }
-            else
-            {
-                itemInHand.sprite = item.icon;
-                itemInHand.sortingOrder = 20;
-                SecondHandReset();
-            }
+    private void ItemIsNotWepon(Item item)
+    {
+        itemInHand.sprite = item.icon;
+        itemInHand.sortingOrder = 20;
+        SecondHandReset();
+        HideAmmoBar(this, null);
+    }
+
+    private void ItemIsWepon(Item item,ItemStats itemStats)
+    {  
+        Weapon weapon = (Weapon)item;
+        itemInHand.sprite = weapon.weaponImage;
+        hitBox.points = weapon.hitBoxPoints;
+        hitBox.transform.localPosition = -weapon.gripPoint1;
+        itemInHand.sortingOrder = 10;
+        itemInHand.transform.localPosition = -weapon.gripPoint1;
+        if (weapon.gripPoint2.x != -100)
+        {
+            secondHand.parent = itemInHand.transform;
+            secondHand.localEulerAngles = Vector3.zero;
+            secondHand.localPosition = weapon.gripPoint2;
         }
         else
         {
-            itemInHand.sprite = null;
             SecondHandReset();
         }
 
-        
+        if (weapon as RangedWeapon != null)
+        {
+            attackModule.isGun = true;
+            RangedWeapon rangedWeapon = (RangedWeapon)weapon;
+            float posY = Mathf.Abs(rangedWeapon.aimPoint.y - rangedWeapon.gripPoint1.y);
+            attackModule.SetTransformHand(posY);
+            aimPoint.localPosition = (Vector2)itemInHand.transform.localPosition + rangedWeapon.aimPoint;
+            SetAmmoBar(this, new SetAmmoBarArgs(rangedWeapon.magazineCapacity,(itemStats as RangedWeaponItem).currentAmmoCount, rangedWeapon.ammoType));
+        }
+        else
+        {
+            attackModule.isGun = false;
+            HideAmmoBar(this, null);
+        }
     }
 
     private void SecondHandReset()
@@ -222,6 +242,17 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     public void Use()
     {
         UseItem(this,null);
+    }
+
+    public void Shot()
+    {
+        (selectedItem as RangedWeaponItem).Shot();
+        UpdateAmmoBar(this, new UpdateAmmoBarArgs((selectedItem as RangedWeaponItem).currentAmmoCount));
+    }
+    public void Reload()
+    {
+        (selectedItem as RangedWeaponItem).Reload(2);
+        UpdateAmmoBar(this, new UpdateAmmoBarArgs((selectedItem as RangedWeaponItem).currentAmmoCount));
     }
 }
 

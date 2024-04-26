@@ -12,7 +12,6 @@ public class RangedWeapon: Weapon
 
     public override ItemStats GetItemStats()
     {
-        Debug.Log(durability);
         return new RangedWeaponItem(ID,durability, magazineCapacity);
     }
 }

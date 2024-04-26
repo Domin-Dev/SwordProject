@@ -1,11 +1,22 @@
 
 using UnityEngine;
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using static UnityEditor.Progress;
+
+
 
 public class ItemsAsset : MonoBehaviour
 {
+    private struct AmmoInfo
+    {
+       public AmmoType type;
+       public int id;
+
+        public AmmoInfo(int id,AmmoType ammoType)
+        {
+            this.id = id;
+            this.type = ammoType;
+        }
+    }
     private static ItemsAsset i;
     public static ItemsAsset instance 
     {
@@ -20,13 +31,20 @@ public class ItemsAsset : MonoBehaviour
     }
 
     private Dictionary<int, Item> items = new Dictionary<int, Item>();
+    private List<AmmoInfo> ammoList;
+
     public void Awake()
     {
         Item[] loadedItems = Resources.LoadAll<Item>("Items");
+        ammoList = new List<AmmoInfo>();
         for (int i = 0; i < loadedItems.Length; i++)
         {
             Item item = loadedItems[i];
             items.Add(item.ID, item);
+            if(item as Ammo != null) 
+            { 
+                ammoList.Add(new AmmoInfo(item.ID,(item as Ammo).type));
+            }
         }
     }
     public Sprite GetIcon(int itemID)
@@ -60,6 +78,18 @@ public class ItemsAsset : MonoBehaviour
         ItemStats item = GetItem(itemID).GetItemStats();
         item.itemCount = itemCount;
         return item;
+    }
+
+    public Sprite GetAmmoSprite(AmmoType type)
+    {
+        for(int i = 0;i<ammoList.Count;i++)
+        {
+            if (ammoList[i].type == type)
+            {
+                return (GetItem(ammoList[i].id) as Ammo).UIBulletIcon;
+            }
+        }
+        return null;
     }
 
 }

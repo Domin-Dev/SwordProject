@@ -15,8 +15,17 @@ public class AttackState : HeroState
         }
         else
         {
-            controller.attackModule.Shot();
-            controller.attackModule.SetAttackVector(new Vector3(0, 0, -60), new Vector3(-0.08f, 0, 0), true);
+            if ((controller.selectedItem as RangedWeaponItem).HasAmmo())
+            {
+                controller.attackModule.Shot();
+                controller.Shot();
+                controller.attackModule.SetAttackVector(new Vector3(0, 0, -60), new Vector3(-0.08f, 0, 0), true);
+            }
+            else
+            {
+                Sounds.instance.Empty();
+                controller.heroStateMachine.ChangeState(controller.idleState);
+            }
         }
     }
     public override void ExitState() 

@@ -19,19 +19,16 @@ public class IdleState : HeroState
     public override void FrameUpdate()
     {
         controller.attackModule.Aim();
-        
 
         if(Input.GetMouseButtonDown(0) && controller.attackModule.canAttack)
         {
             controller.Use();
-            if (!controller.attackModule.isGun)
-            {
-                heroStateMachine.ChangeState(controller.attackState);
-            }
-            else
-            {
-                heroStateMachine.ChangeState(controller.attackState);
-            }
+            heroStateMachine.ChangeState(controller.attackState);
+        }
+
+        if(Input.GetKeyDown(KeyCode.R))
+        {
+            controller.Reload();
         }
 
         controller.GetMovementInput();

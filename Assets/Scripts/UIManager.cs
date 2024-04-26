@@ -31,6 +31,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Canvas mainCanvas;
     [Header("Gun Info UI")]
     [SerializeField] private Transform ammoBar;
+    [SerializeField] private GameObject ammoUI;
     [Space]
     [Header("Equipment UI")]
     [SerializeField] private Transform mainItemBar;
@@ -111,9 +112,6 @@ public class UIManager : MonoBehaviour
         });
     }
 
-
-
-
     public void SetUpUIEquipment(EquipmentManager eqManager)
     {
         eqManager.UpdateSelectedSlotInBar += UpdateSelectedSlot;
@@ -133,6 +131,79 @@ public class UIManager : MonoBehaviour
         LoadSlots(mainEquipmentGrid,EquipmentManager.SlotCount, false);
         LoadSlots(equipmentBarGrid,EquipmentManager.BarSlotCount, true);
         LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
+        
+    }
+    public void SetUpUIPlayer(CharacterController characterController)
+    {
+        characterController.SetAmmoBar += SetAmmoBar;
+        characterController.UpdateAmmoBar += UpdateAmmoBar;
+        characterController.HideAmmoBar += HideAmmoBar;
+    }
+
+    private void HideAmmoBar(object sender, EventArgs e)
+    {
+        ammoBar.gameObject.SetActive(false);
+    }
+
+    private void UpdateAmmoBar(object sender, UpdateAmmoBarArgs e)
+    {
+        Debug.Log(lastAmmoCount +" "+ e.currentCount);
+        if(lastAmmoCount > e.currentCount)
+        { 
+            for(int i = lastAmmoCount -1;i >= e.currentCount;i--)
+            {
+                Image ammo = ammoBar.GetChild(i).GetComponent<Image>();
+                ammo.color = Color.black;
+                Debug.Log(i);
+            }
+        }
+        else if (lastAmmoCount < e.currentCount)
+        {
+            int i;
+            if (lastAmmoCount > 0) i = lastAmmoCount - 1;
+            else i = 0;
+            
+            for (;i < e.currentCount; i++)
+            {
+                Image ammo = ammoBar.GetChild(i).GetComponent<Image>();
+                ammo.color = Color.white;
+            }
+        }
+        lastAmmoCount = e.currentCount;
+    }
+
+    private int lastAmmoCount = -1;
+    private void SetAmmoBar(object sender, SetAmmoBarArgs e)
+    {
+        ammoBar.gameObject.SetActive(true);
+        lastAmmoCount = e.currentCount;
+        Sprite sprite = ItemsAsset.instance.GetAmmoSprite(e.type);
+        for (int i = 0; i < ammoBar.childCount; i++)
+        {
+            Image ammo= ammoBar.GetChild(i).GetComponent<Image>();
+           
+            if(i < e.magazineCapacity)
+            {
+                ammo.gameObject.SetActive(true);
+                ammo.sprite = sprite;
+                if(i < e.currentCount) ammo.color = Color.white;
+                else ammo.color = Color.black;           
+            }
+            else
+                ammo.gameObject.SetActive(false);
+            
+        }
+        int toAdd = e.magazineCapacity - ammoBar.childCount;
+        if (toAdd > 0)
+        {
+            for (int i = 0; i < toAdd; i++)
+            {
+                Image ammo = Instantiate(ammoUI, ammoBar).GetComponent<Image>();
+                ammo.sprite = sprite;
+                if (ammoBar.childCount <= e.currentCount) ammo.color = Color.white;
+                else ammo.color = Color.black;
+            }
+        }
     }
 
     private void UpdateItemLifeBar(object sender, LifeBarArgs e)
@@ -295,12 +366,9 @@ public class UIManager : MonoBehaviour
 
     private void NewItemUI(Transform gridUI, CreateItemArgs e)
     {
-        Debug.Log("git");
         RectTransform transform = Instantiate(item, gridUI.GetChild(e.position.slotIndex)).GetComponent<RectTransform>();
         if (e.itemStats as DestroyableItem != null)
         {
-            Debug.Log("gfdfdit");
-
             Transform bar = Instantiate(lifePointsBar, transform).transform.GetChild(0);
             UpdateBar((e.itemStats as DestroyableItem).GetLifePointsInPercent(),bar);
         }

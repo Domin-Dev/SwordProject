@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using static UnityEngine.Rendering.DebugUI;
-
 
 public struct SlotPosition
 {
@@ -141,16 +139,26 @@ public class LifeBarArgs : PositionArgs
         this.barValue = barValue;
     }
 }
-
-public class AmmoBarArgs : EventArgs
+public class SetAmmoBarArgs : EventArgs
 {
-    public int count;
+    public int magazineCapacity;
+    public int currentCount;
     public AmmoType type;
 
-    public AmmoBarArgs(int count,AmmoType ammoType)
+    public SetAmmoBarArgs(int magazineCapacity,int currentCount, AmmoType ammoType)
     {
-        this.count = count;
+        this.magazineCapacity = magazineCapacity;
+        this.currentCount = currentCount;
         this.type = ammoType;
+    }
+}
+public class UpdateAmmoBarArgs : EventArgs
+{
+    public int currentCount;
+
+    public UpdateAmmoBarArgs(int currentCount)
+    {
+        this.currentCount = currentCount;
     }
 }
 public class EquipmentManager : MonoBehaviour
@@ -176,10 +184,6 @@ public class EquipmentManager : MonoBehaviour
     //
     //Character Controller
     public event EventHandler<ItemStatsArgs> UpdateItemInHand;
-
-    //Ammo Info
-    public event EventHandler<AmmoBarArgs> SetAmmoBar;
-
 
     private int slotInHand { get; set; } = 1;
     private bool equipmentIsOpen = false;
@@ -212,9 +216,9 @@ public class EquipmentManager : MonoBehaviour
     }
     private void Start()
     {
-        UIManager.instance.SetUpUIEquipment(this);     
-        ChangeSelectedSlot(0);
+        UIManager.instance.SetUpUIEquipment(this);          
         selectedSlotInEQ = new SlotPosition(-1,-1);
+        ChangeSelectedSlot(0);
     }
 
     private void Update()
