@@ -20,9 +20,9 @@ public class ParticleAssets : MonoBehaviour
         }
     }
 
-    
     public GameObject smoke;
     public GameObject leaves;
     public GameObject shotSmoke;
     public GameObject shotFire;
+    public GameObject gunShells;
 }

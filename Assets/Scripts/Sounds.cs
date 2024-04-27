@@ -12,6 +12,9 @@ public class Sounds : MonoBehaviour
     [SerializeField] List<AudioClip> ShieldSounds;
     [SerializeField] AudioClip shot;
     [SerializeField] AudioClip empty;
+    [SerializeField] AudioClip reload;
+    [SerializeField] AudioClip roll;
+    [SerializeField] AudioClip ammo;
     private void Awake()
     {
         if(instance == null )
@@ -52,6 +55,20 @@ public class Sounds : MonoBehaviour
     public void Empty()
     {
         audioSource.PlayOneShot(empty);
+    }
+    public void Roll()
+    {
+        audioSource.PlayOneShot(roll);
+    }
+
+    public void Reload()
+    {
+        audioSource.PlayOneShot(reload);
+    }  
+    
+    public void Ammo()
+    {
+        audioSource.PlayOneShot(ammo);
     }
 }
 

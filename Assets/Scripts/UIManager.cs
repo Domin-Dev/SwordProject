@@ -133,11 +133,11 @@ public class UIManager : MonoBehaviour
         LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
         
     }
-    public void SetUpUIPlayer(CharacterController characterController)
+    public void SetUpUIPlayer(ItemController itemController)
     {
-        characterController.SetAmmoBar += SetAmmoBar;
-        characterController.UpdateAmmoBar += UpdateAmmoBar;
-        characterController.HideAmmoBar += HideAmmoBar;
+        itemController.SetAmmoBar += SetAmmoBar;
+        itemController.UpdateAmmoBar += UpdateAmmoBar;
+        itemController.HideAmmoBar += HideAmmoBar;
     }
 
     private void HideAmmoBar(object sender, EventArgs e)

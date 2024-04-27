@@ -17,6 +17,7 @@ public class WeaponEditor : Editor
     static readonly Color gripPoint1Color = new Color(1, 0, 0, 1);
     static readonly Color gripPoint2Color = new Color(0, 0, 1, 1);
     static readonly Color aimPointColor = new Color(1, 1, 0, 1);
+    static readonly Color reloadPointColor = new Color(1, 0, 1, 1);
 
 
     public override void OnInspectorGUI()
@@ -57,28 +58,43 @@ public class WeaponEditor : Editor
             Color color = texture[i];
             if (color.a == 1) 
             {
-                if(color == hitboxColor && !hitBoxIsCut)
+                if (color == hitboxColor && !hitBoxIsCut)
                 {
                     weapon.hitBoxPoints = GetPoints(i);
                     hitBoxIsCut = true;
-                } 
+                }
                 else if (color == gripPoint1Color)
                 {
-                    weapon.gripPoint1 = pixelSize *(GetVector(i) - middle);
+                    weapon.gripPoint1 = GetPosition(i);
                 }
                 else if (color == gripPoint2Color)
                 {
-                    weapon.gripPoint2 = pixelSize * (GetVector(i) - middle);
+                    weapon.gripPoint2 = GetPosition(i);
                 }
-                else if (color == aimPointColor)
+                else
                 {
-                    if(weapon as RangedWeapon != null) (weapon as RangedWeapon).aimPoint = pixelSize * (GetVector(i) - middle);
+                    RangedWeapon rangedWeapon = (weapon as RangedWeapon);
+                    if (rangedWeapon != null)
+                    {
+                        if (color == aimPointColor)
+                        {
+                            rangedWeapon.aimPoint = GetPosition(i);
+                        }
+                        else if (color == reloadPointColor)
+                        {
+                            rangedWeapon.reloadPoint = GetPosition(i);
+                        }
+                    };
                 }
-                Debug.Log(color);
             }
         }
 
         
+    }
+
+    private Vector2 GetPosition(int index)
+    {
+        return pixelSize * (GetVector(index) - middle);
     }
     private Vector2 GetVector(int i)
     {

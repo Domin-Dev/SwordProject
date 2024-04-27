@@ -53,8 +53,16 @@ public class CharacterSpriteController : MonoBehaviour
     private void SetSpriteHead(int index)
     {
         head.sprite = headSprites[index];
-        if(index == 1) head.sortingOrder = 100;
-        else head.sortingOrder = 5;
+        if (index == 1)
+        {
+            head.sortingOrder = 100;
+            body.sortingOrder = 30;
+        }
+        else
+        {
+            head.sortingOrder = 5;
+            body.sortingOrder = 0;
+        }
         if (lastMoveDir == Vector2.zero) SetSpriteBody(index);
     }
 

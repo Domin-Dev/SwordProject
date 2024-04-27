@@ -15,10 +15,10 @@ public class AttackState : HeroState
         }
         else
         {
-            if ((controller.selectedItem as RangedWeaponItem).HasAmmo())
+            if ((controller.itemController.selectedItem as RangedWeaponItem).HasAmmo())
             {
                 controller.attackModule.Shot();
-                controller.Shot();
+                controller.itemController.Shot();
                 controller.attackModule.SetAttackVector(new Vector3(0, 0, -60), new Vector3(-0.08f, 0, 0), true);
             }
             else

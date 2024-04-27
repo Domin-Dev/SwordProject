@@ -34,7 +34,7 @@ public class GridVisualization: MonoBehaviour
     {
         if(Input.GetMouseButtonDown(0))
         {
-            grid.GetValue(MyTools.GetMouseWorldPosition()).ChangeValue(GridTile.TileType.Mud);
+           // grid.GetValue(MyTools.GetMouseWorldPosition()).ChangeValue(GridTile.TileType.Mud);
         }
     }
 

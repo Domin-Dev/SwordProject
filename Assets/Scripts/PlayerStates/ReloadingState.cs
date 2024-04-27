@@ -1,10 +1,10 @@
 ﻿
 using UnityEngine;
 
-public class IdleState : HeroState
+public class ReloadingState : HeroState
 {
     private CharacterController controller;
-    public IdleState(CharacterController controller, HeroStateMachine heroStateMachine) : base(heroStateMachine)
+    public ReloadingState(CharacterController controller, HeroStateMachine heroStateMachine) : base(heroStateMachine)
     {
         this.controller = controller;
     }

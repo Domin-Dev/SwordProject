@@ -27,13 +27,13 @@ public class NPCController : MonoBehaviour, ILifePoints,IUsesWeapons
     public bool canAttack;
 
 
-    public AttackModule attackModule { private set; get; }
+    public HandsController attackModule { private set; get; }
 
     private void Awake()
     {
         hp = maxHP;
         rigidbody2D = GetComponent<Rigidbody2D>();  
-        attackModule = GetComponent<AttackModule>();
+        attackModule = GetComponent<HandsController>();
         attackModule.SetController(this,"Player");
         SetStateMachine();
     }

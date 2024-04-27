@@ -7,6 +7,7 @@ public class RangedWeapon: Weapon
     public float timeToReload;
     public int magazineCapacity;
     public Vector2 aimPoint;
+    public Vector2 reloadPoint;
     public AmmoType ammoType;
 
 

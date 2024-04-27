@@ -181,8 +181,8 @@ public class EquipmentManager : MonoBehaviour
     public event EventHandler<UpdateItemCountArgs> UpdateMainBarItemCount;
 
     public event EventHandler<LifeBarArgs> UpdateItemLifeBar;
-    //
-    //Character Controller
+    
+
     public event EventHandler<ItemStatsArgs> UpdateItemInHand;
 
     private int slotInHand { get; set; } = 1;
@@ -251,9 +251,9 @@ public class EquipmentManager : MonoBehaviour
             BackSlot();
         }
     }
-    public void SetUpEvent(CharacterController characterController)
+    public void SetUpEvent(ItemController itemController)
     {
-        characterController.UseItem += UseSelectedItem;
+        itemController.UseItem += UseSelectedItem;
     }
     private void UseSelectedItem(object sender, EventArgs e)
     {

@@ -4,9 +4,9 @@ using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static UnityEngine.GraphicsBuffer;
+using UnityEngine.EventSystems;
 
-public class AttackModule : MonoBehaviour
+public class HandsController : MonoBehaviour
 {
     // Transforms
     private Transform mainHand;
@@ -142,7 +142,6 @@ public class AttackModule : MonoBehaviour
         }
         flip = this.targetPos.x < mainHand.position.x;
     }
-
     public void Shot()
     {
         Vector3 aimDir = (MyTools.GetMouseWorldPosition() - mainHand.position).normalized;
@@ -152,7 +151,6 @@ public class AttackModule : MonoBehaviour
         Sounds.instance.Shot();
         ShotParticle(angle);
     }
-
     private void ShotParticle(float angle)
     {
         Instantiate(ParticleAssets.instance.shotSmoke, aimPoint.TransformPoint(aimPoint.localPosition + new Vector3(-0.05f, 0)), Quaternion.identity);
@@ -162,14 +160,13 @@ public class AttackModule : MonoBehaviour
     {
           UpdateMeleeWeapon(); 
     }
-
     private void UpdateMeleeWeapon()
     {
         if (!back)
         {
             weapon.localEulerAngles = new Vector3(0,0,GetEulerAnglesLerp(attackAngle,30));
 
-            attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, attackVector, Time.deltaTime * 10f);
+            attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, attackVector, Time.deltaTime * 12f);
 
             if (CheckAngle(attackAngle,1f) && Vector3.Distance(attackItem.localPosition, attackVector) < 0.1f)
             {
@@ -178,8 +175,7 @@ public class AttackModule : MonoBehaviour
         }
         else
         {
-             attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, lastWeaponPosition, Time.deltaTime * 25f);
-            // weapon.localEulerAngles = new Vector3(0, 0, GetEulerAnglesLerp(Vector3.zero,25));
+             attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, lastWeaponPosition, Time.deltaTime * 30f);
 
             if (Vector3.Distance(attackItem.localPosition, lastWeaponPosition) < 0.015) 
             {
@@ -187,7 +183,6 @@ public class AttackModule : MonoBehaviour
             }
         }
     }
-
     private float GetEulerAnglesLerp(Vector3 target,float speed)
     {
         Vector3 angle = weapon.localEulerAngles;
@@ -209,6 +204,10 @@ public class AttackModule : MonoBehaviour
     
     }
 
+    public void Reload()
+    {
+        characterController.itemController.Reload();
+    }
 
 
     //public void UpdateShield()
