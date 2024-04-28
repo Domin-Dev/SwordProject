@@ -1,92 +1,298 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using Unity.IO.LowLevel.Unsafe;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 public class HandsController : MonoBehaviour
 {
-    // Transforms
-    private Transform mainHand;
-    private Transform shieldTransform;
-    private Transform weapon;
-    private Transform fliper;
-    private Transform aimPoint;
+    public class Updater
+    {
+        bool back;
+        public Func<bool> funcToUpdate;
+        public Func<bool> funcToBack;
 
-    private Transform shield;
+        public Updater(Func<bool> funcToUpdate, Func<bool> funcToBack)
+        {
+            this.funcToUpdate = funcToUpdate;
+            this.funcToBack = funcToBack;
+            back = false;
+        }
+        public bool Update()
+        {
+            if (!back)
+            {
+                back = funcToUpdate();
+            }
+            else
+            {
+                if (funcToBack())
+                {
+                    back = false;
+                    return true;                
+                }
+            }
+            return false;
+        }
 
+        public void Back()
+        {
+            back = true; 
+        }
+    }
+    public Updater updaterAttack { private set; get; }
+    public Updater updaterReload { private set; get; }
+ 
+
+
+    #region SerializeFields
+    [SerializeField] private Transform backpack;
+    [SerializeField] private Transform secondHand;
+    [SerializeField] private SpriteRenderer secondHandItem;
+    [SerializeField] private Transform secondHandParent;
+    [SerializeField] private SpriteRenderer itemInHand;
+    [SerializeField] private PolygonCollider2D hitBox;
+    [SerializeField] private Transform aimPoint;
+    [SerializeField] private Transform reloadPoint;
+    [SerializeField] private Transform mainHand;
+    [SerializeField] private Transform hand;
+    [SerializeField] private Transform fliper;
+    #endregion
+    private Vector3 secondHandStartPosition;
+    public ItemStats selectedItem;
+    private Sprite ammoSprite;
+
+    #region Events
+    public event EventHandler UseItem;
+    public event EventHandler<SetAmmoBarArgs> SetAmmoBar;
+    public event EventHandler<UpdateAmmoBarArgs> UpdateAmmoBar;
+    public event EventHandler HideAmmoBar;
+    #endregion
     private Vector3 attackAngle;
     private Vector3 attackVector;
     private Vector3 lastWeaponPosition;
     private Transform attackItem;
-    public bool back;
 
-    //Aim
+    #region Aim
     private Vector3 targetPos;
     private bool flip;
-
+    #endregion
     //other
     private FirstHand firstHand;
     private IUsesWeapons usesWeapons;
-
-    public bool isGun = false;
-    public bool canAttack { get; private set; }
-    public float timer;
+    public bool isGun { get; private set; } = false;
+    public bool canAttack { get; private set; } = true;
     private const float setTime = 0.45f;
 
     private CharacterController characterController;
-
     public GameObject bullet;
 
+
+
+    private void Awake()
+    {
+        secondHandStartPosition = secondHand.localPosition;
+        updaterAttack = new Updater(UpdateAttack, UpdateAttackReturn);
+        updaterReload = new Updater(UpdateReload, UpdateReloadReturn);
+    }
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
+        SetUpEvents();
+        UIManager.instance.SetUpUIPlayer(this);
+        EquipmentManager.instance.SetUpEvent(this);
     }
-    private void Update()
+    private void SetUpEvents()
     {
-        if (!canAttack)
+        EquipmentManager.instance.UpdateItemInHand += UpdateItemInHand;
+    }
+    private void UpdateItemInHand(object sender, ItemStatsArgs e)
+    {
+        itemInHand.transform.localPosition = Vector3.zero;
+
+        if (e.item != null)
         {
-            timer += Time.deltaTime;
-            if (timer >= setTime)
-            {
-                canAttack = true;
-                timer = 0;
-            }
+            Item item = ItemsAsset.instance.GetItem(e.item.itemID);
+            selectedItem = e.item;
+            if (item as Weapon != null)
+                ItemIsWepon(item, e.item);
+            else
+                ItemIsNotWepon(item);
+        }
+        else
+            ItemIsNull();
+    }
+    private void ItemIsNull()
+    {
+        selectedItem = null;
+        itemInHand.sprite = null;
+        isGun = false;
+        SecondHandReset();
+        HideAmmoBar(this, null);
+    }
+    private void ItemIsNotWepon(Item item)
+    {
+        itemInHand.sprite = item.icon;
+        itemInHand.sortingOrder = 20;
+        SecondHandReset();
+        HideAmmoBar(this, null);
+    }
+    private void ItemIsWepon(Item item, ItemStats itemStats)
+    {
+        Weapon weapon = (Weapon)item;
+        itemInHand.sprite = weapon.weaponImage;
+        hitBox.points = weapon.hitBoxPoints;
+        hitBox.transform.localPosition = -weapon.gripPoint1;
+        itemInHand.sortingOrder = 10;
+        itemInHand.transform.localPosition = -weapon.gripPoint1;
+        if (weapon.gripPoint2.x != -100)
+        {
+            secondHand.parent = itemInHand.transform;
+            secondHand.localEulerAngles = Vector3.zero;
+            secondHand.localPosition = weapon.gripPoint2;
+        }
+        else
+        {
+            SecondHandReset();
+        }
+
+        if (weapon as RangedWeapon != null)
+        {
+            isGun = true;
+            RangedWeapon rangedWeapon = (RangedWeapon)weapon;
+            float posY = Mathf.Abs(rangedWeapon.aimPoint.y - rangedWeapon.gripPoint1.y);
+            SetTransformHand(posY);
+            aimPoint.localPosition = (Vector2)itemInHand.transform.localPosition + rangedWeapon.aimPoint;
+            reloadPoint.localPosition = (Vector2)itemInHand.transform.localPosition + rangedWeapon.reloadPoint;
+            SetAmmoBar(this, new SetAmmoBarArgs(rangedWeapon.magazineCapacity, (itemStats as RangedWeaponItem).currentAmmoCount, rangedWeapon.ammoType));
+            ammoSprite = ItemsAsset.instance.GetAmmoHandSprite(rangedWeapon.ammoType);
+        }
+        else
+        {
+            isGun = false;
+            HideAmmoBar(this, null);
         }
     }
+    private void SecondHandReset()
+    {
+        if (secondHand.parent != secondHandParent)
+        {
+            secondHand.parent = secondHandParent;
+            secondHand.localPosition = secondHandStartPosition;
+            secondHand.localEulerAngles = Vector3.zero;
+        }
+    }
+    public void Use()
+    {
+        UseItem(this, null);
+    }
+    public void Shot()
+    {
+        (selectedItem as RangedWeaponItem).Shot();
+        UpdateAmmoBar(this, new UpdateAmmoBarArgs((selectedItem as RangedWeaponItem).currentAmmoCount));
+
+        Vector3 aimDir = (MyTools.GetMouseWorldPosition() - mainHand.position).normalized;
+        float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
+        if (angle < 0) angle = 180 + (180 + angle);
+        Instantiate(bullet, aimPoint.position, Quaternion.identity).transform.localEulerAngles = new Vector3(0, 0, angle + UnityEngine.Random.Range(-5, 5));
+        Sounds.instance.Shot();
+        ShotParticle(angle);
+    }
+
+    private Vector2? target = null;
+    private Vector2 startPosition;
+    private Transform startParent;
+    public void Reload()
+    {
+        startPosition = secondHand.localPosition;
+        startParent = secondHand.parent;
+        secondHand.eulerAngles = Vector3.zero;
+
+        secondHand.parent = transform;
+        target = backpack.transform.position;
+
+        rotationTarget = hand.localEulerAngles - new Vector3(0,0, -60);
+    }
+
+    public void SetGunShells()
+    {
+        Instantiate(ParticleAssets.instance.gunShells, reloadPoint.transform.position, Quaternion.identity);
+    }
+
+    private bool UpdateReload()
+    {    
+        secondHand.position = Vector2.Lerp(secondHand.position, backpack.position, Time.deltaTime * 5f);
+        secondHand.eulerAngles = Vector3.Lerp(secondHand.eulerAngles, new Vector3(0, 0, -90), Time.deltaTime * 2f);
+        if (Vector2.Distance(secondHand.position, backpack.position) < 0.01f)
+        {
+            Sounds.instance.Ammo();
+            secondHandItem.sprite = ammoSprite; 
+            return true;
+        }
+        return false;
+    }
+    private bool UpdateReloadReturn()
+    {     
+        secondHand.position = Vector2.Lerp(secondHand.position, reloadPoint.position, Time.deltaTime * 5f);
+        secondHand.eulerAngles = Vector3.Lerp(secondHand.eulerAngles,mainHand.eulerAngles, Time.deltaTime * 6f);
+
+        if (Vector2.Distance(secondHand.position, reloadPoint.position) < 0.01f)
+        {      
+            (selectedItem as RangedWeaponItem).Reload(1);
+            Sounds.instance.Reload();
+            UpdateAmmoBar(this, new UpdateAmmoBarArgs((selectedItem as RangedWeaponItem).currentAmmoCount));
+            secondHandItem.sprite = null;
+
+            if (!(selectedItem as RangedWeaponItem).CanReload())
+            {
+                Sounds.instance.Roll();
+                secondHand.parent = startParent;
+                secondHand.localPosition = startPosition;
+                characterController.heroStateMachine.ChangeState(characterController.idleState);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private Vector3 rotationTarget;
+
+    public bool UpdateRotation()
+    {
+        hand.localEulerAngles = new Vector3(0,0,GetEulerAnglesLerp(rotationTarget, 30));
+        if (CheckAngle(rotationTarget, 1f))
+        {
+            return true;
+        }   
+        return false;
+    }
+
     public void Aim()
     {
         float angle = GetAngle(targetPos, mainHand, 0);
         float angle1; 
 
         if (flip)
-            angle1 = GetAngle(targetPos, shieldTransform, -100);
+            angle1 = GetAngle(targetPos, secondHandParent, -100);
         else
-            angle1 = GetAngle(targetPos, shieldTransform, 100);        
+            angle1 = GetAngle(targetPos, secondHandParent, 100);        
         
         float z;
-        if (weapon.localEulerAngles.z > 180)
-             z = Mathf.Lerp(weapon.localEulerAngles.z - 360, 0, Time.deltaTime * 10);
+        if (hand.localEulerAngles.z > 180)
+             z = Mathf.Lerp(hand.localEulerAngles.z - 360, 0, Time.deltaTime * 10);
         else
-            z = Mathf.Lerp(weapon.localEulerAngles.z , 0, Time.deltaTime * 10);
+            z = Mathf.Lerp(hand.localEulerAngles.z , 0, Time.deltaTime * 10);
 
-        weapon.localEulerAngles = new Vector3(weapon.localEulerAngles.x, weapon.localEulerAngles.y, z);
+        hand.localEulerAngles = new Vector3(hand.localEulerAngles.x, hand.localEulerAngles.y, z);
         mainHand.eulerAngles = Vector3.Lerp(mainHand.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
-        shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
+        secondHandParent.eulerAngles = Vector3.Lerp(secondHandParent.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 2f);
     }
     public void SetController(IUsesWeapons usesWeapons,string enemyTag)
     {
         this.usesWeapons = usesWeapons;
-        // Transform hero = transform.Find("Hero");
-        mainHand = transform.Find("MainHand");
-        shieldTransform = transform.Find("Shield");
-        weapon = mainHand.GetChild(0).GetChild(0);
-        aimPoint = weapon.GetChild(0).Find("AimPoint");
-        fliper = mainHand.GetChild(0);
-        shield = shieldTransform.GetChild(0);
-
         firstHand = transform.Find("MainHand").GetChild(0).GetChild(0).GetChild(0).GetChild(0).GetComponent<FirstHand>();
         firstHand.SetController(usesWeapons,enemyTag,transform);
     }
@@ -106,24 +312,17 @@ public class HandsController : MonoBehaviour
         }
         return angle;
     }
-    public void SetAttackVector(Vector3 Angle, Vector3 position, bool firstHand)
+    public void SetAttackVector(Vector3 Angle, Vector3 position)
     {       
         canAttack = false;
-        if (firstHand)
-        {
-            attackItem = fliper;
-        }
-        else
-        {
-            attackItem = shield;
-        }
+        Timer.Create(setTime, () => { canAttack = true; });
+        attackItem = fliper;
+        
 
-        attackAngle = weapon.localEulerAngles - Angle;  
+        attackAngle = hand.localEulerAngles - Angle;  
         this.firstHand.AttackSwitch(true);
         lastWeaponPosition = attackItem.localPosition;
         attackVector = position + attackItem.localPosition;
-        back = false;
-        
     }
     public void Updateflip(Vector3 targetPos)
     {
@@ -142,50 +341,34 @@ public class HandsController : MonoBehaviour
         }
         flip = this.targetPos.x < mainHand.position.x;
     }
-    public void Shot()
-    {
-        Vector3 aimDir = (MyTools.GetMouseWorldPosition() - mainHand.position).normalized;
-        float angle = Mathf.Atan2(aimDir.y, aimDir.x) * Mathf.Rad2Deg;
-        if (angle < 0) angle = 180 + (180 + angle);
-        Instantiate(bullet,aimPoint.position, Quaternion.identity).transform.localEulerAngles = new Vector3(0, 0, angle + Random.Range(-5,5));
-        Sounds.instance.Shot();
-        ShotParticle(angle);
-    }
     private void ShotParticle(float angle)
     {
         Instantiate(ParticleAssets.instance.shotSmoke, aimPoint.TransformPoint(aimPoint.localPosition + new Vector3(-0.05f, 0)), Quaternion.identity);
         Instantiate(ParticleAssets.instance.shotFire, aimPoint.position , Quaternion.identity).transform.localEulerAngles = new Vector3(0,0,angle);
     }
-    public void UpdateAttack()
+    public bool UpdateAttackReturn()
     {
-          UpdateMeleeWeapon(); 
+        attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, lastWeaponPosition, Time.deltaTime * 30f);
+        if (Vector3.Distance(attackItem.localPosition, lastWeaponPosition) < 0.015)
+        {
+            ResetAttack();
+            return true;
+        }
+        return false;
     }
-    private void UpdateMeleeWeapon()
+    public bool UpdateAttack()
     {
-        if (!back)
+        hand.localEulerAngles = new Vector3(0,0,GetEulerAnglesLerp(attackAngle,30));
+        attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, attackVector, Time.deltaTime * 12f);
+        if (CheckAngle(attackAngle,1f) && Vector3.Distance(attackItem.localPosition, attackVector) < 0.1f)
         {
-            weapon.localEulerAngles = new Vector3(0,0,GetEulerAnglesLerp(attackAngle,30));
-
-            attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, attackVector, Time.deltaTime * 12f);
-
-            if (CheckAngle(attackAngle,1f) && Vector3.Distance(attackItem.localPosition, attackVector) < 0.1f)
-            {
-                back = true;
-            }
-        }
-        else
-        {
-             attackItem.localPosition = Vector3.Lerp(attackItem.localPosition, lastWeaponPosition, Time.deltaTime * 30f);
-
-            if (Vector3.Distance(attackItem.localPosition, lastWeaponPosition) < 0.015) 
-            {
-                ResetAttack();
-            }
-        }
+            return true;
+        }   
+        return false;
     }
     private float GetEulerAnglesLerp(Vector3 target,float speed)
     {
-        Vector3 angle = weapon.localEulerAngles;
+        Vector3 angle = hand.localEulerAngles;
         if(target.z < 0) angle = new Vector3(0,0, angle.z - 360);
 
         return Mathf.LerpAngle(angle.z, target.z, Time.deltaTime * speed);
@@ -196,43 +379,18 @@ public class HandsController : MonoBehaviour
         if (angle.z > 360) angle = new Vector3(target.x, target.y, target.z % 360);
 
 
-        if (angle.z >= 0) return Mathf.Abs(weapon.localEulerAngles.z - angle.z) < border;
+        if (angle.z >= 0)
+        {
+            Debug.Log(Mathf.Abs(hand.localEulerAngles.z - angle.z));
+            return Mathf.Abs(hand.localEulerAngles.z - angle.z) < border;
+        }
         else
         {
-            return Mathf.Abs(weapon.localEulerAngles.z - (360 + angle.z)) < border;
+            Debug.Log(Mathf.Abs(hand.localEulerAngles.z - (360 + angle.z)));
+            return Mathf.Abs(hand.localEulerAngles.z - (360 + angle.z)) < border;
         }
     
     }
-
-    public void Reload()
-    {
-        characterController.itemController.Reload();
-    }
-
-
-    //public void UpdateShield()
-    //{
-    //    float angle;
-    //    if (flip) angle = GetAngle(targetPos, weaponTransform, -20);
-    //    else angle = GetAngle(targetPos, weaponTransform, 20);
-
-
-    //    weapon.localEulerAngles = new Vector3(weapon.localEulerAngles.x, 0, weapon.localEulerAngles.z);
-    //    if (flip)
-    //    {
-    //        weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 180), Time.deltaTime * 10f);
-    //    }
-    //    else
-    //    {
-    //        weapon.localEulerAngles = Vector3.Lerp(weapon.localEulerAngles, new Vector3(0, weapon.localEulerAngles.y, 0), Time.deltaTime * 10);
-    //    }
-
-
-    //    float angle1 = GetAngle(targetPos, shieldTransform, 180);
-
-    //    weaponTransform.eulerAngles = Vector3.Lerp(weaponTransform.eulerAngles, new Vector3(0, 0, angle), Time.deltaTime * 12f);
-    //    shieldTransform.eulerAngles = Vector3.Lerp(shieldTransform.eulerAngles, new Vector3(0, 0, angle1), Time.deltaTime * 4f);
-    //}
     public void ResetAttack()
     {
         if(attackItem != null)
@@ -244,7 +402,6 @@ public class HandsController : MonoBehaviour
             usesWeapons.EndAttack();
         }
     }
-
     public void SetTransformHand(float posY)
     {
         if (flip)
@@ -256,6 +413,4 @@ public class HandsController : MonoBehaviour
             fliper.localPosition = new Vector3(fliper.localPosition.x, -posY, 0);
         }
     }
-
-
 }

@@ -82,7 +82,6 @@ public class UIManager : MonoBehaviour
         SetGrids();
         SetUpNetworkUI();
     }
-
     private void Update()
     {
         UpdateButtonSize();
@@ -133,11 +132,11 @@ public class UIManager : MonoBehaviour
         LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
         
     }
-    public void SetUpUIPlayer(ItemController itemController)
+    public void SetUpUIPlayer(HandsController handsController)
     {
-        itemController.SetAmmoBar += SetAmmoBar;
-        itemController.UpdateAmmoBar += UpdateAmmoBar;
-        itemController.HideAmmoBar += HideAmmoBar;
+        handsController.SetAmmoBar += SetAmmoBar;
+        handsController.UpdateAmmoBar += UpdateAmmoBar;
+        handsController.HideAmmoBar += HideAmmoBar;
     }
 
     private void HideAmmoBar(object sender, EventArgs e)
@@ -147,7 +146,6 @@ public class UIManager : MonoBehaviour
 
     private void UpdateAmmoBar(object sender, UpdateAmmoBarArgs e)
     {
-        Debug.Log(lastAmmoCount +" "+ e.currentCount);
         if(lastAmmoCount > e.currentCount)
         { 
             for(int i = lastAmmoCount -1;i >= e.currentCount;i--)
@@ -177,7 +175,7 @@ public class UIManager : MonoBehaviour
     {
         ammoBar.gameObject.SetActive(true);
         lastAmmoCount = e.currentCount;
-        Sprite sprite = ItemsAsset.instance.GetAmmoSprite(e.type);
+        Sprite sprite = ItemsAsset.instance.GetAmmoSpriteUI(e.type);
         for (int i = 0; i < ammoBar.childCount; i++)
         {
             Image ammo= ammoBar.GetChild(i).GetComponent<Image>();

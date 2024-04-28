@@ -80,13 +80,24 @@ public class ItemsAsset : MonoBehaviour
         return item;
     }
 
-    public Sprite GetAmmoSprite(AmmoType type)
+    public Sprite GetAmmoSpriteUI(AmmoType type)
     {
         for(int i = 0;i<ammoList.Count;i++)
         {
             if (ammoList[i].type == type)
             {
                 return (GetItem(ammoList[i].id) as Ammo).UIBulletIcon;
+            }
+        }
+        return null;
+    }
+    public Sprite GetAmmoHandSprite(AmmoType type)
+    {
+        for (int i = 0; i < ammoList.Count; i++)
+        {
+            if (ammoList[i].type == type)
+            {
+                return (GetItem(ammoList[i].id) as Ammo).inHandSprite;
             }
         }
         return null;

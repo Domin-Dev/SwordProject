@@ -21,35 +21,32 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     private Rigidbody2D rigidbody2D;
 
     private bool isRepulsed = false;
-    public HandsController attackModule { private set; get; }
-    public ItemController itemController {private set; get; }
+    public HandsController handsController { private set; get; }
 
     #region StateMachine
     public HeroStateMachine heroStateMachine { set; get; }
     public IdleState idleState { set; get; }
     public AttackState attackState { set; get; }
+    public ReloadingState reloadingState { set; get; }
     private void SetStateMachine()
     {
         heroStateMachine = new HeroStateMachine();
         idleState = new IdleState(this, heroStateMachine);
         attackState = new AttackState(this, heroStateMachine);
+        reloadingState = new ReloadingState(this, heroStateMachine);
     }
 
     #endregion
 
     private CharacterSpriteController characterSpriteController;
 
-
     private void Awake()
     {
         characterSpriteController = GetComponent<CharacterSpriteController>();
         rigidbody2D = GetComponent<Rigidbody2D>();
-        attackModule = GetComponent<HandsController>();
-        itemController = GetComponent<ItemController>();
-
-        animator = GetComponent<Animator>();  
-        
-        attackModule.SetController(this,"Enemy");  
+        handsController = GetComponent<HandsController>();
+        animator = GetComponent<Animator>();   
+        handsController.SetController(this,"Enemy");  
         SetStateMachine();
     }
     private void Start()
@@ -59,8 +56,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     private void Update()
     {
         //  if (!IsOwner) return;
-        sightDir = MyTools.GetMouseWorldPosition();
-        attackModule.Updateflip(sightDir);
+        sightDir = MyTools.GetMouseWorldPosition();  
         heroStateMachine.currentState.FrameUpdate();
     }
     private void FixedUpdate()
@@ -68,6 +64,14 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
         heroStateMachine.currentState.FrameFixedUpdate();
     }
    
+    public void UpdateFlip()
+    {
+        handsController.Updateflip(sightDir);
+    }
+    public void UpdateCharacterSprites()
+    {
+        characterSpriteController.UpdateSprite(moveDir, (sightDir - (Vector2)center.position).normalized);
+    }
 
     #region Movement
     public void GetMovementInput()
@@ -80,7 +84,6 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     {
         if (!isRepulsed)
         {
-            characterSpriteController.UpdateSprite(moveDir,(sightDir - (Vector2)center.position).normalized);
             rigidbody2D.velocity = moveDir;
             if(moveDir == new Vector2(0,0))
             {
@@ -116,7 +119,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     IEnumerator BlockTime()
     {
         yield return new WaitForSeconds(.005f);
-        attackModule.back = true;
+        handsController.updaterAttack.Back();
     }
     void IUsesWeapons.EndAttack()
     {
@@ -126,7 +129,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     {
         isRepulsed = true;
         rigidbody2D.AddForce(2 * dir.normalized, ForceMode2D.Impulse);
-        attackModule.ResetAttack(); 
+        handsController.ResetAttack(); 
         yield return new WaitForSeconds(0.1f);
         isRepulsed = false;
     }

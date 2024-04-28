@@ -18,20 +18,22 @@ public class IdleState : HeroState
     }
     public override void FrameUpdate()
     {
-        controller.attackModule.Aim();
+        controller.GetMovementInput();
+        controller.handsController.Aim();
+        controller.UpdateFlip();
+        controller.UpdateCharacterSprites();
 
-        if(Input.GetMouseButtonDown(0) && controller.attackModule.canAttack)
+
+        if(Input.GetMouseButtonDown(0) && controller.handsController.canAttack)
         {
-            controller.itemController.Use();
+            controller.handsController.Use();
             heroStateMachine.ChangeState(controller.attackState);
         }
 
         if(Input.GetKeyDown(KeyCode.R))
         {
-            controller.attackModule.Reload();
+            heroStateMachine.ChangeState(controller.reloadingState);
         }
-
-        controller.GetMovementInput();
     }
 
     public override void FrameFixedUpdate()

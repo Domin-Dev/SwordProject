@@ -126,7 +126,7 @@ public class NPCController : MonoBehaviour, ILifePoints,IUsesWeapons
     IEnumerator BlockTime()
     {
         yield return new WaitForSeconds(.005f);
-        attackModule.back = true;
+       // attackModule.back = true;
     }
     IEnumerator Repulse()
     {

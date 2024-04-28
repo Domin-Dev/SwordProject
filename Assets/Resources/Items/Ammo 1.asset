@@ -19,5 +19,6 @@ MonoBehaviour:
   icon: {fileID: 1275416589, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   bullet: {fileID: 907356828559875784, guid: 39d35432007d90f40b15bf375f8b9449, type: 3}
   UIBulletIcon: {fileID: -1713878118, guid: 6f6089b46f69a5d4d99bc7c3bcd304d1, type: 3}
+  inHandSprite: {fileID: 21300000, guid: 888e11afbd14db74388254ced443f033, type: 3}
   damage: 7
   type: 1

@@ -9,29 +9,34 @@ public class ReloadingState : HeroState
         this.controller = controller;
     }
     public override void EnterState() 
-    { 
-    
+    {
+        controller.handsController.Reload();
+        isReady = false;
     }
     public override void ExitState() 
     { 
     
     }
+    bool isReady;
     public override void FrameUpdate()
     {
-        controller.attackModule.Aim();
-
-        if(Input.GetMouseButtonDown(0) && controller.attackModule.canAttack)
+        if (!isReady)
         {
-            controller.itemController.Use();
-            heroStateMachine.ChangeState(controller.attackState);
+            isReady = controller.handsController.UpdateRotation();
+            if(isReady)  controller.handsController.SetGunShells();
+        }
+        else
+        {
+            controller.handsController.updaterReload.Update();
         }
 
-        if(Input.GetKeyDown(KeyCode.R))
-        {
-            controller.attackModule.Reload();
-        }
-
+    //    controller.handsController.Aim();
         controller.GetMovementInput();
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            controller.heroStateMachine.ChangeState(controller.idleState);
+        }
     }
 
     public override void FrameFixedUpdate()

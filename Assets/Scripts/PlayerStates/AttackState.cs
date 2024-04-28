@@ -9,17 +9,16 @@ public class AttackState : HeroState
 
     public override void EnterState() 
     {
-        if (!controller.attackModule.isGun)
+        if (!controller.handsController.isGun)
         {
-            controller.attackModule.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0), true);
+            controller.handsController.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0));
         }
         else
         {
-            if ((controller.itemController.selectedItem as RangedWeaponItem).HasAmmo())
+            if ((controller.handsController.selectedItem as RangedWeaponItem).HasAmmo())
             {
-                controller.attackModule.Shot();
-                controller.itemController.Shot();
-                controller.attackModule.SetAttackVector(new Vector3(0, 0, -60), new Vector3(-0.08f, 0, 0), true);
+                controller.handsController.Shot();
+                controller.handsController.SetAttackVector(new Vector3(0, 0, -60), new Vector3(-0.08f, 0, 0));
             }
             else
             {
@@ -34,10 +33,9 @@ public class AttackState : HeroState
     }
     public override void FrameUpdate() 
     {
-        controller.attackModule.UpdateAttack();
         controller.GetMovementInput();
+        controller.handsController.updaterAttack.Update();
     }
-
     public override void FrameFixedUpdate()
     {
         controller.UpdateMovement();

@@ -11,7 +11,7 @@ public class NPCAttackState : HeroState
     }
     public override void EnterState() 
     {
-        controller.attackModule.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0),true);
+        controller.attackModule.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0));
        
     }
     public override void ExitState() 

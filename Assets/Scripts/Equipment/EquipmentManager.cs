@@ -251,9 +251,9 @@ public class EquipmentManager : MonoBehaviour
             BackSlot();
         }
     }
-    public void SetUpEvent(ItemController itemController)
+    public void SetUpEvent(HandsController handsController)
     {
-        itemController.UseItem += UseSelectedItem;
+        handsController.UseItem += UseSelectedItem;
     }
     private void UseSelectedItem(object sender, EventArgs e)
     {
