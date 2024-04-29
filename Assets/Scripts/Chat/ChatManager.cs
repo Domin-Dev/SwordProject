@@ -43,7 +43,7 @@ public class ChatManager : MonoBehaviour
     private List<object> commandList;
 
     public static ChatManager instance { private set; get; }
-
+    public bool isChatting { private set; get; }
     private void Awake()
     {
         if(instance == null)
@@ -60,8 +60,10 @@ public class ChatManager : MonoBehaviour
     private void Start()
     {
         ClearIndexes();
-        
+        chatInputField.onSelect.AddListener((string k) => { isChatting = true; });
+        chatInputField.onDeselect.AddListener((string k) => { isChatting = false; SwitchChat();});
     }
+
 
     float timer = 0;
     private void Update()
@@ -196,7 +198,6 @@ public class ChatManager : MonoBehaviour
         }
         SwitchChat();
     }
-
     private void SaveToHistory()
     {
         if (history.Count < maxHistory)
@@ -223,8 +224,6 @@ public class ChatManager : MonoBehaviour
         chatScrollbar.value = 0;
         SetTimerToDisappear();
     }
-
-
     private void CheckCommands()
     {
         string command = chatInputField.text;
@@ -327,6 +326,7 @@ public class ChatManager : MonoBehaviour
     }
     private void TurnOffChat()
     {
+        isChatting = false;
         isChat = false;
         chatInputField.gameObject.SetActive(false);
         chatBackground.color = new Color(1, 1, 1, 0);

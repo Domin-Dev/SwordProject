@@ -9,21 +9,22 @@ public class ReloadingState : HeroState
         this.controller = controller;
     }
     public override void EnterState() 
-    {
+    {     
         controller.handsController.Reload();
         isReady = false;
     }
     public override void ExitState() 
-    { 
-    
+    {
+
     }
+
     bool isReady;
     public override void FrameUpdate()
     {
         if (!isReady)
         {
             isReady = controller.handsController.UpdateRotation();
-            if(isReady)  controller.handsController.SetGunShells();
+            if(isReady)  controller.handsController.SpawnShells();
         }
         else
         {
@@ -35,7 +36,7 @@ public class ReloadingState : HeroState
 
         if (Input.GetMouseButtonDown(0))
         {
-            controller.heroStateMachine.ChangeState(controller.idleState);
+            controller.handsController.EndReloading();
         }
     }
 

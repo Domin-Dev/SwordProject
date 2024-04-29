@@ -103,6 +103,7 @@ public class RangedWeaponItem : DestroyableItem
         return currentAmmoCount < magazineCapacity;
     }
 
+
     public void Shot()
     {
         currentAmmoCount--;
@@ -127,6 +128,10 @@ public class RangedWeaponItem : DestroyableItem
         return currentAmmoCount > 0;
     }
 
+    public int ToFullMagazine()
+    {
+        return magazineCapacity - currentAmmoCount;
+    }
     public override ItemStats Clon()
     {
         return new RangedWeaponItem(this);

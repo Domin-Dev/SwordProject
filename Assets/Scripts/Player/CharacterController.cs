@@ -76,9 +76,12 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     #region Movement
     public void GetMovementInput()
     {
-        float x = Input.GetAxisRaw("Horizontal");
-        float y = Input.GetAxisRaw("Vertical");
-        moveDir = new Vector2(x, y).normalized;
+        if(!ChatManager.instance.isChatting)
+        {
+            float x = Input.GetAxisRaw("Horizontal");
+            float y = Input.GetAxisRaw("Vertical");
+            moveDir = new Vector2(x, y).normalized;
+        }
     }
     public void UpdateMovement()
     {

@@ -80,6 +80,19 @@ public class ItemsAsset : MonoBehaviour
         return item;
     }
 
+
+    public int GetAmmoID(int weaponID)
+    {
+        AmmoType type = (GetItem(weaponID) as RangedWeapon).ammoType;
+        for (int i = 0; i < ammoList.Count; i++)
+        {
+            if (ammoList[i].type == type)
+            {
+                return ammoList[i].id;
+            }
+        }
+        return -1;
+    }
     public Sprite GetAmmoSpriteUI(AmmoType type)
     {
         for(int i = 0;i<ammoList.Count;i++)

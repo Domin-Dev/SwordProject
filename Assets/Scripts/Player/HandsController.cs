@@ -111,6 +111,10 @@ public class HandsController : MonoBehaviour
     }
     private void UpdateItemInHand(object sender, ItemStatsArgs e)
     {
+        if (characterController.heroStateMachine.currentState is ReloadingState)
+        {
+            EndReloading();
+        }
         itemInHand.transform.localPosition = Vector3.zero;
 
         if (e.item != null)
@@ -217,9 +221,12 @@ public class HandsController : MonoBehaviour
         rotationTarget = hand.localEulerAngles - new Vector3(0,0, -60);
     }
 
-    public void SetGunShells()
+    public void SpawnShells()
     {
-        Instantiate(ParticleAssets.instance.gunShells, reloadPoint.transform.position, Quaternion.identity);
+        Transform shells  = Instantiate(ParticleAssets.instance.gunShells, reloadPoint.transform.position, Quaternion.identity).transform;
+        int shellCount = (selectedItem as RangedWeaponItem).ToFullMagazine();
+        shells.GetComponent<ParticleSystem>().textureSheetAnimation.SetSprite(0, ammoSprite);
+        shells.GetComponent<ParticleSystem>().emission.SetBurst(0,new ParticleSystem.Burst(0,1,1,shellCount, 0.03f));
     }
 
     private bool UpdateReload()
@@ -245,21 +252,27 @@ public class HandsController : MonoBehaviour
             Sounds.instance.Reload();
             UpdateAmmoBar(this, new UpdateAmmoBarArgs((selectedItem as RangedWeaponItem).currentAmmoCount));
             secondHandItem.sprite = null;
+            int ammoCount = EquipmentManager.instance.Reload();
 
-            if (!(selectedItem as RangedWeaponItem).CanReload())
+
+            if (!(selectedItem as RangedWeaponItem).CanReload() || ammoCount <= 0)
             {
                 Sounds.instance.Roll();
-                secondHand.parent = startParent;
-                secondHand.localPosition = startPosition;
-                characterController.heroStateMachine.ChangeState(characterController.idleState);
+                EndReloading();  
             }
             return true;
         }
         return false;
     }
+    public void EndReloading()
+    {
+        secondHandItem.sprite = null;
+        secondHand.parent = startParent;
+        secondHand.localPosition = startPosition;
+        characterController.heroStateMachine.ChangeState(characterController.idleState);
+    }
 
     private Vector3 rotationTarget;
-
     public bool UpdateRotation()
     {
         hand.localEulerAngles = new Vector3(0,0,GetEulerAnglesLerp(rotationTarget, 30));
@@ -269,7 +282,6 @@ public class HandsController : MonoBehaviour
         }   
         return false;
     }
-
     public void Aim()
     {
         float angle = GetAngle(targetPos, mainHand, 0);
@@ -412,5 +424,10 @@ public class HandsController : MonoBehaviour
         {
             fliper.localPosition = new Vector3(fliper.localPosition.x, -posY, 0);
         }
+    } 
+    public bool CanReload()
+    {
+        RangedWeaponItem rangedWeapon = selectedItem as RangedWeaponItem;
+        return rangedWeapon != null && rangedWeapon.CanReload() && EquipmentManager.instance.CountAmmo(rangedWeapon);
     }
 }

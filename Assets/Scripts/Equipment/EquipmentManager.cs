@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static UnityEditor.Progress;
 
 public struct SlotPosition
 {
@@ -186,6 +187,9 @@ public class EquipmentManager : MonoBehaviour
     public event EventHandler<ItemStatsArgs> UpdateItemInHand;
 
     private int slotInHand { get; set; } = 1;
+    public int ammoCount;
+    private int ammoID;
+
     private bool equipmentIsOpen = false;
 
     public static readonly int BarSlotCount = 10;
@@ -223,33 +227,36 @@ public class EquipmentManager : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Alpha1))ChangeSelectedSlot(0);
-        else if(Input.GetKeyDown(KeyCode.Alpha2))ChangeSelectedSlot(1);
-        else if(Input.GetKeyDown(KeyCode.Alpha3))ChangeSelectedSlot(2);
-        else if(Input.GetKeyDown(KeyCode.Alpha4))ChangeSelectedSlot(3);
-        else if(Input.GetKeyDown(KeyCode.Alpha5))ChangeSelectedSlot(4);
-        else if(Input.GetKeyDown(KeyCode.Alpha6))ChangeSelectedSlot(5);
-        else if(Input.GetKeyDown(KeyCode.Alpha7))ChangeSelectedSlot(6);
-        else if(Input.GetKeyDown(KeyCode.Alpha8))ChangeSelectedSlot(7);
-        else if(Input.GetKeyDown(KeyCode.Alpha9))ChangeSelectedSlot(8);
-        else if (Input.GetKeyDown(KeyCode.Alpha0))ChangeSelectedSlot(9);
+        if (!ChatManager.instance.isChatting)
+        {
+            if (Input.GetKeyDown(KeyCode.Alpha1)) ChangeSelectedSlot(0);
+            else if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeSelectedSlot(1);
+            else if (Input.GetKeyDown(KeyCode.Alpha3)) ChangeSelectedSlot(2);
+            else if (Input.GetKeyDown(KeyCode.Alpha4)) ChangeSelectedSlot(3);
+            else if (Input.GetKeyDown(KeyCode.Alpha5)) ChangeSelectedSlot(4);
+            else if (Input.GetKeyDown(KeyCode.Alpha6)) ChangeSelectedSlot(5);
+            else if (Input.GetKeyDown(KeyCode.Alpha7)) ChangeSelectedSlot(6);
+            else if (Input.GetKeyDown(KeyCode.Alpha8)) ChangeSelectedSlot(7);
+            else if (Input.GetKeyDown(KeyCode.Alpha9)) ChangeSelectedSlot(8);
+            else if (Input.GetKeyDown(KeyCode.Alpha0)) ChangeSelectedSlot(9);
 
 
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            equipmentIsOpen = !equipmentIsOpen;
-            OpenEquipmentUIArgs args = new OpenEquipmentUIArgs(equipmentIsOpen);
-            OpenEquipmentUI(this, args);
-        }
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                equipmentIsOpen = !equipmentIsOpen;
+                OpenEquipmentUIArgs args = new OpenEquipmentUIArgs(equipmentIsOpen);
+                OpenEquipmentUI(this, args);
+            }
 
-        if (Input.mouseScrollDelta.y > 0)
-        {
-            NextSlot();
-        }
-        else if(Input.mouseScrollDelta.y < 0)
-        {
-            BackSlot();
-        }
+            if (Input.mouseScrollDelta.y > 0)
+            {
+                NextSlot();
+            }
+            else if (Input.mouseScrollDelta.y < 0)
+            {
+                BackSlot();
+            }
+        }    
     }
     public void SetUpEvent(HandsController handsController)
     {
@@ -461,8 +468,7 @@ public class EquipmentManager : MonoBehaviour
             if(equipment[position.slotIndex] == null) return true;
         }
         return false;
-    }
-    
+    }   
     private bool IsSlotInHand(SlotPosition slotPosition)
     {
         return slotPosition.Compare(new SlotPosition(0, slotInHand));
@@ -740,6 +746,38 @@ public class EquipmentManager : MonoBehaviour
         GetItemStats(position).itemCount += value;
         UpdateCount(position);
     }
+    private void DecreaseItemCount(SlotPosition position, int value = 1)
+    {
+        GetItemStats(position).itemCount -= value;
+        if (GetItemStats(position).itemCount <= 0)
+        {
+            ClearSlot(position);
+            RemoveItem(position);
+            return;
+        }
+        UpdateCount(position);
+    }
+    private SlotPosition Find(int itemId)
+    {
+        for (int i = 0; i < equipmentBar.Length; i++)
+        {
+            if (equipmentBar[i] != null && equipmentBar[i].itemID == itemId)
+            {
+                return new SlotPosition(0, i);
+            }
+        }
+
+        for (int i = 0; i < equipment.Length; i++)
+        {
+            if (equipment[i] != null && equipment[i].itemID == itemId)
+            {
+                return new SlotPosition(1, i);
+            }
+        }
+
+        return SlotPosition.NullSlot;
+    }
+
     public TooltipInfo GetTooltipInfo(SlotPosition position)
     {
         ItemStats itemStats = GetItemStats(position);
@@ -749,4 +787,22 @@ public class EquipmentManager : MonoBehaviour
             return ItemsAsset.instance.GetTooltipInfo(itemStats.itemID);
         }
     }
+    public bool CountAmmo(RangedWeaponItem rangedWeaponItem)
+    {
+        ammoID = ItemsAsset.instance.GetAmmoID(rangedWeaponItem.itemID);
+        List<SlotPosition> ammoList = FindItems(ammoID);
+        ammoCount = 0;
+        for (int i = 0; i < ammoList.Count; i++)
+        {
+            ammoCount += GetItemStats(ammoList[i]).itemCount;
+        }
+        return ammoCount > 0;
+    }
+    public int Reload()
+    {
+        DecreaseItemCount(Find(ammoID));
+        ammoCount--;
+        return ammoCount;
+    }
+    
 }

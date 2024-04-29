@@ -30,7 +30,7 @@ public class IdleState : HeroState
             heroStateMachine.ChangeState(controller.attackState);
         }
 
-        if(Input.GetKeyDown(KeyCode.R))
+        if(Input.GetKeyDown(KeyCode.R) && controller.handsController.CanReload())
         {
             heroStateMachine.ChangeState(controller.reloadingState);
         }

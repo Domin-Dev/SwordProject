@@ -11,8 +11,6 @@ public class Detector : MonoBehaviour
             collision.transform.parent.GetComponent<ITransparent>().Hide();
         }
     }
-
-
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.tag == "Tree")
