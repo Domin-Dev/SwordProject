@@ -12,6 +12,7 @@ TagManager:
   - Tree
   - Items
   - Bar
+  - Horse
   layers:
   - Default
   - TransparentFX

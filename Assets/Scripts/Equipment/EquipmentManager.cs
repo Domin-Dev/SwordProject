@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using static UnityEditor.Progress;
+
 
 public struct SlotPosition
 {
@@ -56,12 +56,12 @@ public class UpdateSelectedSlotInBarArgs : EventArgs
         this.currentSlot = currentSlot;
     }
 }
-public class OpenEquipmentUIArgs : EventArgs
+public class BoolArgs : EventArgs
 {
-    public bool open;
-    public OpenEquipmentUIArgs(bool open)
+    public bool value;
+    public BoolArgs(bool value)
     {
-        this.open = open;
+        this.value = value;
     }
 }
 public class CreateItemArgs : EventArgs
@@ -166,7 +166,7 @@ public class EquipmentManager : MonoBehaviour
 {
     //UI
     public event EventHandler<UpdateSelectedSlotInBarArgs> UpdateSelectedSlotInBar;
-    public event EventHandler<OpenEquipmentUIArgs> OpenEquipmentUI;
+    public event EventHandler<BoolArgs> OpenEquipmentUI;
 
     public event EventHandler<CreateItemArgs> CreateItemUI;
     public event EventHandler<MoveItemUIArgs> MoveItemUI;   
@@ -182,12 +182,11 @@ public class EquipmentManager : MonoBehaviour
     public event EventHandler<UpdateItemCountArgs> UpdateMainBarItemCount;
 
     public event EventHandler<LifeBarArgs> UpdateItemLifeBar;
-    
 
     public event EventHandler<ItemStatsArgs> UpdateItemInHand;
 
     private int slotInHand { get; set; } = 1;
-    public int ammoCount;
+    private int ammoCount;
     private int ammoID;
 
     private bool equipmentIsOpen = false;
@@ -196,8 +195,8 @@ public class EquipmentManager : MonoBehaviour
     public static readonly int SlotCount = 30;
 
 
-    public ItemStats[] equipment = new ItemStats[SlotCount];
-    public ItemStats[] equipmentBar = new ItemStats[BarSlotCount];
+    private ItemStats[] equipment = new ItemStats[SlotCount];
+    private ItemStats[] equipmentBar = new ItemStats[BarSlotCount];
 
     private SlotPosition selectedSlotInEQ;
     private ItemStats selectedItemStats;
@@ -244,7 +243,7 @@ public class EquipmentManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.I))
             {
                 equipmentIsOpen = !equipmentIsOpen;
-                OpenEquipmentUIArgs args = new OpenEquipmentUIArgs(equipmentIsOpen);
+                BoolArgs args = new BoolArgs(equipmentIsOpen);
                 OpenEquipmentUI(this, args);
             }
 

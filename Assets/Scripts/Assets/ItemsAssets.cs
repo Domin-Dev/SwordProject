@@ -1,8 +1,6 @@
-
 using UnityEngine;
 using System.Collections.Generic;
-
-
+using System.Linq;
 
 public class ItemsAsset : MonoBehaviour
 {
@@ -32,8 +30,25 @@ public class ItemsAsset : MonoBehaviour
 
     private Dictionary<int, Item> items = new Dictionary<int, Item>();
     private List<AmmoInfo> ammoList;
+    private Dictionary<int, BuildingObject> buildingObjects = new Dictionary<int, BuildingObject>();
 
     public void Awake()
+    {
+        LoadItems();
+        LoadBuildingObjects();
+    }
+
+   
+    private void LoadBuildingObjects()
+    {
+        BuildingObject[] loadedObjects = Resources.LoadAll<BuildingObject>("BuildingObjects");
+        for (int i = 0; i < loadedObjects.Length; i++)
+        {
+            BuildingObject buildingObject = loadedObjects[i];
+            buildingObjects.Add(buildingObject.ID,buildingObject);
+        }
+    }    
+    private void LoadItems()
     {
         Item[] loadedItems = Resources.LoadAll<Item>("Items");
         ammoList = new List<AmmoInfo>();
@@ -41,11 +56,15 @@ public class ItemsAsset : MonoBehaviour
         {
             Item item = loadedItems[i];
             items.Add(item.ID, item);
-            if(item as Ammo != null) 
-            { 
-                ammoList.Add(new AmmoInfo(item.ID,(item as Ammo).type));
+            if (item as Ammo != null)
+            {
+                ammoList.Add(new AmmoInfo(item.ID, (item as Ammo).type));
             }
         }
+    }
+    public BuildingObject[] GetBuildingObjects()
+    {
+        return buildingObjects.Values.ToArray();
     }
     public Sprite GetIcon(int itemID)
     {
@@ -80,6 +99,12 @@ public class ItemsAsset : MonoBehaviour
         return item;
     }
 
+    public ToolType GetToolType(int ID)
+    {
+        Tool item = GetItem(ID) as Tool;
+        if (item != null) return item.toolType;
+        else return ToolType.None;
+    }
 
     public int GetAmmoID(int weaponID)
     {

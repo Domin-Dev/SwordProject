@@ -63,6 +63,7 @@ public class HandsController : MonoBehaviour
     #endregion
     private Vector3 secondHandStartPosition;
     public ItemStats selectedItem;
+    private ToolType toolType;
     private Sprite ammoSprite;
 
     #region Events
@@ -70,7 +71,9 @@ public class HandsController : MonoBehaviour
     public event EventHandler<SetAmmoBarArgs> SetAmmoBar;
     public event EventHandler<UpdateAmmoBarArgs> UpdateAmmoBar;
     public event EventHandler HideAmmoBar;
+    public event EventHandler SwitchBuildingUI;
     #endregion
+
     private Vector3 attackAngle;
     private Vector3 attackVector;
     private Vector3 lastWeaponPosition;
@@ -105,12 +108,21 @@ public class HandsController : MonoBehaviour
         UIManager.instance.SetUpUIPlayer(this);
         EquipmentManager.instance.SetUpEvent(this);
     }
+
+    private void Update()
+    {
+        if(toolType != ToolType.None && Input.GetMouseButtonDown(1))
+        {
+            SwitchBuildingUI(this, null);
+        }
+    }
     private void SetUpEvents()
     {
         EquipmentManager.instance.UpdateItemInHand += UpdateItemInHand;
     }
     private void UpdateItemInHand(object sender, ItemStatsArgs e)
     {
+        toolType = ToolType.None;
         if (characterController.heroStateMachine.currentState is ReloadingState)
         {
             EndReloading();
@@ -122,7 +134,9 @@ public class HandsController : MonoBehaviour
             Item item = ItemsAsset.instance.GetItem(e.item.itemID);
             selectedItem = e.item;
             if (item as Weapon != null)
+            {
                 ItemIsWepon(item, e.item);
+            }
             else
                 ItemIsNotWepon(item);
         }
@@ -146,6 +160,7 @@ public class HandsController : MonoBehaviour
     }
     private void ItemIsWepon(Item item, ItemStats itemStats)
     {
+        toolType = ItemsAsset.instance.GetToolType(item.ID);
         Weapon weapon = (Weapon)item;
         itemInHand.sprite = weapon.weaponImage;
         hitBox.points = weapon.hitBoxPoints;
@@ -220,7 +235,6 @@ public class HandsController : MonoBehaviour
 
         rotationTarget = hand.localEulerAngles - new Vector3(0,0, -60);
     }
-
     public void SpawnShells()
     {
         Transform shells  = Instantiate(ParticleAssets.instance.gunShells, reloadPoint.transform.position, Quaternion.identity).transform;
@@ -228,7 +242,6 @@ public class HandsController : MonoBehaviour
         shells.GetComponent<ParticleSystem>().textureSheetAnimation.SetSprite(0, ammoSprite);
         shells.GetComponent<ParticleSystem>().emission.SetBurst(0,new ParticleSystem.Burst(0,1,1,shellCount, 0.03f));
     }
-
     private bool UpdateReload()
     {    
         secondHand.position = Vector2.Lerp(secondHand.position, backpack.position, Time.deltaTime * 5f);
@@ -393,12 +406,10 @@ public class HandsController : MonoBehaviour
 
         if (angle.z >= 0)
         {
-            Debug.Log(Mathf.Abs(hand.localEulerAngles.z - angle.z));
             return Mathf.Abs(hand.localEulerAngles.z - angle.z) < border;
         }
         else
         {
-            Debug.Log(Mathf.Abs(hand.localEulerAngles.z - (360 + angle.z)));
             return Mathf.Abs(hand.localEulerAngles.z - (360 + angle.z)) < border;
         }
     

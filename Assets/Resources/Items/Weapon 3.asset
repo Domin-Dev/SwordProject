@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b999aea9fb03d7f4ea250a166970f98a, type: 3}
+  m_Script: {fileID: 11500000, guid: ac44ede8a5cadab44b3d50f5e7a695b5, type: 3}
   m_Name: Weapon 3
   m_EditorClassIdentifier: 
   name: 
@@ -20,18 +20,26 @@ MonoBehaviour:
   durability: 50
   weaponImage: {fileID: 1329098765, guid: 9bd43db772e8f024da4e01c9497295f8, type: 3}
   hitBoxPoints:
+  - {x: -0.005, y: -0.035}
   - {x: -0.015, y: -0.024999999}
-  - {x: -0.015, y: 0.024999999}
-  - {x: -0.024999999, y: 0.024999999}
+  - {x: -0.015, y: 0.005}
+  - {x: -0.024999999, y: 0.005}
+  - {x: -0.035, y: 0.015}
+  - {x: -0.035, y: 0.035}
   - {x: -0.024999999, y: 0.044999998}
-  - {x: -0.015, y: 0.055}
-  - {x: 0.035, y: 0.055}
-  - {x: 0.044999998, y: 0.044999998}
-  - {x: 0.044999998, y: 0.015}
-  - {x: 0.035, y: 0.005}
-  - {x: 0.015, y: 0.005}
+  - {x: -0.005, y: 0.044999998}
+  - {x: -0.005, y: 0.055}
+  - {x: 0.005, y: 0.055}
+  - {x: 0.015, y: 0.044999998}
+  - {x: 0.024999999, y: 0.044999998}
+  - {x: 0.035, y: 0.035}
+  - {x: 0.035, y: 0.015}
+  - {x: 0.015, y: -0.005}
   - {x: 0.015, y: -0.024999999}
-  gripPoint1: {x: 0.005, y: -0.044999998}
+  - {x: 0.005, y: -0.035}
+  gripPoint1: {x: 0.005, y: -0.055}
   gripPoint2: {x: -100, y: -100}
   damage: 5
   cooldown: 0
+  toolType: 4
+  efficiency: 0

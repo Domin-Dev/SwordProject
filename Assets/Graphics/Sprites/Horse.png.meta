@@ -178,9 +178,9 @@ TextureImporter:
       name: Horse_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 19
-        width: 13
+        x: 1
+        y: 86
+        width: 14
         height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -199,10 +199,10 @@ TextureImporter:
       name: Horse_1
       rect:
         serializedVersion: 2
-        x: 16
-        y: 3
-        width: 25
-        height: 15
+        x: 51
+        y: 78
+        width: 9
+        height: 14
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -220,10 +220,10 @@ TextureImporter:
       name: Horse_2
       rect:
         serializedVersion: 2
-        x: 42
-        y: 4
-        width: 4
-        height: 12
+        x: 75
+        y: 82
+        width: 5
+        height: 10
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -233,6 +233,195 @@ TextureImporter:
       bones: []
       spriteID: 9a15881107d97634a9f818b2ae9cf48d
       internalID: 649858453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_3
+      rect:
+        serializedVersion: 2
+        x: 7
+        y: 70
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 494e84a7c7c91134fab4e2a83bddc82b
+      internalID: -2047284488
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_4
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 73
+        width: 4
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1f11e7cfa149d3458162ff24e14d88a
+      internalID: -1034433323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_5
+      rect:
+        serializedVersion: 2
+        x: 48
+        y: 52
+        width: 15
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b1e245ea9f05c754fae3aff3713631d9
+      internalID: -1272985382
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_6
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 56
+        width: 15
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5e49b09ef1ed93243be9aa10b2b53ea8
+      internalID: 116874554
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_7
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 56
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bbe0ff08fc16ac545957bcce750a58ae
+      internalID: 994974838
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_8
+      rect:
+        serializedVersion: 2
+        x: 3
+        y: 43
+        width: 4
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ccc9ecdfe1151e3499d6bbf0bccc230d
+      internalID: -1031761748
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_9
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 40
+        width: 25
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: be61c1987b1a17a4bbffa09a7c046617
+      internalID: -970145504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_10
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 41
+        width: 5
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9f64765461025744aa2f3aefb6279c1b
+      internalID: -1870594958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Horse_11
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 38
+        width: 9
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cc2def3c1bd14cd4aa5375febfc17253
+      internalID: 1267894716
       vertices: []
       indices: 
       edges: []
@@ -250,7 +439,16 @@ TextureImporter:
     nameFileIdTable:
       Horse_0: -1180969345
       Horse_1: 1488370132
+      Horse_10: -1870594958
+      Horse_11: 1267894716
       Horse_2: 649858453
+      Horse_3: -2047284488
+      Horse_4: -1034433323
+      Horse_5: -1272985382
+      Horse_6: 116874554
+      Horse_7: 994974838
+      Horse_8: -1031761748
+      Horse_9: -970145504
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

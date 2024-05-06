@@ -8,7 +8,6 @@ public class PlayerCamera : MonoBehaviour
     [SerializeField] private Transform player;
     [SerializeField] private float cameraSpeed;
 
-
     private void Update()
     {
         if (CanFollow())

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 {
@@ -11,10 +12,13 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private int maxHP;
     [SerializeField] private int hp;
     [SerializeField] private Transform hpBar;
-
     [SerializeField] private Transform center;
 
+
     private Animator animator;
+    private SortingGroup sortingGroup;
+    private float speed = 1f;
+
 
     private Vector2 moveDir;
     private Vector2 sightDir;
@@ -22,6 +26,8 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 
     private bool isRepulsed = false;
     public HandsController handsController { private set; get; }
+
+
 
     #region StateMachine
     public HeroStateMachine heroStateMachine { set; get; }
@@ -46,6 +52,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
         rigidbody2D = GetComponent<Rigidbody2D>();
         handsController = GetComponent<HandsController>();
         animator = GetComponent<Animator>();   
+        sortingGroup = GetComponent<SortingGroup>();
         handsController.SetController(this,"Enemy");  
         SetStateMachine();
     }
@@ -82,12 +89,16 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
             float y = Input.GetAxisRaw("Vertical");
             moveDir = new Vector2(x, y).normalized;
         }
+        else
+        {
+            moveDir = Vector2.zero;
+        }
     }
     public void UpdateMovement()
     {
         if (!isRepulsed)
         {
-            rigidbody2D.velocity = moveDir;
+            rigidbody2D.velocity = moveDir * speed;
             if(moveDir == new Vector2(0,0))
             {
                 animator.SetBool("Idle", true);
@@ -135,6 +146,14 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
         handsController.ResetAttack(); 
         yield return new WaitForSeconds(0.1f);
         isRepulsed = false;
+    }
+
+    public void Riding(Horse horse)
+    {
+        horse.sortingGroup.sortingOrder = -10;
+        transform.position = horse.riderPoint.position;
+        horse.transform.parent = transform;
+        speed = horse.speed;
     }
     #endregion
 }
