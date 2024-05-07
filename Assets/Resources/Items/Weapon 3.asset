@@ -41,5 +41,5 @@ MonoBehaviour:
   gripPoint2: {x: -100, y: -100}
   damage: 5
   cooldown: 0
-  toolType: 4
+  toolType: 1
   efficiency: 0

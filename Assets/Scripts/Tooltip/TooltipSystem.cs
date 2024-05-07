@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+
 using UnityEngine;
 
 public class TooltipSystem : MonoBehaviour
@@ -18,6 +17,10 @@ public class TooltipSystem : MonoBehaviour
     public static void Show(string content,string header = "")
     {
         timer = Timer.Create(0.45f,() => { current.tooltip.SetText(content, header); });
+    }
+    public static void ShowInstant(string content, string header = "")
+    {
+       current.tooltip.SetText(content, header);
     }
 
     public static void Hide()

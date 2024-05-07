@@ -75,11 +75,33 @@ public class Grid<T>
     {
         return  position + new Vector2(x,y) * cellSize;
     }
+    public Vector2 GetPosition(Vector2 xy)
+    {
+        return position + xy * cellSize;
+    }
 
+    public void SS()
+    {
+        Debug.Log("s");
+    }
     private void GetXY(Vector2 position,out int x,out int y)
     {
         x = Mathf.FloorToInt((position.x - this.position.x)/ cellSize);
         y = Mathf.FloorToInt((position.y - this.position.y) / cellSize);
+    }
+
+    public Vector2 GetXY(Vector2 position)
+    {
+        int x = Mathf.FloorToInt((position.x - this.position.x) / cellSize);
+        int y = Mathf.FloorToInt((position.y - this.position.y) / cellSize);
+        return new Vector2(x,y);
+    }
+
+    public Vector2 GetGridPosition(Vector3 globalPosition)
+    {
+        int x, y;
+        GetXY(globalPosition,out x,out y);
+        return GetPosition(x,y);
     }
     public void SetValue(int x, int y, T value)
     {

@@ -15,6 +15,7 @@ public class Sounds : MonoBehaviour
     [SerializeField] AudioClip reload;
     [SerializeField] AudioClip roll;
     [SerializeField] AudioClip ammo;
+    [SerializeField] AudioClip hammer;
     private void Awake()
     {
         if(instance == null )
@@ -69,6 +70,11 @@ public class Sounds : MonoBehaviour
     public void Ammo()
     {
         audioSource.PlayOneShot(ammo);
+    }
+
+    public void Hammer()
+    {
+        audioSource.PlayOneShot(hammer);
     }
 }
 

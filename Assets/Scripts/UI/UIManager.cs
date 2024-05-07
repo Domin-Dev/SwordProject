@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using TMPro;
 using System;
 using UnityEditor;
+using System.Collections.Generic;
 
 public class EquipmentGrid
 {
@@ -21,16 +22,13 @@ public class UIManager : MonoBehaviour
 {
     //black background
     [SerializeField] private Transform background;
-   
     [Space(30f)]
-
     //equipment
     [SerializeField] private Canvas mainCanvas;
     [Header("Gun Info UI")]
     [SerializeField] private Transform ammoBar;
     [SerializeField] private GameObject ammoUI;
     [Space]
-
     #region Equipment UI
     [Header("Equipment UI")]
     [SerializeField] private Transform mainItemBar;
@@ -55,14 +53,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject buildingObject;
     [Space(30f)]
     #endregion
-
     [Header("Stats UI")]
-
     [SerializeField] private Button ServerButton;
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ClientButton;
-
-
     [SerializeField] Sprite selected;
     [SerializeField] Sprite unSelected;
 
@@ -72,8 +66,6 @@ public class UIManager : MonoBehaviour
     private const float speedSelecting = 10f;
     private const float speedUnselecting = 15f;
 
-
-
     public Transform itemParent { get { return equipmentDragItems; } }
     public static UIManager instance { private set; get; }
 
@@ -82,7 +74,7 @@ public class UIManager : MonoBehaviour
     private EquipmentGrid equipmentBarGrid;
     private EquipmentGrid mainEquipmentGrid;
 
-
+    private List<Transform> openWindows = new List<Transform>();
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -104,8 +96,8 @@ public class UIManager : MonoBehaviour
         BuildingObject[] array = ItemsAsset.instance.GetBuildingObjects();
         for (int i = 0; i < array.Length; i++)
         {
-            Transform obj = Instantiate(buildingObject, buildingObjectGrid).transform.GetChild(0);
-            obj.GetComponent<Image>().sprite = array[i].icon;
+            Transform obj = Instantiate(buildingObject, buildingObjectGrid).transform;
+            obj.GetChild(0).GetComponent<Image>().sprite = array[i].icon;
             obj.GetComponent<BuildingObjectUI>().ID = array[i].ID;
         }
     }
@@ -155,14 +147,16 @@ public class UIManager : MonoBehaviour
         LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
         
     }
-
-
     public void SetUpUIPlayer(HandsController handsController)
     {
         handsController.SetAmmoBar += SetAmmoBar;
         handsController.UpdateAmmoBar += UpdateAmmoBar;
         handsController.HideAmmoBar += HideAmmoBar;
         handsController.SwitchBuildingUI += SwitchBuildingUI;
+    }
+    public void SetUpUIBuilding(BuildingManager buildingManager)
+    {
+        buildingManager.SwitchBuildingUI += SwitchBuildingUI;
     }
     private void HideAmmoBar(object sender, EventArgs e)
     {
@@ -391,16 +385,25 @@ public class UIManager : MonoBehaviour
     }
     private void OpenEquipment(object sender, BoolArgs e)
     {
+        CloseWindows();
         background.gameObject.SetActive(e.value);
         equipment.gameObject.SetActive(e.value);
         if (!e.value) TooltipSystem.Hide();
+        else openWindows.Add(equipment);
+    }
+    private void CloseWindows()
+    {
+        foreach (Transform item in openWindows)
+        {
+            item.gameObject.SetActive(false);
+        }
     }
     private void SwitchBuildingUI(object sender, EventArgs e)
     {
         bool value = !building.gameObject.activeSelf;
         building.gameObject.SetActive(value);
         background.gameObject.SetActive(value);
-        if (value) TooltipSystem.Hide();
+        if (!value) TooltipSystem.Hide();
     }
     private void UpdateSelectedSlot(object sender, UpdateSelectedSlotInBarArgs e)
     {

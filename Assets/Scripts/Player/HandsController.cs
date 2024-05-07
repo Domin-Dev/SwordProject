@@ -93,8 +93,6 @@ public class HandsController : MonoBehaviour
     private CharacterController characterController;
     public GameObject bullet;
 
-
-
     private void Awake()
     {
         secondHandStartPosition = secondHand.localPosition;
@@ -107,14 +105,6 @@ public class HandsController : MonoBehaviour
         SetUpEvents();
         UIManager.instance.SetUpUIPlayer(this);
         EquipmentManager.instance.SetUpEvent(this);
-    }
-
-    private void Update()
-    {
-        if(toolType != ToolType.None && Input.GetMouseButtonDown(1))
-        {
-            SwitchBuildingUI(this, null);
-        }
     }
     private void SetUpEvents()
     {
@@ -135,6 +125,7 @@ public class HandsController : MonoBehaviour
             selectedItem = e.item;
             if (item as Weapon != null)
             {
+                toolType = ItemsAsset.instance.GetToolType(item.ID);
                 ItemIsWepon(item, e.item);
             }
             else
@@ -142,6 +133,25 @@ public class HandsController : MonoBehaviour
         }
         else
             ItemIsNull();
+
+        SwitchState(toolType);
+    }
+
+    private void SwitchState(ToolType toolType)
+    {
+        switch(toolType)
+        {
+            case ToolType.None:
+                characterController.heroStateMachine.ChangeState(characterController.idleState);
+                break;
+            case ToolType.Hammer: 
+                characterController.heroStateMachine.ChangeState(characterController.buildingState); 
+                break;
+            case ToolType.Axe:
+                characterController.heroStateMachine.ChangeState(characterController.buildingState);
+                break;
+
+        }
     }
     private void ItemIsNull()
     {
@@ -160,7 +170,6 @@ public class HandsController : MonoBehaviour
     }
     private void ItemIsWepon(Item item, ItemStats itemStats)
     {
-        toolType = ItemsAsset.instance.GetToolType(item.ID);
         Weapon weapon = (Weapon)item;
         itemInHand.sprite = weapon.weaponImage;
         hitBox.points = weapon.hitBoxPoints;
@@ -441,4 +450,9 @@ public class HandsController : MonoBehaviour
         RangedWeaponItem rangedWeapon = selectedItem as RangedWeaponItem;
         return rangedWeapon != null && rangedWeapon.CanReload() && EquipmentManager.instance.CountAmmo(rangedWeapon);
     }
+    public void SwitchBuildingObjects()
+    {
+        SwitchBuildingUI(this, null);
+    }
 }
+

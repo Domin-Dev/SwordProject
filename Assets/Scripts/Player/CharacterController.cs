@@ -34,12 +34,14 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     public IdleState idleState { set; get; }
     public AttackState attackState { set; get; }
     public ReloadingState reloadingState { set; get; }
+    public BuildingState buildingState { set; get; }
     private void SetStateMachine()
     {
         heroStateMachine = new HeroStateMachine();
         idleState = new IdleState(this, heroStateMachine);
         attackState = new AttackState(this, heroStateMachine);
         reloadingState = new ReloadingState(this, heroStateMachine);
+        buildingState = new BuildingState(this, heroStateMachine);
     }
 
     #endregion

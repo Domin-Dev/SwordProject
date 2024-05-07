@@ -10,6 +10,8 @@ public class GridTile
     };
 
     public TileType tile;
+    public GridObject gridObject;
+
     public int x, y;
     public Grid<GridTile> grid;
 
@@ -20,9 +22,14 @@ public class GridTile
         this.y = y;
         this.grid = grid;
     }
-    public void ChangeValue(TileType tile)
+    public void ChangeTileType(TileType tile)
     {
         this.tile = tile;
+        grid.TObjectChanged(x, y);
+    }
+    public void ChangeGridObject(GridObject gridObject)
+    {
+        this.gridObject = gridObject;
         grid.TObjectChanged(x, y);
     }
 

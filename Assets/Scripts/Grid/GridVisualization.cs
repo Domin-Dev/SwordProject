@@ -6,14 +6,21 @@ using UnityEngine;
 
 public class GridVisualization: MonoBehaviour
 {
-
-    Grid<GridTile> grid;
+    public Grid<GridTile> grid { set; get; }
     TileStats tileStats;
     int textureWidth;
     int textureHeight;
-
+    public static GridVisualization instance { private set; get; }
     private void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
         tileStats = Resources.Load<TileStats>("Tiles");
     }
     public void SetGrid(Grid<GridTile> grid)
@@ -23,21 +30,12 @@ public class GridVisualization: MonoBehaviour
         this.grid = grid;
         CreateMesh();
         grid.OnTObjectChanged += UpdatedGrid;
+        BuildingManager.instance._grid = grid;
     }
-
     private void UpdatedGrid(object sender, Grid<GridTile>.OnTObjectChangedArgs e)
     {
        UpdateMesh(e.x, e.y,true);
     }
-
-    private void Update()
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-           // grid.GetValue(MyTools.GetMouseWorldPosition()).ChangeValue(GridTile.TileType.Mud);
-        }
-    }
-
     private void UpdateMesh(int x,int y,bool repeat)
     {
         if (x > 0 && y > 0 && x < grid.width && y < grid.height)
@@ -76,9 +74,6 @@ public class GridVisualization: MonoBehaviour
             }
         }
     }
-
-
-
     private void GetUVTile(GridTile.TileType tile,int borders,out Vector2 uv00, out Vector2 uv11)
     {
         Tile tileK;
@@ -115,7 +110,6 @@ public class GridVisualization: MonoBehaviour
             }
         }
     }
-
     private int CalculateBorders(int x,int y)
     {
         int value = 0;
@@ -182,7 +176,6 @@ public class GridVisualization: MonoBehaviour
 
         return value;
     }
-
     public void CreateMesh()
     {
         int width = grid.width;

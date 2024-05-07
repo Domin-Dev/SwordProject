@@ -48,6 +48,11 @@ public class ItemsAsset : MonoBehaviour
             buildingObjects.Add(buildingObject.ID,buildingObject);
         }
     }    
+
+    public BuildingObject GetBuildingObject(int ID)
+    {
+        return buildingObjects[ID];
+    }
     private void LoadItems()
     {
         Item[] loadedItems = Resources.LoadAll<Item>("Items");
