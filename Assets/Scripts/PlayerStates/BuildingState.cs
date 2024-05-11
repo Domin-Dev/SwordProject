@@ -10,11 +10,11 @@ public class BuildingState : HeroState
     }
     public override void EnterState() 
     {
-
+        BuildingManager.instance.StartBuildingMode();
     }
     public override void ExitState() 
     {
-
+        BuildingManager.instance.EndBuildingMode();
     }
     public override void FrameUpdate()
     {
@@ -23,10 +23,10 @@ public class BuildingState : HeroState
         controller.UpdateFlip();
         controller.UpdateCharacterSprites();
 
-        if (Input.GetMouseButtonDown(1))
-        {
-            controller.handsController.SwitchBuildingObjects();
-        }
+        //if (Input.GetMouseButtonDown(1))
+        //{
+        //    controller.handsController.SwitchBuildingObjects();
+        //}
     }
 
     public override void FrameFixedUpdate()

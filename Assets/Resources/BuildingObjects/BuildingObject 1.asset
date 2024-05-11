@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f8dd6b83dc470e843b05e780bdd107b2, type: 3}
   m_Name: BuildingObject 1
   m_EditorClassIdentifier: 
-  icon: {fileID: 21300000, guid: 106ad75e2486d1b4891be2a3b301d991, type: 3}
+  icon: {fileID: -1746336799, guid: 106ad75e2486d1b4891be2a3b301d991, type: 3}
   name: 
   description: fgfgf
   spriteObject: {fileID: 0}

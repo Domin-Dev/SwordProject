@@ -42,7 +42,6 @@ public class WeaponEditor : Editor
     }
     private void CutHitBox(Sprite sprite,Weapon weapon)
     {
-        Debug.Log("cuting");
         hitbox = null;
         pixelSize = 1.0f/sprite.pixelsPerUnit;
         width = (int)sprite.rect.width;

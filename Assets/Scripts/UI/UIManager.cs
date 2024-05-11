@@ -246,7 +246,7 @@ public class UIManager : MonoBehaviour
     private void UpdateBar(float value, Transform barTransform)
     {
         Image bar = barTransform.GetComponent<Image>();
-        bar.transform.localScale = new Vector3(value, 1);
+        bar.transform.localScale = new Vector3(value, 1,1);
         bar.color = new Color(bar.color.r, value, bar.color.b);
     }
     private void UpdateMainBarItemCount(object sender, UpdateItemCountArgs e)

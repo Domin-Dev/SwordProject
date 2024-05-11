@@ -127,6 +127,10 @@ public class Grid<T>
         }
         return default(T);
     }
+    public T GetValueByXY(Vector2 xy)
+    {
+        return GetValue((int)xy.x,(int)xy.y);
+    }
 
     public T GetValue(Vector2 position)
     {

@@ -121,14 +121,14 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: PlankWall
     originalName: 
-    pivot: {x: 0.5, y: 0}
+    pivot: {x: 0.49425286, y: 0}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     rect:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 86
+      width: 87
       height: 29
     spriteID: 20db94e87e0981a4684f9a54cb1a2106
     spriteBone: []
@@ -153,7 +153,7 @@ ScriptedImporter:
       cellRect:
         x: 2
         y: 0
-        width: 86
+        width: 87
         height: 29
       spriteId: 20db94e87e0981a4684f9a54cb1a2106
     linkedCells: []
