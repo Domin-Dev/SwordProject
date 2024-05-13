@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class MyTools 
 {
-    public static Vector2[] Directions = {
+    public static Vector2[] Directions8 = {
         new Vector2(0, 1),
         new Vector2(1, 1),
         new Vector2(1, 0),
@@ -12,6 +12,13 @@ public static class MyTools
         new Vector2(-1,-1), 
         new Vector2(-1,0),
         new Vector2(-1,1)
+    };
+
+    public static Vector2[] Directions4 = {
+        new Vector2(0, 1),
+        new Vector2(1, 0),
+        new Vector2(0,-1),
+        new Vector2(-1,0),
     };
     public static Vector3 GetMouseWorldPosition()
     {

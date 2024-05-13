@@ -139,11 +139,11 @@ public class WeaponEditor : Editor
         while(true) 
         {
 
-            Vector2 pos = last + MyTools.Directions[dir];
+            Vector2 pos = last + MyTools.Directions8[dir];
             if(IsHitBox(pos))
             {
                 current = pos;
-                if((dir % 2 == 1 && IsHitBox(current + MyTools.Directions[k])) || (IsHitBox(last + MyTools.Directions[k]) && IsHitBox(current + MyTools.Directions[k])))
+                if((dir % 2 == 1 && IsHitBox(current + MyTools.Directions8[k])) || (IsHitBox(last + MyTools.Directions8[k]) && IsHitBox(current + MyTools.Directions8[k])))
                 {
                     break;
                 } 
@@ -196,7 +196,7 @@ public class WeaponEditor : Editor
         bool[] neighbors = new bool[8];
         for (int i = 0; i < 8; i++)
         {
-            neighbors[i] = IsHitBox(pos + MyTools.Directions[i]);
+            neighbors[i] = IsHitBox(pos + MyTools.Directions8[i]);
         }
         return neighbors;
     }

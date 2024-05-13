@@ -58,6 +58,10 @@ public class ItemsAsset : MonoBehaviour
     {
         return buildingObjects[ID].sprites;
     }
+    public Sprite GetBuildingObjectSprite(int ID,int spriteIndex)
+    {
+        return buildingObjects[ID].sprites[spriteIndex];
+    }
     private void LoadItems()
     {
         Item[] loadedItems = Resources.LoadAll<Item>("Items");

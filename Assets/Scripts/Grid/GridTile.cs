@@ -33,6 +33,10 @@ public class GridTile
         grid.TObjectChanged(x, y);
     }
 
+    public bool IsBuildObject()
+    {
+        return gridObject != null;
+    }
     public override string ToString()
     {
         return tile.ToString();

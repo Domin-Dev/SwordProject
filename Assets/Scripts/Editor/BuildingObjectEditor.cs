@@ -24,12 +24,13 @@ public class BuildingObjectEditor : Editor
         int k = texture.width / 27;
         List<Sprite> sprites = new List<Sprite>();
 
-
         for (int i = 0; i < k; i++)
         {
             Sprite sprite = Sprite.Create(texture, new Rect(i*27,0,27,51),Vector2.zero);
-            sprites.Add(sprite); 
+            sprites.Add(sprite);
+            AssetDatabase.CreateAsset(sprite, $"Assets/Graphics/Sprites/BuildingObjets/{buildingObject.name}_{i}.asset");
         }
+        AssetDatabase.SaveAssets();
         buildingObject.sprites = sprites.ToArray();
     }
 

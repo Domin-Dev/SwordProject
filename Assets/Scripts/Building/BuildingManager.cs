@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Unity.Mathematics;
-using static UnityEditor.PlayerSettings;
+
 
 
 public class BuildingManager : MonoBehaviour
@@ -47,13 +47,14 @@ public class BuildingManager : MonoBehaviour
     public void EndBuildingMode()
     {
         buildingMode = false;
+        selectedObjectID = -1;
     }
 
     public void SelectedBuildingObject(int ID)
     {
-        SwitchBuildingUI(this, null);   
-        selectedObjectID = ID;
         sprite = ItemsAsset.instance.GetBuildingObjectSprites(0)[0];
+        SwitchBuildingUI(this, null);
+        selectedObjectID = ID;    
     }
 
     List<Transform> plan = new List<Transform>();
@@ -62,7 +63,7 @@ public class BuildingManager : MonoBehaviour
     Vector2 endPos;
     Vector2 size;
     Vector2[] pointsArray;
-    int selectedObjectID;
+    int selectedObjectID = -1;
     Sprite sprite;
 
     private void Start()
@@ -72,35 +73,40 @@ public class BuildingManager : MonoBehaviour
 
     private void Update()
     {
+
+
         if(buildingMode)
         {
-            Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-            if (Input.GetMouseButtonDown(0))
-            {
-                startPos = pos;
-            }
-
-            if(Input.GetMouseButton(0))
-            {
-                if (pos != endPos)
-                {
-                    endPos = pos;
-                    CountSize();    
-                    Planning();
-                    if (pointsArray.Length > 1) TooltipSystem.ShowInstant($"{math.abs(size.x) + 1} x {math.abs(size.y) + 1}");
-                }
-            }
-
-            if(Input.GetMouseButtonUp(0))
-            {
-                TooltipSystem.Hide();
-                ClearPlan();
-                Build();     
-            }
-
-            if(Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButtonDown(1))
             {
                 SwitchBuildingUI(this, null);
+            }
+
+            if(selectedObjectID >= 0)
+            {
+                Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
+                if (Input.GetMouseButtonDown(0))
+                {
+                    startPos = pos;
+                }
+
+                if (Input.GetMouseButton(0))
+                {
+                    if (pos != endPos)
+                    {
+                        endPos = pos;
+                        CountSize();
+                        Planning();
+                        if (pointsArray.Length > 1) TooltipSystem.ShowInstant($"{math.abs(size.x) + 1} x {math.abs(size.y) + 1}");
+                    }
+                }
+
+                if (Input.GetMouseButtonUp(0))
+                {
+                    TooltipSystem.Hide();
+                    ClearPlan();
+                    Build();
+                }
             }
         }
     }
@@ -135,13 +141,15 @@ public class BuildingManager : MonoBehaviour
     {
         currentIndex = 0;
         pointsArray = GetPositions().ToArray();
+        Debug.Log(pointsArray.Length);
         foreach (Vector2 item in pointsArray)
         {
-           if(item != null)  SpawnPlan(grid.GetPosition(item));
+            if (item != null)
+            {
+                SpawnPlan(grid.GetPosition(item));
+            }
         }
     } 
-
-
     List<Vector2> GetPositions()
     {
         int absSizeX = (int)math.abs(size.x);
@@ -189,7 +197,6 @@ public class BuildingManager : MonoBehaviour
 
     void AddToList(List<Vector2> array,Vector2 vector)
     {
-        Debug.Log(vector);
         if (grid.GetValueByXY(vector).gridObject == null)
         {
             array.Add(vector);
@@ -200,7 +207,7 @@ public class BuildingManager : MonoBehaviour
         if (currentIndex > plan.Count - 1)
         {
             Transform transform = Instantiate(BuildingPrefab, pos, Quaternion.identity, parent).transform;
-           // transform.GetComponent<SpriteRenderer>().color = planColor;
+            transform.GetComponent<SpriteRenderer>().color = planColor;
             transform.GetComponent<SpriteRenderer>().sprite = sprite;
             transform.GetComponent<Collider2D>().enabled = false;
             plan.Add(transform);
@@ -221,15 +228,58 @@ public class BuildingManager : MonoBehaviour
             foreach (Vector2 item in pointsArray)
             {
                 Transform obj = Instantiate(BuildingPrefab,grid.GetPosition(item), Quaternion.identity, parent).transform;
-           //     obj.GetComponent<SpriteRenderer>().color = planColor;
+                //     obj.GetComponent<SpriteRenderer>().color = planColor;
+     
                 obj.GetComponent<Collider2D>().enabled = false;
-                obj.GetComponent<SpriteRenderer>().sprite = sprite;
-
                 grid.GetValueByXY(item).gridObject = new ObjectPlan(selectedObjectID,obj);
+                SetNewSprite(item);
             }
         }
         pointsArray = null;
     }
+
+
+    private void SetNewSprite(Vector2 positionXY)
+    {
+        bool[] neighbors = GetNeighbors(positionXY);
+        for (int i = 0; i < 4; i++)
+        {
+            if (neighbors[i]) UpdateSprite(positionXY + MyTools.Directions4[i]);
+        }
+        UpdateSprite(positionXY);
+    }
+
+    private void UpdateSprite(Vector2 positionXY)
+    {
+        GridObject gridObject = grid.GetValueByXY(positionXY).gridObject;
+        bool[] neighbors = GetNeighbors(positionXY);
+
+        int value = 0;
+
+        for (int i = 0; i < neighbors.Length; i++)
+        {
+            if (neighbors[i])
+            {
+                value +=(int)math.pow(2f,i);
+            }
+        }
+        Sprite buildingSprite = null;
+
+        buildingSprite = ItemsAsset.instance.GetBuildingObjectSprite(0,value);
+     
+        gridObject.objectTransform.GetComponent<SpriteRenderer>().sprite = buildingSprite;
+    }
+
+    private bool[] GetNeighbors(Vector2 positionXY)
+    {
+        bool[] neighbors = new bool[4];
+        for (int i = 0; i < 4; i++)
+        {
+            neighbors[i] = grid.GetValueByXY(positionXY + MyTools.Directions4[i]).IsBuildObject();
+        }
+        return neighbors;
+    }
+
 
 
 }
