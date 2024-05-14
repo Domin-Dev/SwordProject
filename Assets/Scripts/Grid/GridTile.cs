@@ -37,6 +37,8 @@ public class GridTile
     {
         return gridObject != null;
     }
+
+
     public override string ToString()
     {
         return tile.ToString();

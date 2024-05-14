@@ -56,11 +56,16 @@ public class ItemsAsset : MonoBehaviour
 
     public Sprite[] GetBuildingObjectSprites(int ID)
     {
-        return buildingObjects[ID].sprites;
+        if (buildingObjects[ID] as Wall != null)
+            return (buildingObjects[ID] as Wall).sprites;
+        else 
+            return new Sprite[0];
     }
     public Sprite GetBuildingObjectSprite(int ID,int spriteIndex)
     {
-        return buildingObjects[ID].sprites[spriteIndex];
+        Sprite[] sprites = GetBuildingObjectSprites(ID);
+        if(sprites.Length > spriteIndex) return sprites[spriteIndex];
+        else return null;
     }
     private void LoadItems()
     {

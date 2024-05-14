@@ -1,13 +1,24 @@
 ﻿
+using System;
 using UnityEngine;
 
 public class BuildingState : HeroState
 {
     private CharacterController controller;
+
+
+    bool isHit = true;
     public BuildingState(CharacterController controller, HeroStateMachine heroStateMachine) : base(heroStateMachine)
     {
         this.controller = controller;
+        BuildingManager.instance.hammerBlow += (object sender, EventArgs e) => 
+        {
+            controller.handsController.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0));
+            isHit = true;
+        };
     }
+
+
     public override void EnterState() 
     {
         BuildingManager.instance.StartBuildingMode();
@@ -23,10 +34,11 @@ public class BuildingState : HeroState
         controller.UpdateFlip();
         controller.UpdateCharacterSprites();
 
-        //if (Input.GetMouseButtonDown(1))
-        //{
-        //    controller.handsController.SwitchBuildingObjects();
-        //}
+        if(isHit)
+        {
+            controller.handsController.updaterAttack.Update();
+        }
+
     }
 
     public override void FrameFixedUpdate()

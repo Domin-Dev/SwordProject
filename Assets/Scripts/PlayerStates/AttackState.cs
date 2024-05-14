@@ -23,7 +23,8 @@ public class AttackState : HeroState
             else
             {
                 Sounds.instance.Empty();
-                controller.heroStateMachine.ChangeState(controller.idleState);
+                //controller.heroStateMachine.ChangeState(controller.idleState);
+                controller.handsController.SetDefaultState();
             }
         }
     }

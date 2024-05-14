@@ -2,15 +2,16 @@ using UnityEngine;
 using System.Collections.Generic;
 using System;
 using Unity.Mathematics;
-
-
+using UnityEngine.Rendering;
+using Unity.VisualScripting;
+using static UnityEditor.PlayerSettings;
 
 public class BuildingManager : MonoBehaviour
 {
     public static BuildingManager instance { private set; get; }
 
     public event EventHandler SwitchBuildingUI;
-
+    public event EventHandler hammerBlow;
     public static Grid<GridTile> grid { private set; get; }
     public Grid<GridTile> _grid
     {
@@ -23,9 +24,31 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    [SerializeField] GameObject BuildingPrefab;
+    [SerializeField] GameObject buildingPrefab;
+
+
+    [SerializeField] GameObject buildingBar;
+    private Transform barValue;
+
+
     [SerializeField] Transform parent;
     [SerializeField] Color planColor;
+
+    List<Transform> plan = new List<Transform>();
+    int currentIndex;
+    Vector2 startPos;
+    Vector2 endPos;
+    Vector2 size;
+    Vector2[] pointsArray;
+    int selectedObjectID = -1;
+    Sprite sprite;
+
+    bool buildingMode;
+
+    Transform objectBar;
+    bool barIsActive;
+
+
     private void Awake()
     {
         if (instance == null)
@@ -38,7 +61,6 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
-    bool buildingMode;
 
     public void StartBuildingMode()
     {
@@ -52,29 +74,26 @@ public class BuildingManager : MonoBehaviour
 
     public void SelectedBuildingObject(int ID)
     {
-        sprite = ItemsAsset.instance.GetBuildingObjectSprites(0)[0];
+        sprite = ItemsAsset.instance.GetBuildingObjectSprite(ID, 0);
         SwitchBuildingUI(this, null);
         selectedObjectID = ID;    
     }
 
-    List<Transform> plan = new List<Transform>();
-    int currentIndex;
-    Vector2 startPos;
-    Vector2 endPos;
-    Vector2 size;
-    Vector2[] pointsArray;
-    int selectedObjectID = -1;
-    Sprite sprite;
-
     private void Start()
     {
         UIManager.instance.SetUpUIBuilding(this);
+        SetUpBar();
     }
 
+    private void SetUpBar()
+    {
+        objectBar = Instantiate(buildingBar, Vector3.one, Quaternion.identity).transform;
+        objectBar.gameObject.SetActive(false);
+        barValue = objectBar.GetChild(0).GetChild(0);
+        barIsActive = false;
+    }
     private void Update()
     {
-
-
         if(buildingMode)
         {
             if (Input.GetMouseButtonDown(1))
@@ -82,7 +101,7 @@ public class BuildingManager : MonoBehaviour
                 SwitchBuildingUI(this, null);
             }
 
-            if(selectedObjectID >= 0)
+            if(selectedObjectID > 0)
             {
                 Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
                 if (Input.GetMouseButtonDown(0))
@@ -108,6 +127,58 @@ public class BuildingManager : MonoBehaviour
                     Build();
                 }
             }
+            else if (selectedObjectID == 0)
+            {
+                Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
+                
+                if (pos != startPos)
+                {
+                    startPos = pos;
+                    UpdateBar();         
+                }
+
+                if (Input.GetMouseButton(0))
+                {
+                    hammerBlow(this, null);
+                    var obj = grid.GetValueByXY(startPos);
+                    if (obj.IsBuildObject() && obj.gridObject as ObjectPlan != null)
+                    {
+                        (obj.gridObject as ObjectPlan).Building(10);
+                        UpdateBar();
+                    }      
+                }
+            }
+        }
+    }
+
+    private void UpdateBar()
+    {
+        var obj = grid.GetValueByXY(startPos);
+        if (obj.IsBuildObject())
+        {
+            TurnOnBuildingBar(obj.gridObject.objectTransform.position + new Vector3(0, 0.5f), (obj.gridObject as IGetBarValue).GetBarValue());
+        }
+        else
+        {
+            TurnOffBuildingBar();
+        }
+    }
+
+    private void TurnOnBuildingBar(Vector2 position,float value)
+    {
+        if (!objectBar.gameObject.activeSelf)
+        {
+            objectBar.gameObject.SetActive(true);
+        }
+        objectBar.transform.position = position;
+        barValue.localScale = new Vector3(value, 1, 1);
+    }
+
+    private void TurnOffBuildingBar()
+    {
+        if (objectBar.gameObject.activeSelf)
+        {
+            objectBar.gameObject.SetActive(false);
         }
     }
     private void CountSize()
@@ -141,7 +212,6 @@ public class BuildingManager : MonoBehaviour
     {
         currentIndex = 0;
         pointsArray = GetPositions().ToArray();
-        Debug.Log(pointsArray.Length);
         foreach (Vector2 item in pointsArray)
         {
             if (item != null)
@@ -194,10 +264,10 @@ public class BuildingManager : MonoBehaviour
         }
         return positions;
     }
-
     void AddToList(List<Vector2> array,Vector2 vector)
     {
-        if (grid.GetValueByXY(vector).gridObject == null)
+        var obj = grid.GetValueByXY(vector);
+        if (obj != null && obj.gridObject == null)
         {
             array.Add(vector);
         }
@@ -206,7 +276,7 @@ public class BuildingManager : MonoBehaviour
     {
         if (currentIndex > plan.Count - 1)
         {
-            Transform transform = Instantiate(BuildingPrefab, pos, Quaternion.identity, parent).transform;
+            Transform transform = Instantiate(buildingPrefab, pos, Quaternion.identity, parent).transform;
             transform.GetComponent<SpriteRenderer>().color = planColor;
             transform.GetComponent<SpriteRenderer>().sprite = sprite;
             transform.GetComponent<Collider2D>().enabled = false;
@@ -227,11 +297,11 @@ public class BuildingManager : MonoBehaviour
             Sounds.instance.Hammer();
             foreach (Vector2 item in pointsArray)
             {
-                Transform obj = Instantiate(BuildingPrefab,grid.GetPosition(item), Quaternion.identity, parent).transform;
-                //     obj.GetComponent<SpriteRenderer>().color = planColor;
+                Transform obj = Instantiate(buildingPrefab,grid.GetPosition(item), Quaternion.identity, parent).transform;
+                obj.GetComponent<SpriteRenderer>().color = planColor;
      
                 obj.GetComponent<Collider2D>().enabled = false;
-                grid.GetValueByXY(item).gridObject = new ObjectPlan(selectedObjectID,obj);
+                grid.GetValueByXY(item).gridObject = new ObjectPlan(selectedObjectID,100,obj);
                 SetNewSprite(item);
             }
         }
@@ -244,7 +314,7 @@ public class BuildingManager : MonoBehaviour
         bool[] neighbors = GetNeighbors(positionXY);
         for (int i = 0; i < 4; i++)
         {
-            if (neighbors[i]) UpdateSprite(positionXY + MyTools.Directions4[i]);
+            if (neighbors[i]) UpdateSprite(positionXY + MyTools.directions4[i]);
         }
         UpdateSprite(positionXY);
     }
@@ -265,8 +335,16 @@ public class BuildingManager : MonoBehaviour
         }
         Sprite buildingSprite = null;
 
-        buildingSprite = ItemsAsset.instance.GetBuildingObjectSprite(0,value);
-     
+        if (neighbors[2])
+        {
+            gridObject.objectTransform.GetComponent<SortingGroup>().sortingOrder = 1;
+        }
+        else
+        {
+            gridObject.objectTransform.GetComponent<SortingGroup>().sortingOrder = 0;
+        }
+
+        buildingSprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID,value);
         gridObject.objectTransform.GetComponent<SpriteRenderer>().sprite = buildingSprite;
     }
 
@@ -275,7 +353,9 @@ public class BuildingManager : MonoBehaviour
         bool[] neighbors = new bool[4];
         for (int i = 0; i < 4; i++)
         {
-            neighbors[i] = grid.GetValueByXY(positionXY + MyTools.Directions4[i]).IsBuildObject();
+           var obj = grid.GetValueByXY(positionXY + MyTools.directions4[i]);
+            if (obj != null) neighbors[i] = obj.IsBuildObject();
+            else neighbors[i] = false;
         }
         return neighbors;
     }

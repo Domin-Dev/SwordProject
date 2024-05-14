@@ -1,20 +1,21 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-using Unity.VisualScripting;
 
-[CustomEditor(typeof(BuildingObject),false)]
+
+
+[CustomEditor(typeof(Wall),false)]
 public class BuildingObjectEditor : Editor
 {
 
-    BuildingObject buildingObject;
+    Wall wall;
     public override void OnInspectorGUI()
     {
-        buildingObject = target as BuildingObject;
+        wall = target as Wall;
 
         if (GUILayout.Button("Cut Sprites"))
         {
-            CutSprites(buildingObject.texture);
+            CutSprites(wall.texture);
         }
         base.OnInspectorGUI();
     }
@@ -26,12 +27,12 @@ public class BuildingObjectEditor : Editor
 
         for (int i = 0; i < k; i++)
         {
-            Sprite sprite = Sprite.Create(texture, new Rect(i*27,0,27,51),Vector2.zero);
+            Sprite sprite = Sprite.Create(texture, new Rect(i*27,0,27,51),new Vector2(0.5f,1f/51f));
             sprites.Add(sprite);
-            AssetDatabase.CreateAsset(sprite, $"Assets/Graphics/Sprites/BuildingObjets/{buildingObject.name}_{i}.asset");
+            AssetDatabase.CreateAsset(sprite, $"Assets/Graphics/Sprites/BuildingObjets/{wall.name}_{i}.asset");
         }
         AssetDatabase.SaveAssets();
-        buildingObject.sprites = sprites.ToArray();
+        wall.sprites = sprites.ToArray();
     }
 
 

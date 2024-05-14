@@ -1,9 +1,17 @@
 using System.Numerics;
 using UnityEngine;
 
-public class GridObject
+public interface IGetBarValue
+{
+    public float GetBarValue();
+}
+
+
+public class GridObject: IGetBarValue
 {
     public int ID;
+    public float hitPoints;
+    private float maxHitPoints;
     public Transform objectTransform;
 
     public GridObject(int ID,Transform obj)
@@ -11,18 +19,31 @@ public class GridObject
         this.ID = ID;
         this.objectTransform = obj;
     }
+
+    public float GetBarValue()
+    {
+        return hitPoints / maxHitPoints;
+    }
 }
 
 
-public class ObjectPlan : GridObject
+public class ObjectPlan : GridObject,IGetBarValue
 {
-    float completionPercentage;
-    public ObjectPlan(int ID,Transform obj):base(ID,obj)
+    int constructionPoints;
+    int constructionPointsTocomplete;
+    public ObjectPlan(int ID,int constructionPointsTocomplete, Transform obj):base(ID,obj)
     {
-        completionPercentage = 0;
+        constructionPoints = Random.Range(0,100);
+        this.constructionPointsTocomplete = constructionPointsTocomplete;
     }
 
+    public float GetBarValue()
+    {
+        return (float)constructionPoints/constructionPointsTocomplete;
+    }
 
-
-
+    public void Building(int value)
+    {
+        constructionPoints += value;
+    }
 }

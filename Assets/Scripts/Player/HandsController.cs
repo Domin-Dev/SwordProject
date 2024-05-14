@@ -137,6 +137,12 @@ public class HandsController : MonoBehaviour
         SwitchState(toolType);
     }
 
+    public void SetDefaultState()
+    {
+        Debug.Log(toolType);
+        SwitchState(toolType);
+    }
+
     private void SwitchState(ToolType toolType)
     {
         switch(toolType)
