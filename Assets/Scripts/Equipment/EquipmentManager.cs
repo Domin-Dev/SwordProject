@@ -260,7 +260,15 @@ public class EquipmentManager : MonoBehaviour
     public void SetUpEvent(HandsController handsController)
     {
         handsController.UseItem += UseSelectedItem;
+        BuildingManager.instance.builtObject += BuiltObject;
     }
+
+    private void BuiltObject(object sender, EventArgs e)
+    {
+        if(!DecreaseItemCount(new SlotPosition(0, slotInHand), 1))
+        UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[slotInHand]));
+    }
+
     private void UseSelectedItem(object sender, EventArgs e)
     {
         DestroyableItem item = equipmentBar[slotInHand] as DestroyableItem;
@@ -745,16 +753,17 @@ public class EquipmentManager : MonoBehaviour
         GetItemStats(position).itemCount += value;
         UpdateCount(position);
     }
-    private void DecreaseItemCount(SlotPosition position, int value = 1)
+    private bool DecreaseItemCount(SlotPosition position, int value = 1)
     {
         GetItemStats(position).itemCount -= value;
         if (GetItemStats(position).itemCount <= 0)
         {
             ClearSlot(position);
             RemoveItem(position);
-            return;
+            return false;
         }
         UpdateCount(position);
+        return true;
     }
     private SlotPosition Find(int itemId)
     {
@@ -776,7 +785,6 @@ public class EquipmentManager : MonoBehaviour
 
         return SlotPosition.NullSlot;
     }
-
     public TooltipInfo GetTooltipInfo(SlotPosition position)
     {
         ItemStats itemStats = GetItemStats(position);

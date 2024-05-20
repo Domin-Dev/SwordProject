@@ -1,4 +1,8 @@
+using System.Reflection;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
+using UnityEngine.Rendering;
+using System.Collections.Generic;
 
 public static class MyTools 
 {
@@ -12,14 +16,12 @@ public static class MyTools
         new Vector2(-1,0),
         new Vector2(-1,1)
     };
-
     public static Vector2[] directions4 = {
         new Vector2(0, 1),
         new Vector2(1, 0),
         new Vector2(0,-1),
         new Vector2(-1,0),
     };
-
     public static Vector2[] diagonalDirections = {
         new Vector2(1, 1),
         new Vector2(1, -1),

@@ -71,7 +71,6 @@ public class HandsController : MonoBehaviour
     public event EventHandler<SetAmmoBarArgs> SetAmmoBar;
     public event EventHandler<UpdateAmmoBarArgs> UpdateAmmoBar;
     public event EventHandler HideAmmoBar;
-    public event EventHandler SwitchBuildingUI;
     #endregion
 
     private Vector3 attackAngle;
@@ -117,8 +116,12 @@ public class HandsController : MonoBehaviour
         {
             EndReloading();
         }
-        itemInHand.transform.localPosition = Vector3.zero;
+        else
+        {
+            characterController.heroStateMachine.ChangeState(characterController.idleState);
+        }
 
+        itemInHand.transform.localPosition = Vector3.zero;
         if (e.item != null)
         {
             Item item = ItemsAsset.instance.GetItem(e.item.itemID);
@@ -134,12 +137,11 @@ public class HandsController : MonoBehaviour
         else
             ItemIsNull();
 
-        SwitchState(toolType);
+      //  SwitchState(toolType);
     }
 
     public void SetDefaultState()
     {
-        Debug.Log(toolType);
         SwitchState(toolType);
     }
 
@@ -150,13 +152,6 @@ public class HandsController : MonoBehaviour
             case ToolType.None:
                 characterController.heroStateMachine.ChangeState(characterController.idleState);
                 break;
-            case ToolType.Hammer: 
-                characterController.heroStateMachine.ChangeState(characterController.buildingState); 
-                break;
-            case ToolType.Axe:
-                characterController.heroStateMachine.ChangeState(characterController.buildingState);
-                break;
-
         }
     }
     private void ItemIsNull()
@@ -173,6 +168,11 @@ public class HandsController : MonoBehaviour
         itemInHand.sortingOrder = 20;
         SecondHandReset();
         HideAmmoBar(this, null);
+
+        if(item as BuildingObject != null)
+        {
+            characterController.heroStateMachine.ChangeState(characterController.buildingState);
+        }
     }
     private void ItemIsWepon(Item item, ItemStats itemStats)
     {
@@ -455,10 +455,6 @@ public class HandsController : MonoBehaviour
     {
         RangedWeaponItem rangedWeapon = selectedItem as RangedWeaponItem;
         return rangedWeapon != null && rangedWeapon.CanReload() && EquipmentManager.instance.CountAmmo(rangedWeapon);
-    }
-    public void SwitchBuildingObjects()
-    {
-        SwitchBuildingUI(this, null);
     }
 }
 

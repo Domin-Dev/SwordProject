@@ -45,14 +45,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform equipmentDragItems;
     [Space(30f)]
     #endregion
-    #region Building UI
-    [Header("Building UI")]
-    [SerializeField] private Transform building;
-    [SerializeField] private Transform buildingObjectGrid;
-    [Space]
-    [SerializeField] private GameObject buildingObject;
-    [Space(30f)]
-    #endregion
     [Header("Stats UI")]
     [SerializeField] private Button ServerButton;
     [SerializeField] private Button HostButton;
@@ -83,24 +75,12 @@ public class UIManager : MonoBehaviour
 
         SetGrids();
         SetUpNetworkUI();
-        SetBuildingObjects();
     }
     private void Update()
     {
         UpdateButtonSize();
     }
 
-
-    private void SetBuildingObjects()
-    {
-        BuildingObject[] array = ItemsAsset.instance.GetBuildingObjects();
-        for (int i = 0; i < array.Length; i++)
-        {
-            Transform obj = Instantiate(buildingObject, buildingObjectGrid).transform;
-            obj.GetChild(0).GetComponent<Image>().sprite = array[i].icon;
-            obj.GetComponent<BuildingObjectUI>().ID = array[i].ID;
-        }
-    }
     private void SetGrids()
     {
         barGrid = new EquipmentGrid(mainItemBar, 0);
@@ -152,11 +132,6 @@ public class UIManager : MonoBehaviour
         handsController.SetAmmoBar += SetAmmoBar;
         handsController.UpdateAmmoBar += UpdateAmmoBar;
         handsController.HideAmmoBar += HideAmmoBar;
-        handsController.SwitchBuildingUI += SwitchBuildingUI;
-    }
-    public void SetUpUIBuilding(BuildingManager buildingManager)
-    {
-        buildingManager.SwitchBuildingUI += SwitchBuildingUI;
     }
     private void HideAmmoBar(object sender, EventArgs e)
     {
@@ -267,6 +242,7 @@ public class UIManager : MonoBehaviour
         {
             DragDrop slot = mainItemBar.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
             slot.transform.SetParent(mainItemBar.GetChild(e.to.slotIndex));
+            slot.transform.SetAsFirstSibling();
             slot.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         }
         else if(e.from.gridIndex == 0)
@@ -341,6 +317,7 @@ public class UIManager : MonoBehaviour
 
         DragDrop slot = gridFrom.GetChild(e.from.slotIndex).GetComponentInChildren<DragDrop>();
         slot.transform.SetParent(gridTo.GetChild(e.to.slotIndex));
+        slot.transform.SetAsFirstSibling();
         slot.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         slot.IsInSlot();           
     }
@@ -359,6 +336,8 @@ public class UIManager : MonoBehaviour
     private void NewItemUI(Transform gridUI, CreateItemArgs e)
     {
         RectTransform transform = Instantiate(item, gridUI.GetChild(e.position.slotIndex)).GetComponent<RectTransform>();
+        transform.SetAsFirstSibling();
+
         if (e.itemStats as DestroyableItem != null)
         {
             Transform bar = Instantiate(lifePointsBar, transform).transform.GetChild(0);
@@ -397,13 +376,6 @@ public class UIManager : MonoBehaviour
         {
             item.gameObject.SetActive(false);
         }
-    }
-    private void SwitchBuildingUI(object sender, EventArgs e)
-    {
-        bool value = !building.gameObject.activeSelf;
-        building.gameObject.SetActive(value);
-        background.gameObject.SetActive(value);
-        if (!value) TooltipSystem.Hide();
     }
     private void UpdateSelectedSlot(object sender, UpdateSelectedSlotInBarArgs e)
     {

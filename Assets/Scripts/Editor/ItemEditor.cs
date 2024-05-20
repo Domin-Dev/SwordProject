@@ -1,11 +1,11 @@
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEditor;
 using UnityEngine;
-using static Unity.VisualScripting.Member;
+using UnityEngine.Rendering;
 
 [CustomEditor(typeof(Item),true)]
 public class ItemEditor : Editor
 {
+ 
     public override void OnInspectorGUI()
     {
         IconField(target);

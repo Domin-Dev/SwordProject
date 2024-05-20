@@ -30,42 +30,25 @@ public class ItemsAsset : MonoBehaviour
 
     private Dictionary<int, Item> items = new Dictionary<int, Item>();
     private List<AmmoInfo> ammoList;
-    private Dictionary<int, BuildingObject> buildingObjects = new Dictionary<int, BuildingObject>();
+
 
     public void Awake()
     {
         LoadItems();
-        LoadBuildingObjects();
     }
 
    
-    private void LoadBuildingObjects()
+    public Sprite GetBuildingObjectSprite(int id,int index)
     {
-        BuildingObject[] loadedObjects = Resources.LoadAll<BuildingObject>("BuildingObjects");
-        for (int i = 0; i < loadedObjects.Length; i++)
+        if (items.ContainsKey(id))
         {
-            BuildingObject buildingObject = loadedObjects[i];
-            buildingObjects.Add(buildingObject.ID,buildingObject);
+            Wall item = items[id] as Wall;
+            if(item != null && item.sprites.Length > index)
+            {
+                return item.sprites[index];
+            }
         }
-    }    
-
-    public BuildingObject GetBuildingObject(int ID)
-    {
-        return buildingObjects[ID];
-    }
-
-    public Sprite[] GetBuildingObjectSprites(int ID)
-    {
-        if (buildingObjects[ID] as Wall != null)
-            return (buildingObjects[ID] as Wall).sprites;
-        else 
-            return new Sprite[0];
-    }
-    public Sprite GetBuildingObjectSprite(int ID,int spriteIndex)
-    {
-        Sprite[] sprites = GetBuildingObjectSprites(ID);
-        if(sprites.Length > spriteIndex) return sprites[spriteIndex];
-        else return null;
+        return null;
     }
     private void LoadItems()
     {
@@ -81,13 +64,6 @@ public class ItemsAsset : MonoBehaviour
             }
         }
     }
-    public BuildingObject[] GetBuildingObjects()
-    {
-        return buildingObjects.Values.ToArray();
-    }
-
-
-
     public Sprite GetIcon(int itemID)
     {
         return items[itemID].icon;

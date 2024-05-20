@@ -75,7 +75,11 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
             if (!isInSlot)
             {
                 EquipmentManager.instance.UnselectedSlot();
-                if (parent != null) transform.SetParent(parent);
+                if (parent != null)
+                {
+                    transform.SetParent(parent);
+                    transform.SetAsFirstSibling();
+                }
                 rectTransform.anchoredPosition = Vector2.zero;
             }
             else

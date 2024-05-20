@@ -22,6 +22,7 @@ public class DropSlot : MonoBehaviour, IDropHandler, IPointerClickHandler,IPoint
             {
                 EquipmentManager.instance.MoveSelectedItem(slotPosition);
                 eventData.pointerDrag.transform.SetParent(transform);
+                eventData.pointerDrag.transform.SetAsFirstSibling();
                 eventData.pointerDrag.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
                 eventData.pointerDrag.GetComponent<DragDrop>().IsInSlot();
                 Sounds.instance.Shield();

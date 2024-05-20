@@ -4,13 +4,14 @@ using UnityEngine;
 
 
 
-[CustomEditor(typeof(Wall),false)]
+[CustomEditor(typeof(Wall),true)]
 public class BuildingObjectEditor : Editor
 {
 
     Wall wall;
     public override void OnInspectorGUI()
     {
+        ItemEditor.IconField(target);
         wall = target as Wall;
 
         if (GUILayout.Button("Cut Sprites"))
@@ -32,7 +33,7 @@ public class BuildingObjectEditor : Editor
             AssetDatabase.CreateAsset(sprite, $"Assets/Graphics/Sprites/BuildingObjets/{wall.name}_{i}.asset");
         }
         AssetDatabase.SaveAssets();
-        wall.sprites = sprites.ToArray();
+        wall._sprites = sprites.ToArray();
     }
 
 

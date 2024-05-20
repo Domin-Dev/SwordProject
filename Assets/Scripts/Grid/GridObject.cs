@@ -33,7 +33,7 @@ public class ObjectPlan : GridObject,IGetBarValue
     int constructionPointsTocomplete;
     public ObjectPlan(int ID,int constructionPointsTocomplete, Transform obj):base(ID,obj)
     {
-        constructionPoints = Random.Range(0,100);
+        constructionPoints = 0;
         this.constructionPointsTocomplete = constructionPointsTocomplete;
     }
 
@@ -42,8 +42,9 @@ public class ObjectPlan : GridObject,IGetBarValue
         return (float)constructionPoints/constructionPointsTocomplete;
     }
 
-    public void Building(int value)
+    public float Building(int value)
     {
         constructionPoints += value;
+        return GetBarValue();
     }
 }

@@ -9,11 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f8dd6b83dc470e843b05e780bdd107b2, type: 3}
-  m_Name: BuildingObject
+  m_Script: {fileID: 11500000, guid: 2768a2250e2de5d4aa957a906e0eb4f7, type: 3}
+  m_Name: Item
   m_EditorClassIdentifier: 
-  icon: {fileID: -526591471, guid: 106ad75e2486d1b4891be2a3b301d991, type: 3}
-  name: Building
+  name: 
   description: 
-  ID: 0
+  ID: 90
+  stackMax: 50
+  icon: {fileID: -1935859808, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   durability: 0
+  sprites: []
+  texture: {fileID: 2800000, guid: 9755133acbc71554bbe177a9cd599766, type: 3}
