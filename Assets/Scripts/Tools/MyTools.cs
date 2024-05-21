@@ -6,7 +6,10 @@ using System.Collections.Generic;
 
 public static class MyTools 
 {
-    public static Vector2[] directions8 = {
+
+    public readonly static Color hitboxColor = new Color(0, 1, 0, 1);
+    public readonly static string spritesPath = "Assets/Graphics/Sprites/BuildingObjets";
+    public readonly static Vector2[] directions8 = {
         new Vector2(0, 1),
         new Vector2(1, 1),
         new Vector2(1, 0),
@@ -16,19 +19,18 @@ public static class MyTools
         new Vector2(-1,0),
         new Vector2(-1,1)
     };
-    public static Vector2[] directions4 = {
+    public readonly static Vector2[] directions4 = {
         new Vector2(0, 1),
         new Vector2(1, 0),
         new Vector2(0,-1),
         new Vector2(-1,0),
     };
-    public static Vector2[] diagonalDirections = {
+    public readonly static Vector2[] diagonalDirections = {
         new Vector2(1, 1),
         new Vector2(1, -1),
         new Vector2(-1,-1),
         new Vector2(-1,1)
     };
-
     public static Vector3 GetMouseWorldPosition()
     {
         Vector3 pos = Input.mousePosition;

@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
+using UnityEngine.U2D;
 
 public class ItemsAsset : MonoBehaviour
 {
@@ -37,15 +39,52 @@ public class ItemsAsset : MonoBehaviour
         LoadItems();
     }
 
-   
+    private void Start()
+    {
+        Floor[] array = GetItemsByType<Floor>();
+        Texture2D texture = new Texture2D(1150, 25 * array.Length);
+        texture.filterMode = FilterMode.Point;
+        for (int i = 0; i < array.Length; i++)
+        {
+            int width = array[i].texture.width;
+            Color32[] colors = array[i].texture.GetPixels32();
+            texture.SetPixels32(0, i * 25, width, 25, colors);
+        }
+        texture.Apply(true, true);
+        GridVisualization.instance.GetComponent<MeshRenderer>().material.mainTexture = texture;
+    }
+    public T[] GetItemsByType<T>() where T : Item 
+    {
+        List<T> itemList = new List<T>();
+        foreach(var item in items) 
+        {
+            if(item.Value is T)
+            {
+                itemList.Add(item.Value as T);
+            }
+        }
+        return itemList.ToArray();
+    }
     public Sprite GetBuildingObjectSprite(int id,int index)
     {
         if (items.ContainsKey(id))
         {
             Wall item = items[id] as Wall;
-            if(item != null && item.sprites.Length > index)
+            if(item != null && item.objectVariants.Length > index)
             {
-                return item.sprites[index];
+                return item.objectVariants[index].sprite;
+            }
+        }
+        return null;
+    }
+    public Vector2[] GetBuildingObjectHitbox(int id, int index)
+    {
+        if (items.ContainsKey(id))
+        {
+            Wall item = items[id] as Wall;
+            if (item != null && item.objectVariants.Length > index)
+            {
+                return item.objectVariants[index].hitbox;
             }
         }
         return null;
@@ -96,7 +135,6 @@ public class ItemsAsset : MonoBehaviour
         item.itemCount = itemCount;
         return item;
     }
-
     public ToolType GetToolType(int ID)
     {
         Tool item = GetItem(ID) as Tool;

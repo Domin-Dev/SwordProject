@@ -13,7 +13,6 @@ public class WeaponEditor : Editor
     Vector2 middle;
     Color[] texture;
 
-    static readonly Color hitboxColor = new Color(0, 1, 0, 1);
     static readonly Color gripPoint1Color = new Color(1, 0, 0, 1);
     static readonly Color gripPoint2Color = new Color(0, 0, 1, 1);
     static readonly Color aimPointColor = new Color(1, 1, 0, 1);
@@ -52,8 +51,8 @@ public class WeaponEditor : Editor
         };
 
         Cutter cutter = new Cutter(sprite);
-        weapon.hitBoxPoints = cutter.CutHitBox(hitboxColor);
-        Vector2?[] points = cutter.GetPoints(colors, hitboxColor);
+        weapon.hitBoxPoints = cutter.CutHitBox(MyTools.hitboxColor);
+        Vector2?[] points = cutter.GetPoints(colors, MyTools.hitboxColor);
         if (points[0] != null) weapon.gripPoint1 = (Vector2)points[0];
 
         if (points[1] != null) weapon.gripPoint2 = (Vector2)points[1];

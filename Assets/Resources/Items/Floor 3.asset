@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8e0be7e15a922e4fba3b0072447ef13, type: 3}
+  m_Name: Floor 3
+  m_EditorClassIdentifier: 
+  name: Mud
+  description: 
+  ID: 94
+  stackMax: 50
+  icon: {fileID: -1489986285, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  durability: 0
+  texture: {fileID: 2800000, guid: 73e110b589b57264d9ae57808fa58280, type: 3}
+  sprites:
+  - {fileID: 21300000, guid: e6bbb93c24e91f049b9d4316b63b7ff2, type: 2}
+  - {fileID: 21300000, guid: 9927c93e38ef2754cb4a412d28e5f77a, type: 2}
+  - {fileID: 21300000, guid: cb951a774cc590141bff8f8a0d636670, type: 2}
+  - {fileID: 21300000, guid: ddd229976c0ccba4ea8f220e0437fd32, type: 2}
+  - {fileID: 21300000, guid: 036cf3f1df73eca4da8966b2b846d38f, type: 2}
+  - {fileID: 21300000, guid: 66bfb9f375fa8814d805f3ab0ab80bc6, type: 2}
+  - {fileID: 21300000, guid: 846d8bddb81788d4d8d6dfe5449ed078, type: 2}
+  - {fileID: 21300000, guid: d4c56b90df689704da4b8a58431810b8, type: 2}
+  - {fileID: 21300000, guid: cfd3dc94869265648a03f3f1f96b531e, type: 2}
+  - {fileID: 21300000, guid: 8d96cf19a912603448694922f09497bc, type: 2}
+  - {fileID: 21300000, guid: 77bf748ba0a1c89449ca998301916203, type: 2}
+  - {fileID: 21300000, guid: 5866c07644b6e1140a306617d626132f, type: 2}
+  - {fileID: 21300000, guid: 4209d6976e3c100419228f246ccc9dba, type: 2}
+  - {fileID: 21300000, guid: e804901f87e8a2946967700a9638451d, type: 2}
+  - {fileID: 21300000, guid: 36fed538379d6e84f9646fc108baa670, type: 2}
+  grassSprites: []

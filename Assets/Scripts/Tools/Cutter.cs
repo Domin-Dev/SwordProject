@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D;
 
 public class Cutter
 {
@@ -11,9 +12,19 @@ public class Cutter
 
     public Cutter(Sprite sprite)
     {
+        middle = new Vector2((sprite.rect.width - 1) / 2, (sprite.rect.height - 1) / 2);
+        Setup(sprite);
+    }
+    public Cutter(Sprite sprite,Vector2 middle)
+    {
+        this.middle = middle - new Vector2(0.5f, 0.5f); 
+        Setup(sprite);
+    }
+
+    private void Setup(Sprite sprite)
+    {
         pixelSize = 1.0f / sprite.pixelsPerUnit;
         width = (int)sprite.rect.width;
-        middle = new Vector2((sprite.rect.width - 1) / 2, (sprite.rect.height - 1) / 2);
         texture = sprite.texture.GetPixels((int)sprite.rect.x, (int)sprite.rect.y, (int)sprite.rect.width, (int)sprite.rect.height);
     }
     public Vector2[] CutHitBox(Color hitboxColor)
@@ -25,7 +36,7 @@ public class Cutter
             {
                 if (color == hitboxColor)
                 {
-                   return GetPoints(i);            
+                    return GetPoints(i);
                 }  
             }
         }
@@ -69,6 +80,7 @@ public class Cutter
         List<Vector2> pointsToReturn = new List<Vector2>();
         Vector2 startPosition = GetVector(i);
         Vector2 position = startPosition;
+        Debug.Log(startPosition - middle);
         pointsToReturn.Add(pixelSize * (startPosition - middle));
         while (true)
         {

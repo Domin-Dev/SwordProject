@@ -1,9 +1,7 @@
 using UnityEngine;
-using System.Collections.Generic;
 using System;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
-using static UnityEditor.PlayerSettings;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -160,8 +158,8 @@ public class BuildingManager : MonoBehaviour
         if (grid.GetValueByXY(posXY).IsBuildObject()) return;    
 
         Sounds.instance.Hammer();
-        Transform obj = Instantiate(buildingPrefab,grid.GetPosition(posXY), Quaternion.identity, parent).transform;     
-        obj.GetComponent<Collider2D>().enabled = false;
+        Transform obj = Instantiate(buildingPrefab,grid.GetPosition(posXY), Quaternion.identity, parent).transform;
+
         grid.GetValueByXY(posXY).gridObject = new ObjectPlan(selectedObjectID,100,obj);
         SetNewSprite(posXY);
         builtObject(this, null);
@@ -191,7 +189,6 @@ public class BuildingManager : MonoBehaviour
                 value +=(int)math.pow(2f,i);
             }
         }
-        Sprite buildingSprite = null;
 
         if (neighbors[2])
         {
@@ -202,9 +199,9 @@ public class BuildingManager : MonoBehaviour
             gridObject.objectTransform.GetComponent<SortingGroup>().sortingOrder = 0;
         }
 
-        buildingSprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID,value);
+        gridObject.objectTransform.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID, value); ;
+        gridObject.objectTransform.GetComponent<PolygonCollider2D>().points = ItemsAsset.instance.GetBuildingObjectHitbox(selectedObjectID,value);
 
-        gridObject.objectTransform.GetComponent<SpriteRenderer>().sprite = buildingSprite;
     }
     private bool[] GetNeighbors(Vector2 positionXY)
     {

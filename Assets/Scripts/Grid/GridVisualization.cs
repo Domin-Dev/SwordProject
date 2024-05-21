@@ -2,7 +2,9 @@
 
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.U2D;
 
 public class GridVisualization: MonoBehaviour
 {
@@ -25,13 +27,17 @@ public class GridVisualization: MonoBehaviour
     }
     public void SetGrid(Grid<GridTile> grid)
     {
-        textureWidth = GetComponent<MeshRenderer>().material.mainTexture.width;
-        textureHeight = GetComponent<MeshRenderer>().material.mainTexture.height;
+        Texture mainTexture = GetComponent<MeshRenderer>().material.mainTexture;
+     
+        textureWidth = mainTexture.width;
+        textureHeight = mainTexture.height;
         this.grid = grid;
         CreateMesh();
         grid.OnTObjectChanged += UpdatedGrid;
         BuildingManager.instance._grid = grid;
     }
+
+
     private void UpdatedGrid(object sender, Grid<GridTile>.OnTObjectChangedArgs e)
     {
        UpdateMesh(e.x, e.y,true);
