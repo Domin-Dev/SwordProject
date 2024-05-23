@@ -38,21 +38,6 @@ public class ItemsAsset : MonoBehaviour
     {
         LoadItems();
     }
-
-    private void Start()
-    {
-        Floor[] array = GetItemsByType<Floor>();
-        Texture2D texture = new Texture2D(1150, 25 * array.Length);
-        texture.filterMode = FilterMode.Point;
-        for (int i = 0; i < array.Length; i++)
-        {
-            int width = array[i].texture.width;
-            Color32[] colors = array[i].texture.GetPixels32();
-            texture.SetPixels32(0, i * 25, width, 25, colors);
-        }
-        texture.Apply(true, true);
-        GridVisualization.instance.GetComponent<MeshRenderer>().material.mainTexture = texture;
-    }
     public T[] GetItemsByType<T>() where T : Item 
     {
         List<T> itemList = new List<T>();

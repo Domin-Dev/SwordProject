@@ -17,7 +17,7 @@ MonoBehaviour:
 
     id : 1
 
-    stack max: 1'
+    stack max: 100'
   ID: 0
   stackMax: 1
   icon: {fileID: -2066496519, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}

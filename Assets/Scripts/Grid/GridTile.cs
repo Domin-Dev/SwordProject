@@ -1,30 +1,26 @@
 ﻿
 public class GridTile
 {
-    public enum TileType
-    {
-        Grass,
-        Sand,
-        Water,
-        Mud,
-    };
-
-    public TileType tile;
+    public int tileID;
     public GridObject gridObject;
 
     public int x, y;
     public Grid<GridTile> grid;
 
+    public enum TileType
+    {
+
+    };
     public GridTile(int x, int y, Grid<GridTile> grid)
     {
-        tile = TileType.Grass;
+        this.tileID = -1;
         this.x = x;
         this.y = y;
         this.grid = grid;
     }
-    public void ChangeTileType(TileType tile)
+    public void ChangeTileType(int tileID)
     {
-        this.tile = tile;
+        this.tileID = tileID;
         grid.TObjectChanged(x, y);
     }
     public void ChangeGridObject(GridObject gridObject)
@@ -41,7 +37,7 @@ public class GridTile
 
     public override string ToString()
     {
-        return tile.ToString();
+        return tileID.ToString();
     }
 
 }

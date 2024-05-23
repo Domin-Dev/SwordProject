@@ -52,6 +52,8 @@ public class BuildingManager : MonoBehaviour
         SetUpBar();
         SetUpPlanObject();
     }
+
+    Action<Vector2> build;
     private void Update()
     {
         if (buildingMode)
@@ -62,7 +64,7 @@ public class BuildingManager : MonoBehaviour
                 Plan(pos);
                 if (Input.GetMouseButtonDown(0))
                 {
-                    Build(pos);
+                    build(pos);
                 }
 
             }
@@ -76,19 +78,19 @@ public class BuildingManager : MonoBehaviour
                     UpdateBar();
                 }
 
-                if (Input.GetMouseButtonDown(0))
-                {
-                    var obj = grid.GetValueByXY(startPos);
-                    if (obj.IsBuildObject() && obj.gridObject as ObjectPlan != null)
-                    {
-                        if ((obj.gridObject as ObjectPlan).Building(40) >= 1)
-                        {
-                            (obj.gridObject as ObjectPlan).objectTransform.GetComponent<SpriteRenderer>().color = Color.white;
-                        }
-                        UpdateBar();
-                        Sounds.instance.Hammer();
-                    }
-                }
+                //if (Input.GetMouseButtonDown(0))
+                //{
+                //    var obj = grid.GetValueByXY(startPos);
+                //    if (obj.IsBuildObject() && obj.gridObject as ObjectPlan != null)
+                //    {
+                //        if ((obj.gridObject as ObjectPlan).Building(40) >= 1)
+                //        {
+                //            (obj.gridObject as ObjectPlan).objectTransform.GetComponent<SpriteRenderer>().color = Color.white;
+                //        }
+                //        UpdateBar();
+                //        Sounds.instance.Hammer();
+                //    }
+                //}
             }
         }
     }
@@ -97,6 +99,7 @@ public class BuildingManager : MonoBehaviour
         selectedObjectID = id;
         planObject.gameObject.SetActive(true);
         planObject.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(id, 0);
+        SetBuildMode();
         buildingMode = true;
     }
     public void EndBuildingMode()
@@ -118,8 +121,6 @@ public class BuildingManager : MonoBehaviour
         planObject.GetComponent<Collider2D>().enabled = false;
         planObject.GetComponent<SpriteRenderer>().color = planColor;
     }
-
-
     private void UpdateBar()
     {
         var obj = grid.GetValueByXY(startPos);
@@ -148,21 +149,32 @@ public class BuildingManager : MonoBehaviour
             objectBar.gameObject.SetActive(false);
         }
     }
-
     private void Plan(Vector2 pos)
     {
         planObject.transform.position = grid.GetPosition(pos);
     }
-    private void Build(Vector2 posXY)
+
+    private void SetBuildMode()
+    {
+        Item item = ItemsAsset.instance.GetItem(selectedObjectID);
+        if (item as Wall != null) build = BuildWall;
+        else if (item as Floor != null) build = BuildFloor;    
+    }
+    private void BuildWall(Vector2 posXY)
     {
         if (grid.GetValueByXY(posXY).IsBuildObject()) return;    
 
         Sounds.instance.Hammer();
         Transform obj = Instantiate(buildingPrefab,grid.GetPosition(posXY), Quaternion.identity, parent).transform;
-
-        grid.GetValueByXY(posXY).gridObject = new ObjectPlan(selectedObjectID,100,obj);
+        grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID,obj);
         SetNewSprite(posXY);
         builtObject(this, null);
+    }
+
+    private void BuildFloor(Vector2 posXY)
+    {
+        grid.GetValueByXY(posXY).tileID = selectedObjectID;
+        GridVisualization.instance.UpdateMesh((int)posXY.x, (int)posXY.y,true);
     }
 
 

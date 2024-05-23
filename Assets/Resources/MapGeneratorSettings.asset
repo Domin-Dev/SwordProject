@@ -10,18 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6aa03cb7e6fb640439b21ea557b69d5d, type: 3}
-  m_Name: Tiles
+  m_Name: MapGeneratorSettings
   m_EditorClassIdentifier: 
+  grassID: 100
   tiles:
-  - tile: 0
-    uv00: {x: 0, y: 50}
-    variants: 15
-    chance: 60
-  - tile: 1
-    uv00: {x: 0, y: 0}
-    variants: 15
-    chance: 40
-  - tile: 3
-    uv00: {x: 0, y: 75}
-    variants: 15
-    chance: 60
+  - tileID: 100
+  - tileID: 101
+  - tileID: 102

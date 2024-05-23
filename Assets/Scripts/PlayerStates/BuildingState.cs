@@ -24,7 +24,6 @@ public class BuildingState : HeroState
         controller.handsController.Aim();
         controller.UpdateFlip();
         controller.UpdateCharacterSprites();
-        Debug.Log("s");
     }
 
     public override void FrameFixedUpdate()

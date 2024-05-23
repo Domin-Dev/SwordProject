@@ -9,15 +9,16 @@ public class FloorEditor : Editor
 {
 
     Floor floor;
+
     public override void OnInspectorGUI()
     {
-        ItemEditor.IconField(target);
-        floor = target as Floor;
+        //ItemEditor.IconField(target);
+        //floor = target as Floor;
 
-        if (GUILayout.Button("Cut Sprites"))
-        {
-            CutSpritesFloor(floor.texture);
-        }
+        //if (GUILayout.Button("Cut Sprites"))
+        //{
+        //    CutSpritesFloor(floor.texture);
+        //}
         base.OnInspectorGUI();
     }
 
@@ -38,6 +39,6 @@ public class FloorEditor : Editor
             AssetDatabase.CreateAsset(sprite, $"{MyTools.spritesPath}/{floor.name}/{floor.name}_{i}.asset");
         }
         AssetDatabase.SaveAssets();
-        floor.sprites = objectVariants.ToArray();
+       // floor.sprites = objectVariants.ToArray();
     }
 }

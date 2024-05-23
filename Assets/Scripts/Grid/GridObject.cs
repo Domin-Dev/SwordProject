@@ -24,27 +24,9 @@ public class GridObject: IGetBarValue
     {
         return hitPoints / maxHitPoints;
     }
+
+
 }
 
 
-public class ObjectPlan : GridObject,IGetBarValue
-{
-    int constructionPoints;
-    int constructionPointsTocomplete;
-    public ObjectPlan(int ID,int constructionPointsTocomplete, Transform obj):base(ID,obj)
-    {
-        constructionPoints = 0;
-        this.constructionPointsTocomplete = constructionPointsTocomplete;
-    }
 
-    public float GetBarValue()
-    {
-        return (float)constructionPoints/constructionPointsTocomplete;
-    }
-
-    public float Building(int value)
-    {
-        constructionPoints += value;
-        return GetBarValue();
-    }
-}
