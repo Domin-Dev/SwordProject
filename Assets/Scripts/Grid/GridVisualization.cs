@@ -75,10 +75,10 @@ public class GridVisualization: MonoBehaviour
         {
             Floor floor = array[i];
             Vector2? grassUV = null;
-            if (floor.tileTextures.Length > 0)
+            if (floor.grassTexture != null)
             {
                 grassUV = new Vector2(0, (float)k * sizeTile / textureHeight);
-                CopyTexture(ref k, sizeTile, floor.tileTextures[0].texture, texture);
+                CopyTexture(ref k, sizeTile, floor.grassTexture, texture);
             }
             Vector2 uv00 = new Vector2(0,(float)k * sizeTile / textureHeight);
             CopyTexture(ref k, sizeTile, floor.texture, texture);
@@ -97,7 +97,7 @@ public class GridVisualization: MonoBehaviour
             if(floor.texture != null)
             {
                 counter++;
-                if(floor.tileTextures.Length > 0)
+                if(floor.grassTexture != null)
                 {
                     counter++;
                 }
@@ -137,20 +137,18 @@ public class GridVisualization: MonoBehaviour
             Mesh mesh = this.GetComponent<MeshFilter>().mesh;
             Vector2[] uv = mesh.uv;
             int index = x + y * grid.width;
-            int tileID = grid.GetValue(x, y).tileID;
+            GridTile gridTile = grid.GetValue(x, y);
 
             Vector2 uv11, uv00;
-            int borders = 0;
-            
-            borders = CalculateBorders(x, y);
-            GetUVTile(tileID, borders, out uv00, out uv11);
+            int borders = CalculateBorders(x, y);
 
-            if(repeat)
-                Debug.Log(uv00 + " " + uv11);
-
-            UVSet(uv, index, uv00, uv11);
-            mesh.uv = uv;
-            
+            if (borders != gridTile.borders || repeat)
+            {
+                GetUVTile(gridTile.tileID, borders, out uv00, out uv11);
+                gridTile.borders = borders;
+                UVSet(uv, index, uv00, uv11);
+                mesh.uv = uv;
+            }
 
             if (repeat)
             {
@@ -296,12 +294,13 @@ public class GridVisualization: MonoBehaviour
                 triangles[index * 6 + 5] = index * 4 + 3;
 
 
-                int tileID = grid.GetValue(x, y).tileID;
-
+                GridTile gridTile =grid.GetValue(x, y);
+             
                 int borders = 0;
-                if (IsGrass(tileID)) borders = CalculateBorders(x, y);
+                if (IsGrass(gridTile.tileID)) borders = CalculateBorders(x, y);
                 Vector2 uv11, uv00;
-                GetUVTile(tileID,borders, out uv00, out uv11);
+                GetUVTile(gridTile.tileID, borders, out uv00, out uv11);
+                gridTile.borders = borders;
                 UVSet(uv, index, uv00, uv11);
             }
         }

@@ -12,7 +12,7 @@ public class FloorEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        //ItemEditor.IconField(target);
+        ItemEditor.IconField(target);
         //floor = target as Floor;
 
         //if (GUILayout.Button("Cut Sprites"))

@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
+using static UnityEngine.Rendering.DebugUI;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class BuildingManager : MonoBehaviour
     Vector2 startPos;
     int selectedObjectID = -1;
     bool buildingMode;
+    int rotation = 0;
 
     Transform objectBar;
     bool barIsActive;
@@ -66,6 +68,21 @@ public class BuildingManager : MonoBehaviour
                 {
                     build(pos);
                 }
+
+                if (Input.GetKeyDown(KeyCode.R))
+                {
+                    if(rotation >= 3)
+                    {
+                        rotation = 0;
+                    }
+                    else
+                    {
+                        rotation++;
+                    }
+                    planObject.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID,rotation%2);
+
+                }
+
 
             }
             else if (selectedObjectID == 0)
@@ -157,26 +174,41 @@ public class BuildingManager : MonoBehaviour
     private void SetBuildMode()
     {
         Item item = ItemsAsset.instance.GetItem(selectedObjectID);
-        if (item as Wall != null) build = BuildWall;
-        else if (item as Floor != null) build = BuildFloor;    
+        if (item is Wall) build = BuildWall;
+        else if (item is Floor) build = BuildFloor;
+        else if (item is BuildingObject) build = BuildObject;
     }
     private void BuildWall(Vector2 posXY)
     {
         if (grid.GetValueByXY(posXY).IsBuildObject()) return;    
-
         Sounds.instance.Hammer();
         Transform obj = Instantiate(buildingPrefab,grid.GetPosition(posXY), Quaternion.identity, parent).transform;
         grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID,obj);
         SetNewSprite(posXY);
         builtObject(this, null);
     }
-
     private void BuildFloor(Vector2 posXY)
     {
-        grid.GetValueByXY(posXY).tileID = selectedObjectID;
-        GridVisualization.instance.UpdateMesh((int)posXY.x, (int)posXY.y,true);
+        GridTile gridTile = grid.GetValueByXY(posXY);
+        if (gridTile.tileID != selectedObjectID)
+        {
+            grid.GetValueByXY(posXY).tileID = selectedObjectID;
+            GridVisualization.instance.UpdateMesh((int)posXY.x, (int)posXY.y, true);
+            Sounds.instance.Hammer();
+            builtObject(this, null);
+        }
     }
+    private void BuildObject(Vector2 posXY)
+    {
+        if (grid.GetValueByXY(posXY).IsBuildObject()) return;
 
+        Sounds.instance.Hammer();
+        Transform obj = Instantiate(buildingPrefab, grid.GetPosition(posXY), Quaternion.identity, parent).transform;
+        obj.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID, rotation %2);
+        obj.GetComponent<PolygonCollider2D>().points = ItemsAsset.instance.GetBuildingObjectHitbox(selectedObjectID, rotation % 2);
+        grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID, obj);
+        builtObject(this, null);
+    }
 
     private void SetNewSprite(Vector2 positionXY)
     {
@@ -220,8 +252,9 @@ public class BuildingManager : MonoBehaviour
         bool[] neighbors = new bool[4];
         for (int i = 0; i < 4; i++)
         {
-           var obj = grid.GetValueByXY(positionXY + MyTools.directions4[i]);
-            if (obj != null) neighbors[i] = obj.IsBuildObject();
+            var obj = grid.GetValueByXY(positionXY + MyTools.directions4[i]);
+            Debug.Log(obj.tileID);
+            if (obj != null && obj.IsBuildObject(selectedObjectID)) neighbors[i] = true;
             else neighbors[i] = false;
         }
         return neighbors;

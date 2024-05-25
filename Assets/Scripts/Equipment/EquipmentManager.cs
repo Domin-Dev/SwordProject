@@ -504,7 +504,6 @@ public class EquipmentManager : MonoBehaviour
                     MoveItemUI(this, moveItemUIArgs); 
                     if(target.gridIndex == 0)
                     {
-                        Debug.Log(selectedItemStats.ToString());
                         NewMainBarItemUI(selectedItemStats, target);
                     }
                 }

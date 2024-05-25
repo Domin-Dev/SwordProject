@@ -80,7 +80,6 @@ public class Cutter
         List<Vector2> pointsToReturn = new List<Vector2>();
         Vector2 startPosition = GetVector(i);
         Vector2 position = startPosition;
-        Debug.Log(startPosition - middle);
         pointsToReturn.Add(pixelSize * (startPosition - middle));
         while (true)
         {

@@ -6,10 +6,10 @@ public class TileTexture
     public int tileIndex;
 }
 
-[CreateAssetMenu(fileName = "Floor", menuName = "GameAsset/Items/BuildingObjects/Floor")]
-public class Floor : BuildingObject 
+[CreateAssetMenu(fileName = "Floor", menuName = "GameAsset/Items/BuildingItems/Floor")]
+public class Floor : BuildingItem 
 {
-    public TileTexture[] tileTextures;
+    public Texture2D grassTexture;
     public int chanceOfDefaultTile;
 }
 

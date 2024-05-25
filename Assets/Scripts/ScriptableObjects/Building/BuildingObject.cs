@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using UnityEngine;
-public abstract class BuildingObject : Item
+
+[CreateAssetMenu(fileName = "Building Object", menuName = "GameAsset/Items/BuildingItems/BuildingObject")]
+public class BuildingObject : VariantItem
 {
-    public int durability;
-    public Texture2D texture;
+
 }
 

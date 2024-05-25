@@ -2,7 +2,9 @@
 public class GridTile
 {
     public int tileID;
+    public int borders;
     public GridObject gridObject;
+
 
     public int x, y;
     public Grid<GridTile> grid;
@@ -14,6 +16,7 @@ public class GridTile
     public GridTile(int x, int y, Grid<GridTile> grid)
     {
         this.tileID = -1;
+        this.borders = 0;
         this.x = x;
         this.y = y;
         this.grid = grid;
@@ -33,7 +36,10 @@ public class GridTile
     {
         return gridObject != null;
     }
-
+    public bool IsBuildObject(int id)
+    {  
+        return IsBuildObject() && gridObject.ID == id; 
+    }
 
     public override string ToString()
     {

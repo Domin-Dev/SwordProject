@@ -169,7 +169,7 @@ public class HandsController : MonoBehaviour
         SecondHandReset();
         HideAmmoBar(this, null);
 
-        if(item as BuildingObject != null)
+        if(item as BuildingItem != null)
         {
             characterController.heroStateMachine.ChangeState(characterController.buildingState);
         }

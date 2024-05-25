@@ -1,8 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEditor;
-using UnityEngine.U2D;
+
 
 public class ItemsAsset : MonoBehaviour
 {
@@ -54,7 +52,7 @@ public class ItemsAsset : MonoBehaviour
     {
         if (items.ContainsKey(id))
         {
-            Wall item = items[id] as Wall;
+            VariantItem item = items[id] as VariantItem;
             if(item != null && item.objectVariants.Length > index)
             {
                 return item.objectVariants[index].sprite;
@@ -66,7 +64,7 @@ public class ItemsAsset : MonoBehaviour
     {
         if (items.ContainsKey(id))
         {
-            Wall item = items[id] as Wall;
+            VariantItem item = items[id] as VariantItem;
             if (item != null && item.objectVariants.Length > index)
             {
                 return item.objectVariants[index].hitbox;
