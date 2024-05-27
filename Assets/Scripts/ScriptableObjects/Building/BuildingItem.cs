@@ -5,17 +5,18 @@ public abstract class BuildingItem : Item
     public Texture2D texture;
 }
 
+
 public abstract class VariantItem : BuildingItem
 {
-    public ObjectVariant[] objectVariants { get; private set; }
-#if UNITY_EDITOR
-    public ObjectVariant[] _objectVariants { set
-        {
-            objectVariants = value;
-        }
-    }
+    public ObjectVariant[] objectVariants;
+//#if UNITY_EDITOR
+//    public ObjectVariant[] _objectVariants { set
+//        {
+//            objectVariants = value;
+//        }
+//    }
 
-#endif
+//#endif
 
 }
 

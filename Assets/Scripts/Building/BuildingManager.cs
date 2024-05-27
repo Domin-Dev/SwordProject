@@ -30,6 +30,7 @@ public class BuildingManager : MonoBehaviour
 
     Vector2 startPos;
     int selectedObjectID = -1;
+    int rotationStates = 0;
     bool buildingMode;
     int rotation = 0;
 
@@ -56,6 +57,9 @@ public class BuildingManager : MonoBehaviour
     }
 
     Action<Vector2> build;
+    Vector2 lastPos;
+
+
     private void Update()
     {
         if (buildingMode)
@@ -63,13 +67,12 @@ public class BuildingManager : MonoBehaviour
             if (selectedObjectID > 0)
             {
                 Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-                Plan(pos);
+                if(lastPos != pos) Plan(pos);
                 if (Input.GetMouseButtonDown(0))
                 {
                     build(pos);
                 }
-
-                if (Input.GetKeyDown(KeyCode.R))
+                if (Input.GetKeyDown(KeyCode.R) && rotationStates > 0)
                 {
                     if(rotation >= 3)
                     {
@@ -79,11 +82,9 @@ public class BuildingManager : MonoBehaviour
                     {
                         rotation++;
                     }
-                    planObject.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID,rotation%2);
+                    planObject.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID,rotation%rotationStates);
 
                 }
-
-
             }
             else if (selectedObjectID == 0)
             {
@@ -115,8 +116,8 @@ public class BuildingManager : MonoBehaviour
     {
         selectedObjectID = id;
         planObject.gameObject.SetActive(true);
-        planObject.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(id, 0);
         SetBuildMode();
+        planObject.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(id,rotation % rotationStates);
         buildingMode = true;
     }
     public void EndBuildingMode()
@@ -168,7 +169,12 @@ public class BuildingManager : MonoBehaviour
     }
     private void Plan(Vector2 pos)
     {
+        lastPos = pos;
         planObject.transform.position = grid.GetPosition(pos);
+        if (grid.GetValueByXY(pos).IsBuildObject())
+            planObject.gameObject.SetActive(false);
+        else
+            planObject.gameObject.SetActive(true);
     }
 
     private void SetBuildMode()
@@ -177,6 +183,13 @@ public class BuildingManager : MonoBehaviour
         if (item is Wall) build = BuildWall;
         else if (item is Floor) build = BuildFloor;
         else if (item is BuildingObject) build = BuildObject;
+
+        if (item is BuildingObject) rotationStates = (item as BuildingObject).objectVariants.Length;
+        else
+        {
+            rotationStates = 1;
+            rotation = 0;
+        }
     }
     private void BuildWall(Vector2 posXY)
     {
@@ -204,8 +217,8 @@ public class BuildingManager : MonoBehaviour
 
         Sounds.instance.Hammer();
         Transform obj = Instantiate(buildingPrefab, grid.GetPosition(posXY), Quaternion.identity, parent).transform;
-        obj.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID, rotation %2);
-        obj.GetComponent<PolygonCollider2D>().points = ItemsAsset.instance.GetBuildingObjectHitbox(selectedObjectID, rotation % 2);
+        obj.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID, rotation % rotationStates);
+        obj.GetComponent<PolygonCollider2D>().points = ItemsAsset.instance.GetBuildingObjectHitbox(selectedObjectID, rotation % rotationStates);
         grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID, obj);
         builtObject(this, null);
     }

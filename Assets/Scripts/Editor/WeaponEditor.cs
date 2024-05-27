@@ -25,8 +25,7 @@ public class WeaponEditor : Editor
 
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PrefixLabel("Weapon Image");
-        weapon.weaponImage = (Sprite)EditorGUILayout.ObjectField(weapon.weaponImage, typeof(Sprite), false, GUILayout.Width(150), GUILayout.Height(150));
-      
+        weapon.weaponImage = (Sprite)EditorGUILayout.ObjectField(weapon.weaponImage, typeof(Sprite), false, GUILayout.Width(150), GUILayout.Height(150));         
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.BeginHorizontal();
@@ -63,5 +62,7 @@ public class WeaponEditor : Editor
             if (points[2] != null) rangedWeapon.aimPoint = (Vector2)points[2];
             if (points[0] != null) rangedWeapon.reloadPoint = (Vector2)points[3];
         }
+
+        base.SaveChanges();
     }
 }

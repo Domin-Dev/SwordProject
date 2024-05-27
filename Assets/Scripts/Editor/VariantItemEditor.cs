@@ -8,15 +8,23 @@ using UnityEngine;
 public class VariantItemEditor : Editor
 {
     VariantItem variantItem;
+    SerializedProperty serializedProperty;
+    private void OnEnable()
+    {
+        variantItem = target as VariantItem;
+        serializedProperty = serializedObject.FindProperty("objectVariants");
+    }
     public override void OnInspectorGUI()
     {
         ItemEditor.IconField(target);
-        variantItem = target as VariantItem;
 
         if (GUILayout.Button("Cut Sprites"))
         {
             CutSpritesWall(variantItem.texture);
+            NewSaveChanges();
         }
+
+        serializedObject.ApplyModifiedProperties();
         base.OnInspectorGUI();
     }
 
@@ -39,7 +47,18 @@ public class VariantItemEditor : Editor
            
             AssetDatabase.CreateAsset(sprite, $"{MyTools.spritesPath}/{variantItem.name}/{variantItem.name}_{i}.asset");
         }
+
+
+        variantItem.objectVariants = objectVariants.ToArray();
         AssetDatabase.SaveAssets();
-        variantItem._objectVariants = objectVariants.ToArray();
+        EditorUtility.SetDirty(variantItem);
+    }
+
+    private  void NewSaveChanges()
+    { 
+        serializedObject.Update();
+        serializedObject.ApplyModifiedProperties();
+        AssetDatabase.SaveAssets();
+        EditorUtility.SetDirty(variantItem); 
     }
 }

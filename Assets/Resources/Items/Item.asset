@@ -25,94 +25,94 @@ MonoBehaviour:
     - {x: -0.12, y: 0.285}
     - {x: 0.12, y: 0.285}
     - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: e7c0f5c78598cb44bb83e8dd1804cd84, type: 2}
-  - hitbox:
-    - {x: -0.12, y: 0.005}
-    - {x: -0.12, y: 0.285}
-    - {x: 0.12, y: 0.285}
-    - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: eba744e61d6f568428443f66c34f4369, type: 2}
-  - hitbox:
-    - {x: -0.12, y: 0.005}
-    - {x: -0.12, y: 0.285}
-    - {x: 0.12, y: 0.285}
-    - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: fc480c6084268ac4aa515318f6b95a12, type: 2}
-  - hitbox:
-    - {x: -0.12, y: 0.005}
-    - {x: -0.12, y: 0.285}
-    - {x: 0.12, y: 0.285}
-    - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: a531fb5c35288304d8657a771bdd544a, type: 2}
-  - hitbox:
-    - {x: -0.12, y: 0.105}
-    - {x: -0.12, y: 0.285}
-    - {x: 0.12, y: 0.285}
-    - {x: 0.12, y: 0.105}
-    sprite: {fileID: 21300000, guid: bbbf2157a0daba941b1fe64902301659, type: 2}
-  - hitbox:
-    - {x: -0.12, y: 0.105}
-    - {x: -0.12, y: 0.39499998}
-    - {x: 0.12, y: 0.39499998}
-    - {x: 0.12, y: 0.105}
-    sprite: {fileID: 21300000, guid: ad10ee69caf00a34f9e10256ae5ea952, type: 2}
-  - hitbox:
-    - {x: -0.12, y: 0.105}
-    - {x: -0.12, y: 0.285}
-    - {x: 0.12, y: 0.285}
-    - {x: 0.12, y: 0.105}
-    sprite: {fileID: 21300000, guid: b78f019de093f7344a41d0bc519bac53, type: 2}
-  - hitbox:
-    - {x: -0.12, y: 0.105}
-    - {x: -0.12, y: 0.39499998}
-    - {x: 0.12, y: 0.39499998}
-    - {x: 0.12, y: 0.105}
-    sprite: {fileID: 21300000, guid: 50d38da17e3af714e8369f97fb75d4dd, type: 2}
-  - hitbox:
-    - {x: -0.12, y: 0.005}
-    - {x: -0.12, y: 0.285}
-    - {x: 0.12, y: 0.285}
-    - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: 1a226cf20c8ed5e40bd702347883ec73, type: 2}
+    sprite: {fileID: 21300000, guid: fa0679916a392d2489fd517a8719a310, type: 2}
   - hitbox:
     - {x: -0.12, y: 0.005}
     - {x: -0.12, y: 0.39499998}
     - {x: 0.12, y: 0.39499998}
     - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: 74b9e08e8c66fed48a4c864495b934df, type: 2}
+    sprite: {fileID: 21300000, guid: 2d49bb77345d32d4ba58b41e794edb91, type: 2}
   - hitbox:
     - {x: -0.12, y: 0.005}
     - {x: -0.12, y: 0.285}
     - {x: 0.12, y: 0.285}
     - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: 156e0ae2cb6cae8498a7a88ac2bc309b, type: 2}
+    sprite: {fileID: 21300000, guid: a4c59e4f633dc3649bd292f05614c0d5, type: 2}
   - hitbox:
     - {x: -0.12, y: 0.005}
     - {x: -0.12, y: 0.39499998}
     - {x: 0.12, y: 0.39499998}
     - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: bf2f1aff1f1b8474592c9f01aacc729b, type: 2}
+    sprite: {fileID: 21300000, guid: 569891ed9ba01b944ae0562470cfdf3f, type: 2}
   - hitbox:
     - {x: -0.12, y: 0.105}
     - {x: -0.12, y: 0.285}
     - {x: 0.12, y: 0.285}
     - {x: 0.12, y: 0.105}
-    sprite: {fileID: 21300000, guid: 9368d3e31b20ff54db34d8a07d54fe7f, type: 2}
+    sprite: {fileID: 21300000, guid: 13389aa375b0d114c944e096c55d9b02, type: 2}
   - hitbox:
     - {x: -0.12, y: 0.105}
     - {x: -0.12, y: 0.39499998}
     - {x: 0.12, y: 0.39499998}
     - {x: 0.12, y: 0.105}
-    sprite: {fileID: 21300000, guid: bbf886910518e23469ac9585f6302ee1, type: 2}
+    sprite: {fileID: 21300000, guid: c6c257b163a7d854693824c009960884, type: 2}
   - hitbox:
     - {x: -0.12, y: 0.105}
     - {x: -0.12, y: 0.285}
     - {x: 0.12, y: 0.285}
     - {x: 0.12, y: 0.105}
-    sprite: {fileID: 21300000, guid: d2b0e0d1c5a1b7e4ca6d66ff53822fe1, type: 2}
+    sprite: {fileID: 21300000, guid: 439290e607eab14489d7266573379ee6, type: 2}
   - hitbox:
     - {x: -0.12, y: 0.105}
     - {x: -0.12, y: 0.39499998}
     - {x: 0.12, y: 0.39499998}
     - {x: 0.12, y: 0.105}
-    sprite: {fileID: 21300000, guid: 3a0e949594c25014f9731def051d9d6d, type: 2}
+    sprite: {fileID: 21300000, guid: bf88f9f3966d8bc42bb1ce229da99d56, type: 2}
+  - hitbox:
+    - {x: -0.12, y: 0.005}
+    - {x: -0.12, y: 0.285}
+    - {x: 0.12, y: 0.285}
+    - {x: 0.12, y: 0.005}
+    sprite: {fileID: 21300000, guid: ef79844678a9f1b45aaf6068b5dc837e, type: 2}
+  - hitbox:
+    - {x: -0.12, y: 0.005}
+    - {x: -0.12, y: 0.39499998}
+    - {x: 0.12, y: 0.39499998}
+    - {x: 0.12, y: 0.005}
+    sprite: {fileID: 21300000, guid: 2cb08e4b1c45482419d3aa58133320f8, type: 2}
+  - hitbox:
+    - {x: -0.12, y: 0.005}
+    - {x: -0.12, y: 0.285}
+    - {x: 0.12, y: 0.285}
+    - {x: 0.12, y: 0.005}
+    sprite: {fileID: 21300000, guid: d99ec6308cba012448434e8cf02d996d, type: 2}
+  - hitbox:
+    - {x: -0.12, y: 0.005}
+    - {x: -0.12, y: 0.39499998}
+    - {x: 0.12, y: 0.39499998}
+    - {x: 0.12, y: 0.005}
+    sprite: {fileID: 21300000, guid: 01949a3d1eb157a4d9860b33a3cc75d3, type: 2}
+  - hitbox:
+    - {x: -0.12, y: 0.105}
+    - {x: -0.12, y: 0.285}
+    - {x: 0.12, y: 0.285}
+    - {x: 0.12, y: 0.105}
+    sprite: {fileID: 21300000, guid: 65ea1194fcdd55540aceea5d280ef8d6, type: 2}
+  - hitbox:
+    - {x: -0.12, y: 0.105}
+    - {x: -0.12, y: 0.39499998}
+    - {x: 0.12, y: 0.39499998}
+    - {x: 0.12, y: 0.105}
+    sprite: {fileID: 21300000, guid: 8231010073ea47044873b9d825450fad, type: 2}
+  - hitbox:
+    - {x: -0.12, y: 0.105}
+    - {x: -0.12, y: 0.285}
+    - {x: 0.12, y: 0.285}
+    - {x: 0.12, y: 0.105}
+    sprite: {fileID: 21300000, guid: 5ad714473ee1a4748bc46a22558f0d0d, type: 2}
+  - hitbox:
+    - {x: -0.12, y: 0.105}
+    - {x: -0.12, y: 0.39499998}
+    - {x: 0.12, y: 0.39499998}
+    - {x: 0.12, y: 0.105}
+    sprite: {fileID: 21300000, guid: 943f1205c5a64714e814e85eb7235ba2, type: 2}
