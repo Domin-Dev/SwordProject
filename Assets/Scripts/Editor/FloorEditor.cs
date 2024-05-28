@@ -2,14 +2,10 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-
-
 [CustomEditor(typeof(Floor),true)]
 public class FloorEditor : Editor
 {
-
     Floor floor;
-
     public override void OnInspectorGUI()
     {
         ItemEditor.IconField(target);
@@ -21,8 +17,6 @@ public class FloorEditor : Editor
         //}
         base.OnInspectorGUI();
     }
-
-
     private void CutSpritesFloor(Texture2D texture)
     {
         int k = texture.width / 25;

@@ -118,6 +118,7 @@ public class GridVisualization: MonoBehaviour
         CreateMesh();
         grid.OnTObjectChanged += UpdatedGrid;
         BuildingManager.instance._grid = grid;
+        Actions.instance._grid = grid;
     }
     private void UpdatedGrid(object sender, Grid<GridTile>.OnTObjectChangedArgs e)
     {

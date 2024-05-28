@@ -22,7 +22,9 @@ MonoBehaviour:
   objectVariants:
   - hitbox:
     - {x: -0.12, y: 0.005}
-    - {x: -0.12, y: 0.195}
-    - {x: 0.12, y: 0.195}
+    - {x: -0.12, y: 0.175}
+    - {x: 0.12, y: 0.175}
     - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: e009b462ef95bd44caccdaac2b767a67, type: 2}
+    minY: 0.005
+    sprites:
+    - {fileID: 21300000, guid: e009b462ef95bd44caccdaac2b767a67, type: 2}

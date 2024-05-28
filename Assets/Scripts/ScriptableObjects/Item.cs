@@ -11,24 +11,19 @@ public class Item : ScriptableObject
 
     [Header("Item graphic")]
     public Sprite icon;
-
-
     public virtual ItemStats GetItemStats()
     {
         return new ItemStats(ID);
     }
 }
-
 [CreateAssetMenu(fileName = "DestroyableItem", menuName = "GameAsset/Items/DestroyableItem")]
 public class Destroyable: Item
 {
     [Header("Destroyable")]
     public int durability;
-
     public override ItemStats GetItemStats()
     {
         return new DestroyableItem(ID,durability);
     }
-
 }
 

@@ -22,25 +22,33 @@ MonoBehaviour:
   objectVariants:
   - hitbox:
     - {x: -0.12, y: 0.005}
-    - {x: -0.12, y: 0.13499999}
-    - {x: 0.12, y: 0.13499999}
+    - {x: -0.12, y: 0.185}
+    - {x: 0.12, y: 0.185}
     - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: afaa8e47cd7a4074b9cc4b1b9c8aec4e, type: 2}
+    minY: 0.005
+    sprites:
+    - {fileID: 21300000, guid: afaa8e47cd7a4074b9cc4b1b9c8aec4e, type: 2}
   - hitbox:
     - {x: -0.12, y: 0.005}
     - {x: -0.12, y: 0.285}
-    - {x: -0.04, y: 0.285}
-    - {x: -0.04, y: 0.005}
-    sprite: {fileID: 21300000, guid: b5f970d7d17d02247b57ca5f3cc8af25, type: 2}
+    - {x: 0, y: 0.285}
+    - {x: 0, y: 0.005}
+    minY: 0.005
+    sprites:
+    - {fileID: 21300000, guid: b5f970d7d17d02247b57ca5f3cc8af25, type: 2}
   - hitbox:
-    - {x: -0.12, y: 0.155}
-    - {x: -0.12, y: 0.285}
-    - {x: 0.12, y: 0.285}
-    - {x: 0.12, y: 0.155}
-    sprite: {fileID: 21300000, guid: 3738d8285ab6568438dfb01de5bf0df7, type: 2}
+    - {x: -0.12, y: 0.114999995}
+    - {x: -0.12, y: 0.295}
+    - {x: 0.12, y: 0.295}
+    - {x: 0.12, y: 0.114999995}
+    minY: 0.114999995
+    sprites:
+    - {fileID: 21300000, guid: 3738d8285ab6568438dfb01de5bf0df7, type: 2}
   - hitbox:
-    - {x: 0.04, y: 0.005}
-    - {x: 0.04, y: 0.285}
+    - {x: 0, y: 0.005}
+    - {x: 0, y: 0.285}
     - {x: 0.12, y: 0.285}
     - {x: 0.12, y: 0.005}
-    sprite: {fileID: 21300000, guid: 9f3db07a68d12cf4ba9d2252ac029d28, type: 2}
+    minY: 0.005
+    sprites:
+    - {fileID: 21300000, guid: 9f3db07a68d12cf4ba9d2252ac029d28, type: 2}

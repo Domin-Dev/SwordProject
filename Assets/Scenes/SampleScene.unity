@@ -5925,6 +5925,7 @@ GameObject:
   - component: {fileID: 550983243}
   - component: {fileID: 550983245}
   - component: {fileID: 550983246}
+  - component: {fileID: 550983247}
   m_Layer: 0
   m_Name: GameManagers
   m_TagString: Untagged
@@ -5984,10 +5985,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a39e0cc4cfed134d9b48dca31b3cf80, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pointer: {fileID: 758751607331998011, guid: 383f396db7203344d8b4ed7eb2f47318, type: 3}
   buildingPrefab: {fileID: 9169308965752663696, guid: 53f6a46f6239f734395b5c14044bf32a, type: 3}
   buildingBar: {fileID: 5029889828829879956, guid: a4f0e9ed03ed36e4d95107b8bc1246c5, type: 3}
   parent: {fileID: 643743966}
   planColor: {r: 1, g: 1, b: 1, a: 0.39215687}
+--- !u!114 &550983247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 550983242}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80c6b504c4b6d8a44bf478d134d6a292, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &556642436
 GameObject:
   m_ObjectHideFlags: 0
@@ -22890,21 +22904,6 @@ Transform:
   - {fileID: 2010395970}
   m_Father: {fileID: 862836730}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!4 &438289507768814909
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6420357825493756570}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &533628814581391816
 Transform:
   m_ObjectHideFlags: 0
@@ -23694,22 +23693,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2010395970}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &6420357825493756570
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 438289507768814909}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!1 &6422915461143718553
 GameObject:
   m_ObjectHideFlags: 0
@@ -24199,4 +24182,3 @@ SceneRoots:
   - {fileID: 1474636377}
   - {fileID: 1938083280}
   - {fileID: 1118006086}
-  - {fileID: 438289507768814909}

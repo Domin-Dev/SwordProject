@@ -3,6 +3,7 @@ using System;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
 using static UnityEngine.Rendering.DebugUI;
+using Unity.VisualScripting;
 
 public class BuildingManager : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class BuildingManager : MonoBehaviour
         }
     }
 
+    [SerializeField] GameObject pointer;
     [SerializeField] GameObject buildingPrefab;
     [SerializeField] GameObject buildingBar;
     private Transform barValue;
@@ -38,6 +40,7 @@ public class BuildingManager : MonoBehaviour
     bool barIsActive;
 
     Transform planObject;
+    Transform pointerObject;
 
     private void Awake()
     {
@@ -54,11 +57,11 @@ public class BuildingManager : MonoBehaviour
     {
         SetUpBar();
         SetUpPlanObject();
+        SetUpPointer();
     }
 
     Action<Vector2> build;
     Vector2 lastPos;
-
 
     private void Update()
     {
@@ -66,8 +69,8 @@ public class BuildingManager : MonoBehaviour
         {
             if (selectedObjectID > 0)
             {
-                Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-                if(lastPos != pos) Plan(pos);
+                Vector2 pos = Actions.GetMousePosXY();
+                if (lastPos != pos) Plan(pos);
                 if (Input.GetMouseButtonDown(0))
                 {
                     build(pos);
@@ -117,7 +120,9 @@ public class BuildingManager : MonoBehaviour
         selectedObjectID = id;
         planObject.gameObject.SetActive(true);
         SetBuildMode();
-        planObject.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(id,rotation % rotationStates);
+        SpriteRenderer spriteRenderer = planObject.GetComponent<SpriteRenderer>();
+        spriteRenderer.sprite = ItemsAsset.instance.GetBuildingObjectSprite(id,rotation % rotationStates); 
+        
         buildingMode = true;
     }
     public void EndBuildingMode()
@@ -135,9 +140,14 @@ public class BuildingManager : MonoBehaviour
     }
     private void SetUpPlanObject()
     {
-        planObject = Instantiate(buildingPrefab, Vector2.zero, Quaternion.identity, parent).transform;
+        planObject = Instantiate(buildingPrefab, Vector2.zero, Quaternion.identity, parent).transform.GetChild(0);
         planObject.GetComponent<Collider2D>().enabled = false;
         planObject.GetComponent<SpriteRenderer>().color = planColor;
+    }
+    private void SetUpPointer()
+    {
+        pointerObject = Instantiate(pointer, parent).transform;
+        pointerObject.gameObject.SetActive(false);
     }
     private void UpdateBar()
     {
@@ -176,7 +186,6 @@ public class BuildingManager : MonoBehaviour
         else
             planObject.gameObject.SetActive(true);
     }
-
     private void SetBuildMode()
     {
         Item item = ItemsAsset.instance.GetItem(selectedObjectID);
@@ -196,7 +205,7 @@ public class BuildingManager : MonoBehaviour
         if (grid.GetValueByXY(posXY).IsBuildObject()) return;    
         Sounds.instance.Hammer();
         Transform obj = Instantiate(buildingPrefab,grid.GetPosition(posXY), Quaternion.identity, parent).transform;
-        grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID,obj);
+        grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID,0,obj);
         SetNewSprite(posXY);
         builtObject(this, null);
     }
@@ -216,13 +225,28 @@ public class BuildingManager : MonoBehaviour
         if (grid.GetValueByXY(posXY).IsBuildObject()) return;
 
         Sounds.instance.Hammer();
-        Transform obj = Instantiate(buildingPrefab, grid.GetPosition(posXY), Quaternion.identity, parent).transform;
-        obj.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID, rotation % rotationStates);
-        obj.GetComponent<PolygonCollider2D>().points = ItemsAsset.instance.GetBuildingObjectHitbox(selectedObjectID, rotation % rotationStates);
-        grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID, obj);
+        Transform obj = Instantiate(buildingPrefab, grid.GetPosition(posXY), Quaternion.identity, parent).transform.GetChild(0);
+      
+        ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(selectedObjectID, rotation % rotationStates);
+
+        obj.GetComponent<SpriteRenderer>().sprite = objectVariant.sprites[0];
+        obj.GetComponent<PolygonCollider2D>().points = objectVariant.hitbox;
+        CreateGridObject(posXY, rotation % rotationStates, obj.parent);
+        ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.minY, 0));
         builtObject(this, null);
     }
+    private void CreateGridObject(Vector2 posXY,int indexVariant, Transform buildingObj)
+    {
+        Item item = ItemsAsset.instance.GetItem(selectedObjectID);
+        GridTile gridObject = grid.GetValueByXY(posXY);
 
+        switch (item)
+        {
+            case DoorItem : gridObject.gridObject = new GridDoor(selectedObjectID,indexVariant, buildingObj);
+                return;
+        }
+        gridObject.gridObject = new GridObject(selectedObjectID,indexVariant, buildingObj);
+    }
     private void SetNewSprite(Vector2 positionXY)
     {
         bool[] neighbors = GetNeighbors(positionXY);
@@ -236,7 +260,6 @@ public class BuildingManager : MonoBehaviour
     {
         GridObject gridObject = grid.GetValueByXY(positionXY).gridObject;
         bool[] neighbors = GetNeighbors(positionXY);
-
         int value = 0;
 
         for (int i = 0; i < neighbors.Length; i++)
@@ -256,9 +279,19 @@ public class BuildingManager : MonoBehaviour
             gridObject.objectTransform.GetComponent<SortingGroup>().sortingOrder = 0;
         }
 
-        gridObject.objectTransform.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID, value); ;
-        gridObject.objectTransform.GetComponent<PolygonCollider2D>().points = ItemsAsset.instance.GetBuildingObjectHitbox(selectedObjectID,value);
+        Transform child = gridObject.objectTransform.GetChild(0);
+        ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(selectedObjectID, value);
 
+        child.GetComponent<SpriteRenderer>().sprite = objectVariant.sprites[0];
+        child.GetComponent<PolygonCollider2D>().points = objectVariant.hitbox;
+        ChangePositionPivot(gridObject.objectTransform,child.TransformPoint(0, objectVariant.minY, 0));
+    }
+    private void ChangePositionPivot(Transform transform,Vector3 newPosition)
+    {
+        Transform child = transform.GetChild(0);
+        child.SetParent(null);
+        transform.position = newPosition;
+        child.SetParent(transform);
     }
     private bool[] GetNeighbors(Vector2 positionXY)
     {
@@ -266,13 +299,16 @@ public class BuildingManager : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             var obj = grid.GetValueByXY(positionXY + MyTools.directions4[i]);
-            Debug.Log(obj.tileID);
             if (obj != null && obj.IsBuildObject(selectedObjectID)) neighbors[i] = true;
             else neighbors[i] = false;
         }
         return neighbors;
     }
 
-
-
+    public void ChangeSprite(Vector2 posXY, int index)
+    {
+        GridObject gridObject = grid.GetValueByXY(posXY).gridObject;
+        gridObject.objectTransform.GetComponentInChildren<SpriteRenderer>().sprite = ItemsAsset.instance.GetObjectVariant(gridObject.ID,gridObject.indexVariant).sprites[index];
+        gridObject.objectTransform.GetComponentInChildren<Collider2D>().enabled = false;
+    }
 }

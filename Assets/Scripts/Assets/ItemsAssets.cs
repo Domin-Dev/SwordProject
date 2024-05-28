@@ -55,11 +55,25 @@ public class ItemsAsset : MonoBehaviour
             VariantItem item = items[id] as VariantItem;
             if(item != null && item.objectVariants.Length > index)
             {
-                return item.objectVariants[index].sprite;
+                return item.objectVariants[index].sprites[0];
             }
         }
         return null;
     }
+
+    public ObjectVariant GetObjectVariant(int id, int index)
+    {
+        if (items.ContainsKey(id))
+        {
+            VariantItem item = items[id] as VariantItem;
+            if (item != null && item.objectVariants.Length > index)
+            {
+                return item.objectVariants[index].Clone();
+            }
+        }
+        return null;
+    }
+
     public Vector2[] GetBuildingObjectHitbox(int id, int index)
     {
         if (items.ContainsKey(id))
@@ -67,7 +81,7 @@ public class ItemsAsset : MonoBehaviour
             VariantItem item = items[id] as VariantItem;
             if (item != null && item.objectVariants.Length > index)
             {
-                return item.objectVariants[index].hitbox;
+               // return item.objectVariants[index].hitbox;
             }
         }
         return null;

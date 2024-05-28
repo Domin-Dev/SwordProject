@@ -9,27 +9,26 @@ public abstract class BuildingItem : Item
 public abstract class VariantItem : BuildingItem
 {
     public ObjectVariant[] objectVariants;
-//#if UNITY_EDITOR
-//    public ObjectVariant[] _objectVariants { set
-//        {
-//            objectVariants = value;
-//        }
-//    }
-
-//#endif
-
 }
+
 
 
 [System.Serializable]
 public class ObjectVariant
 {
     public Vector2[] hitbox;
-    public Sprite sprite;
+    public float minY;
+    public Sprite[] sprites;
 
-    public ObjectVariant(Vector2[] hitbox, Sprite sprite)
+    public ObjectVariant(Vector2[] hitbox, Sprite[] sprites, float minY)
     {
         this.hitbox = hitbox;
-        this.sprite = sprite;
+        this.sprites = sprites;
+        this.minY = minY;
+    }
+
+    public ObjectVariant Clone()
+    {
+        return new ObjectVariant(hitbox, sprites, minY);
     }
 }
