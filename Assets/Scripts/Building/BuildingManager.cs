@@ -229,10 +229,10 @@ public class BuildingManager : MonoBehaviour
       
         ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(selectedObjectID, rotation % rotationStates);
 
-        obj.GetComponent<SpriteRenderer>().sprite = objectVariant.sprites[0];
-        obj.GetComponent<PolygonCollider2D>().points = objectVariant.hitbox;
+        obj.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
+        obj.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
         CreateGridObject(posXY, rotation % rotationStates, obj.parent);
-        ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.minY, 0));
+        ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0));
         builtObject(this, null);
     }
     private void CreateGridObject(Vector2 posXY,int indexVariant, Transform buildingObj)
@@ -282,9 +282,9 @@ public class BuildingManager : MonoBehaviour
         Transform child = gridObject.objectTransform.GetChild(0);
         ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(selectedObjectID, value);
 
-        child.GetComponent<SpriteRenderer>().sprite = objectVariant.sprites[0];
-        child.GetComponent<PolygonCollider2D>().points = objectVariant.hitbox;
-        ChangePositionPivot(gridObject.objectTransform,child.TransformPoint(0, objectVariant.minY, 0));
+        child.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
+        child.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
+        ChangePositionPivot(gridObject.objectTransform,child.TransformPoint(0, objectVariant.variants[0].minY, 0));
     }
     private void ChangePositionPivot(Transform transform,Vector3 newPosition)
     {
@@ -308,7 +308,7 @@ public class BuildingManager : MonoBehaviour
     public void ChangeSprite(Vector2 posXY, int index)
     {
         GridObject gridObject = grid.GetValueByXY(posXY).gridObject;
-        gridObject.objectTransform.GetComponentInChildren<SpriteRenderer>().sprite = ItemsAsset.instance.GetObjectVariant(gridObject.ID,gridObject.indexVariant).sprites[index];
+        gridObject.objectTransform.GetComponentInChildren<SpriteRenderer>().sprite = ItemsAsset.instance.GetObjectVariant(gridObject.ID,gridObject.indexVariant).variants[index].sprite;
         gridObject.objectTransform.GetComponentInChildren<Collider2D>().enabled = false;
     }
 }

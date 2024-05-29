@@ -16,19 +16,34 @@ public abstract class VariantItem : BuildingItem
 [System.Serializable]
 public class ObjectVariant
 {
+
+    public Variant[] variants;
+    public ObjectVariant(Variant[] variants)
+    { 
+        this.variants = variants;
+    }
+    public ObjectVariant Clone()
+    {
+        return new ObjectVariant(variants);
+    }
+}
+
+[System.Serializable]
+public class Variant
+{
     public Vector2[] hitbox;
     public float minY;
-    public Sprite[] sprites;
+    public Sprite sprite;
 
-    public ObjectVariant(Vector2[] hitbox, Sprite[] sprites, float minY)
+    public Variant(Vector2[] hitbox, Sprite sprite, float minY)
     {
         this.hitbox = hitbox;
-        this.sprites = sprites;
+        this.sprite = sprite;
         this.minY = minY;
     }
 
-    public ObjectVariant Clone()
+    public Variant Clone()
     {
-        return new ObjectVariant(hitbox, sprites, minY);
+        return new Variant(hitbox, sprite, minY);
     }
 }

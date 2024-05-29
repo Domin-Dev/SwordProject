@@ -40,9 +40,7 @@ public class VariantItemEditor : Editor
             AssetDatabase.CreateFolder($"{MyTools.spritesPath}", variantItem.name);
         }
 
-        if (h == 2) Cut1(texture,objectVariants,k);
-        else if (h == 3) Cut2(texture,objectVariants, k);
-
+        Cut(texture,objectVariants, k,h/2);
 
         variantItem.objectVariants = objectVariants.ToArray();
         AssetDatabase.SaveAssets();
@@ -50,34 +48,27 @@ public class VariantItemEditor : Editor
 
     }
 
-    private void Cut1(Texture2D texture, List<ObjectVariant> objectVariants,int k)
+
+    private void Cut(Texture2D texture, List<ObjectVariant> objectVariants, int k,int numberVariant)
     {
         for (int i = 0; i < k; i++)
         {
-            Sprite[] sprites = new Sprite[1];
-            sprites[0] = Sprite.Create(texture, new Rect(i * 27, 0, 27, 51), new Vector2(0.5f, 1f / 51f));
-            Sprite hitbox = Sprite.Create(texture, new Rect(i * 27, 51, 27, 51), Vector2.zero);
-            Cutter cutter = new Cutter(hitbox, sprites[0].pivot);
-            Vector2[] hitboxArray = cutter.CutHitBox(MyTools.hitboxColor);
-            objectVariants.Add(new ObjectVariant(hitboxArray,sprites, hitboxArray[0].y));
+            List<Variant> variants = new List<Variant>();
+            for (int j = 0; j < numberVariant; j++)
+            {
+                Sprite sprite = Sprite.Create(texture, new Rect(i * 27, j * 102, 27, 51), new Vector2(0.5f, 1f / 51f));
+                Sprite hitbox = Sprite.Create(texture, new Rect(i * 27, j * 102 + 51, 27, 51), Vector2.zero);
+                Cutter cutter = new Cutter(hitbox, sprite.pivot);
+                Vector2[] hitboxArray = cutter.CutHitBox(MyTools.hitboxColor);
+                variants.Add(new Variant(hitboxArray, sprite, hitboxArray[0].y));
+            }
 
-            AssetDatabase.CreateAsset(sprites[0], $"{MyTools.spritesPath}/{variantItem.name}/{variantItem.name}_{i}.asset");
-        }
-    }
-    private void Cut2(Texture2D texture, List<ObjectVariant> objectVariants, int k)
-    {
-        for (int i = 0; i < k; i++)
-        {
-            Sprite[] sprites = new Sprite[2];
-            sprites[0] = Sprite.Create(texture, new Rect(i * 27, 0, 27, 51), new Vector2(0.5f, 1f / 51f));
-            sprites[1] = Sprite.Create(texture, new Rect(i * 27, 102, 27, 51), new Vector2(0.5f, 1f / 51f));
-            Sprite hitbox = Sprite.Create(texture, new Rect(i * 27, 51, 27, 51), Vector2.zero);
-            Cutter cutter = new Cutter(hitbox, sprites[0].pivot);
-            Vector2[] hitboxArray = cutter.CutHitBox(MyTools.hitboxColor);
-            objectVariants.Add(new ObjectVariant(hitboxArray,sprites, hitboxArray[0].y));
+            objectVariants.Add(new ObjectVariant(variants.ToArray()));
 
-            AssetDatabase.CreateAsset(sprites[0], $"{MyTools.spritesPath}/{variantItem.name}/{variantItem.name}_{i}.asset");
-            AssetDatabase.CreateAsset(sprites[1], $"{MyTools.spritesPath}/{variantItem.name}/{variantItem.name}_{i+k}.asset");
+            for (int j = 0; j < numberVariant; j++)
+            {
+                AssetDatabase.CreateAsset(variants[j].sprite, $"{MyTools.spritesPath}/{variantItem.name}/{variantItem.name}_{i+k*j}.asset");
+            }
         }
     }
 

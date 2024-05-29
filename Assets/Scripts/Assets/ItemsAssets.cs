@@ -55,7 +55,7 @@ public class ItemsAsset : MonoBehaviour
             VariantItem item = items[id] as VariantItem;
             if(item != null && item.objectVariants.Length > index)
             {
-                return item.objectVariants[index].sprites[0];
+                return item.objectVariants[index].variants[0].sprite;
             }
         }
         return null;

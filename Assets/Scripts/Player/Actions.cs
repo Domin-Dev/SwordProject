@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Actions : MonoBehaviour
 {
+    [SerializeField] GameObject pointer;
+    [SerializeField] Transform parent;
+    Transform pointerTransform;
     public static Grid<GridTile> grid { private set; get; }
     public static Actions instance { private set; get; }
     public Grid<GridTile> _grid
@@ -31,6 +34,11 @@ public class Actions : MonoBehaviour
         }        
     }
 
+    private void Start()
+    {
+        pointerTransform = Instantiate(pointer, parent).transform;
+    }
+
     public static Vector2 GetMousePosXY()
     {
         return instance.lastPos;
@@ -41,13 +49,13 @@ public class Actions : MonoBehaviour
         if(pos != lastPos)
         {
             lastPos = pos;
-
+            pointerTransform.position = grid.GetPosition(pos);
         }
 
-        if(Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0))
         {
             GridObject gridObject = grid.GetValueByXY(pos).gridObject;
-            if(gridObject != null)
+            if (gridObject != null && gridObject is GridDoor)
             {
                 Debug.Log(gridObject.GetType());
                 BuildingManager.instance.ChangeSprite(pos, 1);
@@ -57,7 +65,7 @@ public class Actions : MonoBehaviour
         if (Input.GetMouseButtonDown(1))
         {
             GridObject gridObject = grid.GetValueByXY(pos).gridObject;
-            if (gridObject != null)
+            if (gridObject != null && gridObject is GridDoor)
             {
                 Debug.Log(gridObject.GetType());
                 BuildingManager.instance.ChangeSprite(pos, 0);
