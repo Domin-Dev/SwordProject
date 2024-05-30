@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d9b1873d12d744448a3503317eafd98, type: 3}
   m_Name: RangedWeapon
   m_EditorClassIdentifier: 
-  name: 
+  name: Shotgun
   description: 
   ID: 15
   stackMax: 1
   icon: {fileID: -946185050, guid: f61881ba51203f94d9644cd4838d6f2b, type: 3}
+  crafingIngredients: []
   durability: 66
   weaponImage: {fileID: -946185050, guid: f61881ba51203f94d9644cd4838d6f2b, type: 3}
   hitBoxPoints:
@@ -35,4 +36,5 @@ MonoBehaviour:
   timeToReload: 0
   magazineCapacity: 2
   aimPoint: {x: 0.125, y: 0.005}
+  reloadPoint: {x: 0, y: 0}
   ammoType: 1

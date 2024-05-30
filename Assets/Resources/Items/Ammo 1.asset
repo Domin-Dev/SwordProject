@@ -12,11 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48ec4ba6633d2ab4684d21d70b3bdcf3, type: 3}
   m_Name: Ammo 1
   m_EditorClassIdentifier: 
-  name: 
+  name: Shotgun Bullet
   description: 
   ID: 11
   stackMax: 20
   icon: {fileID: 1275416589, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  crafingIngredients:
+  - itemID: 1
+    number: 434
+  - itemID: 2
+    number: 30
+  - itemID: 2
+    number: 7
+  - itemID: 22
+    number: 7
+  - itemID: 23
+    number: 7
   bullet: {fileID: 907356828559875784, guid: 39d35432007d90f40b15bf375f8b9449, type: 3}
   UIBulletIcon: {fileID: -1713878118, guid: 6f6089b46f69a5d4d99bc7c3bcd304d1, type: 3}
   inHandSprite: {fileID: 21300000, guid: 888e11afbd14db74388254ced443f033, type: 3}

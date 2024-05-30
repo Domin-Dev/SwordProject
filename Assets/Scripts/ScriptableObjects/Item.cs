@@ -18,20 +18,22 @@ public class Item : ScriptableObject
     {
         return new ItemStats(ID);
     }
-}
 
-[System.Serializable]
-public class CrafingIngredient
-{
-    public int itemID;
-    public int number;
-
-    public CrafingIngredient(int itemID, int number)
+    [System.Serializable]
+    public class CrafingIngredient
     {
-        this.itemID = itemID;
-        this.number = number;
+        public int itemID;
+        public int number;
+
+        public CrafingIngredient(int itemID, int number)
+        {
+            this.itemID = itemID;
+            this.number = number;
+        }
     }
 }
+
+
 
 
 [CreateAssetMenu(fileName = "DestroyableItem", menuName = "GameAsset/Items/DestroyableItem")]

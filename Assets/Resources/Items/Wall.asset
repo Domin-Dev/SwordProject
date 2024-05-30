@@ -12,11 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2768a2250e2de5d4aa957a906e0eb4f7, type: 3}
   m_Name: Wall
   m_EditorClassIdentifier: 
-  name: 
+  name: Coat
   description: 
   ID: 200
   stackMax: 50
   icon: {fileID: 742991713, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  crafingIngredients: []
   durability: 0
   texture: {fileID: 2800000, guid: 779b5d671e5442b49a90e51ca973ad2b, type: 3}
-  objectVariants: []
+  objectVariants:
+  - variants:
+    - hitbox: []
+      minY: 0
+      sprite: {fileID: 0}

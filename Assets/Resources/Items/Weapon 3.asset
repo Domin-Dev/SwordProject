@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac44ede8a5cadab44b3d50f5e7a695b5, type: 3}
   m_Name: Weapon 3
   m_EditorClassIdentifier: 
-  name: 
+  name: Hammer
   description: 
   ID: 5
   stackMax: 50
   icon: {fileID: 1848595146, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  crafingIngredients: []
   durability: 50
   weaponImage: {fileID: 1329098765, guid: 9bd43db772e8f024da4e01c9497295f8, type: 3}
   hitBoxPoints:

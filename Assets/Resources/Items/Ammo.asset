@@ -12,11 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48ec4ba6633d2ab4684d21d70b3bdcf3, type: 3}
   m_Name: Ammo
   m_EditorClassIdentifier: 
-  name: 
+  name: Gun Bullet
   description: 
   ID: 10
   stackMax: 20
   icon: {fileID: 1603983635, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  crafingIngredients:
+  - itemID: 0
+    number: 0
+  - itemID: 20
+    number: 0
   bullet: {fileID: 907356828559875784, guid: 39d35432007d90f40b15bf375f8b9449, type: 3}
   UIBulletIcon: {fileID: 950248845, guid: 6f6089b46f69a5d4d99bc7c3bcd304d1, type: 3}
   inHandSprite: {fileID: 21300000, guid: 96ed2977599248c4e87cbb7ba33b850b, type: 3}

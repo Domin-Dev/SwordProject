@@ -10,11 +10,7 @@ public class ItemEditor : Editor
     public override void OnInspectorGUI()
     {
         IconField(target);
-        if (GUILayout.Button("siema", EditorStyles.popup))
-        {
-            SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), new ItemFinder());
-        }
-        base.OnInspectorGUI();
+        base.OnInspectorGUI();     
     }
 
     public static void IconField(Object target)
@@ -27,4 +23,12 @@ public class ItemEditor : Editor
         EditorGUILayout.EndHorizontal();
     }
 
+    public override Texture2D RenderStaticPreview(string assetPath, Object[] subAssets, int width, int height)
+    {
+        Item item = target as Item;
+        var texture = new Texture2D(width, height);
+        EditorUtility.CopySerialized(item.icon.texture,texture);
+       
+        return texture;
+    }
 }
