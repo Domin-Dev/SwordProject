@@ -23,8 +23,8 @@ MonoBehaviour:
   - variants:
     - hitbox:
       - {x: -0.12, y: 0.005}
-      - {x: -0.12, y: 0.145}
-      - {x: 0.12, y: 0.145}
+      - {x: -0.12, y: 0.105}
+      - {x: 0.12, y: 0.105}
       - {x: 0.12, y: 0.005}
       minY: 0.005
       sprite: {fileID: 21300000, guid: 718a65e92ca0b6d41980bf7c2e8cb3ac, type: 2}
@@ -38,8 +38,8 @@ MonoBehaviour:
   - variants:
     - hitbox:
       - {x: -0.12, y: 0.005}
-      - {x: -0.12, y: 0.145}
-      - {x: 0.12, y: 0.145}
+      - {x: -0.12, y: 0.105}
+      - {x: 0.12, y: 0.105}
       - {x: 0.12, y: 0.005}
       minY: 0.005
       sprite: {fileID: 21300000, guid: e2dab3f6922a7734381d881b9918e08c, type: 2}
@@ -60,8 +60,8 @@ MonoBehaviour:
       sprite: {fileID: 21300000, guid: 952ec1a25eb6336409275dfb717c4503, type: 2}
     - hitbox:
       - {x: -0.12, y: 0.005}
-      - {x: -0.12, y: 0.145}
-      - {x: 0.12, y: 0.145}
+      - {x: -0.12, y: 0.105}
+      - {x: 0.12, y: 0.105}
       - {x: 0.12, y: 0.005}
       minY: 0.005
       sprite: {fileID: 21300000, guid: 1c594b25ada133744a67975c360634f1, type: 2}
@@ -74,9 +74,9 @@ MonoBehaviour:
       minY: 0.005
       sprite: {fileID: 21300000, guid: 07fe0b92bae65234284b37a7c0711850, type: 2}
     - hitbox:
-      - {x: -0.12, y: 0.005}
-      - {x: -0.12, y: 0.145}
-      - {x: 0.12, y: 0.145}
-      - {x: 0.12, y: 0.005}
-      minY: 0.005
+      - {x: -0.12, y: 0.195}
+      - {x: -0.12, y: 0.295}
+      - {x: 0.12, y: 0.295}
+      - {x: 0.12, y: 0.195}
+      minY: 0.195
       sprite: {fileID: 21300000, guid: bb72e643706f5bb48a239ddd102998ae, type: 2}

@@ -11,11 +11,29 @@ public class Item : ScriptableObject
 
     [Header("Item graphic")]
     public Sprite icon;
+
+    [Header("Craft recipe")]
+    public CrafingIngredient[] crafingIngredients;
     public virtual ItemStats GetItemStats()
     {
         return new ItemStats(ID);
     }
 }
+
+[System.Serializable]
+public class CrafingIngredient
+{
+    public int itemID;
+    public int number;
+
+    public CrafingIngredient(int itemID, int number)
+    {
+        this.itemID = itemID;
+        this.number = number;
+    }
+}
+
+
 [CreateAssetMenu(fileName = "DestroyableItem", menuName = "GameAsset/Items/DestroyableItem")]
 public class Destroyable: Item
 {

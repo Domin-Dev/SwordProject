@@ -308,7 +308,12 @@ public class BuildingManager : MonoBehaviour
     public void ChangeSprite(Vector2 posXY, int index)
     {
         GridObject gridObject = grid.GetValueByXY(posXY).gridObject;
-        gridObject.objectTransform.GetComponentInChildren<SpriteRenderer>().sprite = ItemsAsset.instance.GetObjectVariant(gridObject.ID,gridObject.indexVariant).variants[index].sprite;
-        gridObject.objectTransform.GetComponentInChildren<Collider2D>().enabled = false;
+        Variant  variant = ItemsAsset.instance.GetObjectVariant(gridObject.ID, gridObject.indexVariant).variants[index];
+        gridObject.objectTransform.GetComponentInChildren<SpriteRenderer>().sprite = variant.sprite;
+        PolygonCollider2D polygonCollider2D = gridObject.objectTransform.GetComponentInChildren<PolygonCollider2D>();
+        polygonCollider2D.points = variant.hitbox;
+        polygonCollider2D.usedByComposite = false;
+        Timer.Create(2f, () => { polygonCollider2D.usedByComposite = true; });
+        ChangePositionPivot(gridObject.objectTransform, gridObject.objectTransform.GetChild(0).TransformPoint(0, variant.minY, 0));
     }
 }

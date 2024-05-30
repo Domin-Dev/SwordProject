@@ -17,6 +17,9 @@ MonoBehaviour:
   ID: 300
   stackMax: 50
   icon: {fileID: -654061978, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  crafingIngredients:
+  - itemID: 0
+    number: 0
   durability: 0
   texture: {fileID: 2800000, guid: 51550981a0ee56645b5e2a23f17bdc07, type: 3}
   objectVariants:

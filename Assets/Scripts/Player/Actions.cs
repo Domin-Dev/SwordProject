@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.PlayerSettings;
 
 public class Actions : MonoBehaviour
 {
@@ -52,24 +53,22 @@ public class Actions : MonoBehaviour
             pointerTransform.position = grid.GetPosition(pos);
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            GridObject gridObject = grid.GetValueByXY(pos).gridObject;
-            if (gridObject != null && gridObject is GridDoor)
-            {
-                Debug.Log(gridObject.GetType());
-                BuildingManager.instance.ChangeSprite(pos, 1);
-            }
-        }
-
         if (Input.GetMouseButtonDown(1))
         {
             GridObject gridObject = grid.GetValueByXY(pos).gridObject;
             if (gridObject != null && gridObject is GridDoor)
             {
-                Debug.Log(gridObject.GetType());
-                BuildingManager.instance.ChangeSprite(pos, 0);
+                Door(gridObject as GridDoor,pos);
             }
         }
+    }
+
+    private void Door(GridDoor gridDoor,Vector2 position)
+    {
+        if(gridDoor.doorIsClosed)
+            BuildingManager.instance.ChangeSprite(position, 1);
+        else
+            BuildingManager.instance.ChangeSprite(position, 0);
+        gridDoor.doorIsClosed = !gridDoor.doorIsClosed;
     }
 }
