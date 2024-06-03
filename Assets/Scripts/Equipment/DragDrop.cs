@@ -29,8 +29,6 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
         parent = transform.parent;
     }
 
-
-
     public void OnBeginDrag(PointerEventData eventData)
     {
         if (eventData.button != PointerEventData.InputButton.Middle && EquipmentManager.instance.IsNotSelected())

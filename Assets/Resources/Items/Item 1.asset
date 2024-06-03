@@ -18,5 +18,5 @@ MonoBehaviour:
   stackMax: 500
   icon: {fileID: -788020699, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   crafingIngredients:
-  - itemID: 0
+  - itemID: 300
     number: 0

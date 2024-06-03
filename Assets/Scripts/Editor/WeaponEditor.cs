@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 [CustomEditor(typeof(Weapon),true)]
-public class WeaponEditor : Editor
+public class WeaponEditor : ItemEditor
 {
     Sprite hitbox;
     int width;
@@ -21,8 +21,6 @@ public class WeaponEditor : Editor
     public override void OnInspectorGUI()
     {
         Weapon weapon = target as Weapon;
-        ItemEditor.IconField(weapon);
-
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.PrefixLabel("Weapon Image");
         weapon.weaponImage = (Sprite)EditorGUILayout.ObjectField(weapon.weaponImage, typeof(Sprite), false, GUILayout.Width(150), GUILayout.Height(150));         

@@ -21,6 +21,7 @@ public class ItemList : MonoBehaviour
             return null;
         }
     }
+
     static ItemList()
     {
         Item[] loadedItems = Resources.LoadAll<Item>("Items");
@@ -28,8 +29,31 @@ public class ItemList : MonoBehaviour
         for (int i = 0; i < loadedItems.Length; i++)
         {
             Item item = loadedItems[i];
+            if(items.ContainsKey(item.ID)) Debug.LogError(item.name +" " + item.ID);
             items.Add(item.ID, item);
         }
         Debug.Log(items.Count);
+    }
+
+    public static Texture2D GetIcon(Item item)
+    {
+        if (item.icon == null) return null;
+        Rect rect = item.icon.rect;
+        var texture = new Texture2D((int)rect.width, (int)rect.height);
+        Color[] pixels = item.icon.texture.GetPixels((int)rect.x, (int)rect.y, (int)rect.width, (int)rect.height);
+        texture.SetPixels(pixels);
+        texture.Apply();
+        return texture;
+    }
+
+    public static Texture2D GetIcon(int itemID)
+    {
+        Item item;
+        if (items.ContainsKey(itemID))
+            item = items[itemID];     
+        else
+            return null;
+
+       return GetIcon(item);
     }
 }

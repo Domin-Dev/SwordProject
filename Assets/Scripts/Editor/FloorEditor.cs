@@ -3,12 +3,12 @@ using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(Floor),true)]
-public class FloorEditor : Editor
+public class FloorEditor : ItemEditor
 {
     Floor floor;
     public override void OnInspectorGUI()
     {
-        ItemEditor.IconField(target);
+       
         //floor = target as Floor;
 
         //if (GUILayout.Button("Cut Sprites"))

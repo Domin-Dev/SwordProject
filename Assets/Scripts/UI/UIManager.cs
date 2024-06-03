@@ -6,6 +6,8 @@ using TMPro;
 using System;
 using UnityEditor;
 using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor.TextCore.Text;
 
 public class EquipmentGrid
 {
@@ -22,13 +24,12 @@ public class UIManager : MonoBehaviour
 {
     //black background
     [SerializeField] private Transform background;
-    [Space(30f)]
+    [Space(20f)]
     //equipment
     [SerializeField] private Canvas mainCanvas;
     [Header("Gun Info UI")]
     [SerializeField] private Transform ammoBar;
     [SerializeField] private GameObject ammoUI;
-    [Space]
     #region Equipment UI
     [Header("Equipment UI")]
     [SerializeField] private Transform mainItemBar;
@@ -43,14 +44,26 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform equipmentItemSlots;
     [SerializeField] private Transform equipmentItemBar;
     [SerializeField] private Transform equipmentDragItems;
-    [Space(30f)]
+    [Space(20f)]
     #endregion
+    #region Stats UI
     [Header("Stats UI")]
     [SerializeField] private Button ServerButton;
     [SerializeField] private Button HostButton;
     [SerializeField] private Button ClientButton;
     [SerializeField] Sprite selected;
     [SerializeField] Sprite unSelected;
+    #endregion
+    #region Crafting UI
+    [Header("Crafting UI")]
+    [SerializeField] Transform recipeDescription;
+    [SerializeField] Transform recipes;
+    [SerializeField] GameObject recipeIcon;
+    [SerializeField] Image selectedRecipeIcon;
+    [SerializeField] TextMeshProUGUI selectedRecipeName;
+    [SerializeField] TextMeshProUGUI selectedRecipeDescription;
+    [SerializeField] Transform ingredients;
+    #endregion
 
     private const float buttonScale = 1f;
     private const float selectedButtonScale = 1.1f;
@@ -75,6 +88,7 @@ public class UIManager : MonoBehaviour
 
         SetGrids();
         SetUpNetworkUI();
+        LoadRecipes();
     }
     private void Update()
     {
@@ -359,16 +373,19 @@ public class UIManager : MonoBehaviour
         {
             transform.GetComponent<DragDrop>().enabled = false;
         }
-
-
     }
     private void OpenEquipment(object sender, BoolArgs e)
     {
         CloseWindows();
         background.gameObject.SetActive(e.value);
         equipment.gameObject.SetActive(e.value);
+
         if (!e.value) TooltipSystem.Hide();
-        else openWindows.Add(equipment);
+        else
+        {
+            openWindows.Add(equipment);
+            ClearRecipe();
+        }
     }
     private void CloseWindows()
     {
@@ -411,10 +428,8 @@ public class UIManager : MonoBehaviour
             {
                 index = i + 1;
                 Transform slot = Instantiate(itemSlot, equipmentGrid.gridTransform).transform;
-                if (isMainBar)
-                    slot.GetComponent<DropSlot>().enabled = false;        
-                else 
-                    slot.GetComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
+                if (!isMainBar)
+                    slot.AddComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
                 
                 if (index > 9) index = 0;
                 Instantiate(slotIndex,slot).GetComponent<TextMeshProUGUI>().text = index.ToString();
@@ -425,7 +440,7 @@ public class UIManager : MonoBehaviour
             for (int i = 0; i < number; i++)
             {
                 Transform slot = Instantiate(itemSlot, equipmentGrid.gridTransform).transform;
-                slot.GetComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
+                slot.AddComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
             }
         }
     }
@@ -449,5 +464,52 @@ public class UIManager : MonoBehaviour
     {
         if (position.slotIndex < mainItemBar.childCount) return mainItemBar.GetChild(position.slotIndex).GetComponentInChildren<DragDrop>().transform;
         else return null;
+    }
+
+    private void LoadRecipes()
+    {
+        Item[] items = ItemsAsset.instance.GetItems();
+        for (int i = 0; i < items.Length; i++)
+        {
+            Item item = items[i];
+            Transform recipe = Instantiate(itemSlot, recipes).transform;
+            Transform icon = Instantiate(recipeIcon, recipe).transform;
+            icon.GetComponent<Image>().sprite = item.icon;
+            icon.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+            recipe.AddComponent<Recipe>().SetID(item.ID);
+        }
+    }
+
+    public void SelectRecipe(int id)
+    {
+        recipeDescription.gameObject.SetActive(true);
+        Item item = ItemsAsset.instance.GetItem(id);
+        selectedRecipeIcon.sprite = item.icon;
+        selectedRecipeName.text = item.name;
+        selectedRecipeDescription.text = item.description;
+        LoadIngredients(item);
+    }
+    private void LoadIngredients(Item item)
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            Transform slot = ingredients.GetChild(i);
+            if (item.crafingIngredients.Length > i)
+            {
+                slot.gameObject.SetActive(true);
+                Item.CrafingIngredient ingredient = item.crafingIngredients[i];          
+                Sprite sprite = ItemsAsset.instance.GetIcon(ingredient.itemID);
+                slot.GetChild(0).GetComponent<Image>().sprite = sprite;
+                slot.GetComponentInChildren<TextMeshProUGUI>().text = ingredient.number.ToString();
+            }
+            else
+            {
+                slot.gameObject.SetActive(false);
+            }
+        }        
+    }
+    public void ClearRecipe()
+    {
+        recipeDescription.gameObject.SetActive(false);
     }
 }

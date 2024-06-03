@@ -5,7 +5,7 @@ using UnityEngine;
 
 
 [CustomEditor(typeof(VariantItem),true)]
-public class VariantItemEditor : Editor
+public class VariantItemEditor : ItemEditor
 {
     VariantItem variantItem;
     SerializedProperty serializedProperty;
@@ -16,18 +16,16 @@ public class VariantItemEditor : Editor
     }
     public override void OnInspectorGUI()
     {
-        ItemEditor.IconField(target);
-
         if (GUILayout.Button("Cut Sprites"))
         {
             CutSpritesWall(variantItem.texture);
             NewSaveChanges();
         }
-
         serializedObject.ApplyModifiedProperties();
         base.OnInspectorGUI();
     }
 
+   
     private void CutSpritesWall(Texture2D texture)
     {
         int k = texture.width / 27;

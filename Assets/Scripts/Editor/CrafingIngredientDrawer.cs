@@ -18,21 +18,23 @@ public class CrafingIngredientDrawer : PropertyDrawer
         {
             EditorGUI.indentLevel++;
 
-            var buttonRect = new Rect(position.x + position.width * 0.75f, position.y + EditorGUIUtility.singleLineHeight + 2, position.width * 0.25f, EditorGUIUtility.singleLineHeight);
-            var itemRect = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight + 2, position.width * 0.75f, EditorGUIUtility.singleLineHeight);
+            var buttonRect = new Rect(position.x + position.width * 0.5f, position.y + EditorGUIUtility.singleLineHeight + 2, position.width * 0.5f, EditorGUIUtility.singleLineHeight);
+            var itemRect = new Rect(position.x, position.y + EditorGUIUtility.singleLineHeight + 2, position.width * 0.5f, EditorGUIUtility.singleLineHeight);
             var valueRect = new Rect(position.x, position.y + (EditorGUIUtility.singleLineHeight + 2) * 2, position.width, EditorGUIUtility.singleLineHeight);
            
    
             var itemId = property.FindPropertyRelative("itemID");
             EditorGUI.PropertyField(itemRect, itemId, new GUIContent("itemID"));
             EditorGUI.PropertyField(valueRect, property.FindPropertyRelative("number"), new GUIContent("number"));
-
+           
 
             string buttonText = ItemList.GetItemName(itemId.intValue);
             if (buttonText == null) buttonText = "Select Item ID";
+            else buttonText += $" [ID: {itemId.intValue}]";
 
 
-            if (GUI.Button(buttonRect, buttonText, EditorStyles.popup))
+            var buttonContent = new GUIContent(buttonText,ItemList.GetIcon(itemId.intValue));
+            if (GUI.Button(buttonRect,buttonContent, EditorStyles.popup))
             {
                 SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), new ItemFinder((x) => {
                     itemId.intValue = x; 

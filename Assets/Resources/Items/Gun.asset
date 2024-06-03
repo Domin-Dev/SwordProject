@@ -22,14 +22,10 @@ MonoBehaviour:
   stackMax: 1
   icon: {fileID: -2066496519, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   crafingIngredients:
-  - itemID: 0
-    number: 0
-  - itemID: 35
-    number: -37
-  - itemID: 35
-    number: 134
-  - itemID: -20
-    number: 101
+  - itemID: 10
+    number: 90
+  - itemID: 10
+    number: 90
   durability: 20
   weaponImage: {fileID: 866442174, guid: 59c72a0771dd7a043a02a6626b207c98, type: 3}
   hitBoxPoints:

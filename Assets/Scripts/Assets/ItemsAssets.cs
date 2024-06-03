@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-
+using System.Linq;
 
 public class ItemsAsset : MonoBehaviour
 {
@@ -172,6 +172,18 @@ public class ItemsAsset : MonoBehaviour
             }
         }
         return null;
+    }
+
+    public Item[] GetItems()
+    {
+        Item[] itemArray = new Item[items.Count];
+        int i = 0;
+        foreach (var item in items)
+        {
+            itemArray[i] = item.Value;
+            i++;
+        }
+        return itemArray;
     }
 
 }
