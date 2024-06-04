@@ -7,7 +7,6 @@ using System;
 using UnityEditor;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-using UnityEditor.TextCore.Text;
 
 public class EquipmentGrid
 {
@@ -63,6 +62,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] TextMeshProUGUI selectedRecipeName;
     [SerializeField] TextMeshProUGUI selectedRecipeDescription;
     [SerializeField] Transform ingredients;
+    [SerializeField] Button craftButton;
     #endregion
 
     private const float buttonScale = 1f;
@@ -385,6 +385,7 @@ public class UIManager : MonoBehaviour
         {
             openWindows.Add(equipment);
             ClearRecipe();
+            CheckRecipes();
         }
     }
     private void CloseWindows()
@@ -472,7 +473,9 @@ public class UIManager : MonoBehaviour
         for (int i = 0; i < items.Length; i++)
         {
             Item item = items[i];
+            if(item.crafingIngredients.Length == 0) continue;
             Transform recipe = Instantiate(itemSlot, recipes).transform;
+            recipe.name = item.ID.ToString();
             Transform icon = Instantiate(recipeIcon, recipe).transform;
             icon.GetComponent<Image>().sprite = item.icon;
             icon.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
@@ -480,18 +483,29 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    int selectedRecipe;
     public void SelectRecipe(int id)
     {
+        selectedRecipe = id;
         recipeDescription.gameObject.SetActive(true);
         Item item = ItemsAsset.instance.GetItem(id);
         selectedRecipeIcon.sprite = item.icon;
         selectedRecipeName.text = item.name;
         selectedRecipeDescription.text = item.description;
+        if(CanCraft(id))
+        {
+            craftButton.interactable = true;
+        }
+        else
+        {
+            craftButton.interactable= false;
+        }
+
         LoadIngredients(item);
     }
     private void LoadIngredients(Item item)
     {
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i < 8; i++)
         {
             Transform slot = ingredients.GetChild(i);
             if (item.crafingIngredients.Length > i)
@@ -512,4 +526,85 @@ public class UIManager : MonoBehaviour
     {
         recipeDescription.gameObject.SetActive(false);
     }
+
+    string lastValue = string.Empty;
+    private bool CheckLastValue(string value)
+    {
+        return  (value.Length == 0 && lastValue.Length == 0) || 
+            (lastValue.Length > 0 && value.Length >= lastValue.Length && lastValue.ToLower() == value.Substring(0, lastValue.Length).ToLower());
+    }
+    public void Search(string value)
+    {
+        if(CheckLastValue(value))
+        {
+            if (value.Length == lastValue.Length) return;
+            for (int i = 0; i < recipes.childCount; i++)
+            {
+                Transform child = recipes.GetChild(i);
+                if(child.gameObject.activeSelf)
+                {
+                    ComperName(child, value,int.Parse(child.name));
+                }
+            }
+            lastValue = value;
+            return;
+        }
+
+        for (int i = 0; i < recipes.childCount; i++)
+        {
+            Transform child = recipes.GetChild(i);
+            ComperName(child, value, int.Parse(child.name));
+        }
+        lastValue = value;
+    }
+    private void ComperName(Transform child,string searchText,int itemID)
+    {
+        Item item = ItemsAsset.instance.GetItem(itemID);
+        if (item.name.Length >= searchText.Length && item.name.Contains(searchText, StringComparison.CurrentCultureIgnoreCase))
+        {
+            child.gameObject.SetActive(true);
+        }
+        else
+        {
+            child.gameObject.SetActive(false);
+        }
+    }
+    private void CheckRecipes()
+    {
+        Dictionary<int,int> items = EquipmentManager.instance.GetItemDictionary();
+        for (int i = 0; i < recipes.childCount; i++)
+        {
+            Transform child = recipes.GetChild(i);
+            if (CanCraft(int.Parse(child.name), items))
+            {
+                child.GetComponent<Image>().color = Color.white;
+                child.GetChild(0).GetComponent<Image>().color = Color.white;
+            }
+            else
+            {
+                child.GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
+                child.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
+            }
+        }
+    }
+    private bool CanCraft(int ID,Dictionary<int,int> items)
+    {
+        Item item = ItemsAsset.instance.GetItem(ID);
+        for (int i = 0; i < item.crafingIngredients.Length; i++)
+        {
+            items.TryGetValue(item.crafingIngredients[i].itemID, out int value);
+            if (value < item.crafingIngredients[i].number) return false;
+        }
+        return true;
+    }
+    private bool CanCraft(int ID)
+    {
+       return CanCraft(ID, EquipmentManager.instance.GetItemDictionary());
+    }
+    public void Craft()
+    {
+        EquipmentManager.instance.Craft(selectedRecipe);
+    }
+
+
 }

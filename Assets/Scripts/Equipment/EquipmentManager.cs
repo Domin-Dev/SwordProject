@@ -265,7 +265,7 @@ public class EquipmentManager : MonoBehaviour
 
     private void BuiltObject(object sender, EventArgs e)
     {
-        if(!DecreaseItemCount(new SlotPosition(0, slotInHand), 1))
+        if(DecreaseItemCount(new SlotPosition(0, slotInHand), 1) <= 0)
         UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[slotInHand]));
     }
 
@@ -752,17 +752,30 @@ public class EquipmentManager : MonoBehaviour
         GetItemStats(position).itemCount += value;
         UpdateCount(position);
     }
-    private bool DecreaseItemCount(SlotPosition position, int value = 1)
+
+    private void DecreaseItemCount(int itemID,int value = 1)
     {
-        GetItemStats(position).itemCount -= value;
-        if (GetItemStats(position).itemCount <= 0)
+        var list = FindItems(itemID);
+        for (int i = 0; i < list.Count; i++)
+        {
+            int balance = DecreaseItemCount(list[i], value);
+            if (balance < 0) value = -balance;
+            else return;
+        }
+    }
+    private int DecreaseItemCount(SlotPosition position, int value = 1)
+    {
+        ItemStats itemStats = GetItemStats(position);
+        int balance = itemStats.itemCount - value;
+        if (balance <= 0)
         {
             ClearSlot(position);
-            RemoveItem(position);
-            return false;
+            RemoveItem(position);        
+            return balance;
         }
+        itemStats.itemCount = balance;
         UpdateCount(position);
-        return true;
+        return 1;
     }
     private SlotPosition Find(int itemId)
     {
@@ -809,6 +822,40 @@ public class EquipmentManager : MonoBehaviour
         DecreaseItemCount(Find(ammoID));
         ammoCount--;
         return ammoCount;
+    } 
+    public Dictionary<int,int> GetItemDictionary()
+    {
+        Dictionary<int,int> items = new Dictionary<int,int>();
+        AddItemsToDictionary(items, equipment);
+        AddItemsToDictionary(items, equipmentBar);
+        return items;
     }
-    
+    private void AddItemsToDictionary(Dictionary<int,int> items, ItemStats[] itemStats)
+    {
+        foreach (var item in itemStats)
+        {
+            if (item != null)
+            {
+                if (items.ContainsKey(item.itemID))
+                {
+                    items[item.itemID] += item.itemCount;
+                }
+                else
+                {
+                    items.Add(item.itemID, item.itemCount);
+                }
+            }
+        }
+    }
+
+    public void Craft(int itemID)
+    {
+        Item item = ItemsAsset.instance.GetItem(itemID);
+        AddNewItem(item.GetItemStats());
+        for (int i = 0; i < item.crafingIngredients.Length; i++)
+        {
+            Item.CrafingIngredient ingredient = item.crafingIngredients[i];
+            DecreaseItemCount(ingredient.itemID, ingredient.number);
+        }
+    }
 }
