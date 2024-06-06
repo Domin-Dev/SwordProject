@@ -370,13 +370,9 @@ public class EquipmentManager : MonoBehaviour
     }
     public bool AddNewItem(ItemStats itemStats)
     {
-        if(itemStats as DestroyableItem != null)
-        {
-            (itemStats as DestroyableItem).Use();
-        }
-
         if (itemStats.itemCount > 0)
         {
+
             List<SlotPosition> itemList = FindItems(itemStats.itemID);
             int stackMax = ItemsAsset.instance.GetStackMax(itemStats.itemID);
 
@@ -396,6 +392,7 @@ public class EquipmentManager : MonoBehaviour
                         else
                         {
                             IncreaseItemCount(itemList[i], itemStats.itemCount);
+                            UIManager.instance.CheckRecipesWithItem(itemStats.itemID,true);
                             return true;
                         }
 
@@ -420,6 +417,7 @@ public class EquipmentManager : MonoBehaviour
                     {
                         equipmentBar[i] = itemStats;
                         NewItemUI(itemStats, new SlotPosition(0, i), false);
+                        UIManager.instance.CheckRecipesWithItem(itemStats.itemID, true);
                         return true;
                     }
                 }
@@ -442,10 +440,12 @@ public class EquipmentManager : MonoBehaviour
                     {
                         equipment[i] = itemStats;
                         NewItemUI(itemStats, new SlotPosition(1, i), false);
+                        UIManager.instance.CheckRecipesWithItem(itemStats.itemID, true);
                         return true;
                     }
                 }
             }
+
         }
         return false;
     }
@@ -770,11 +770,13 @@ public class EquipmentManager : MonoBehaviour
         if (balance <= 0)
         {
             ClearSlot(position);
-            RemoveItem(position);        
+            RemoveItem(position);
+            UIManager.instance.CheckRecipesWithItem(itemStats.itemID,false);
             return balance;
         }
         itemStats.itemCount = balance;
         UpdateCount(position);
+        UIManager.instance.CheckRecipesWithItem(itemStats.itemID, false);
         return 1;
     }
     private SlotPosition Find(int itemId)
@@ -817,6 +819,17 @@ public class EquipmentManager : MonoBehaviour
         }
         return ammoCount > 0;
     }
+    public int CountItems(int id)
+    {
+        var items = FindItems(id);
+        int counter = 0;
+        foreach (var item in items)
+        {
+            counter += GetItemStats(item).itemCount;
+        }
+        return counter;
+    }
+
     public int Reload()
     {
         DecreaseItemCount(Find(ammoID));
@@ -847,15 +860,17 @@ public class EquipmentManager : MonoBehaviour
             }
         }
     }
-
     public void Craft(int itemID)
     {
         Item item = ItemsAsset.instance.GetItem(itemID);
-        AddNewItem(item.GetItemStats());
+        ItemStats itemStats = item.GetItemStats();
+        itemStats.itemCount = item.numberItem;
+        AddNewItem(itemStats);
         for (int i = 0; i < item.crafingIngredients.Length; i++)
         {
             Item.CrafingIngredient ingredient = item.crafingIngredients[i];
             DecreaseItemCount(ingredient.itemID, ingredient.number);
         }
     }
+
 }

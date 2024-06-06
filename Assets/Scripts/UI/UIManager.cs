@@ -6,7 +6,10 @@ using TMPro;
 using System;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Unity.VisualScripting;
+using System.Linq;
+using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
 
 public class EquipmentGrid
 {
@@ -59,6 +62,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] Transform recipes;
     [SerializeField] GameObject recipeIcon;
     [SerializeField] Image selectedRecipeIcon;
+    [SerializeField] TextMeshProUGUI selectedRecipeNumberItems;
     [SerializeField] TextMeshProUGUI selectedRecipeName;
     [SerializeField] TextMeshProUGUI selectedRecipeDescription;
     [SerializeField] Transform ingredients;
@@ -380,7 +384,11 @@ public class UIManager : MonoBehaviour
         background.gameObject.SetActive(e.value);
         equipment.gameObject.SetActive(e.value);
 
-        if (!e.value) TooltipSystem.Hide();
+        if (!e.value)
+        {
+            TooltipSystem.Hide();
+            openWindows.Remove(equipment);
+        }
         else
         {
             openWindows.Add(equipment);
@@ -469,11 +477,10 @@ public class UIManager : MonoBehaviour
 
     private void LoadRecipes()
     {
-        Item[] items = ItemsAsset.instance.GetItems();
-        for (int i = 0; i < items.Length; i++)
+        ReadOnlyCollection<Item> items = ItemsAsset.instance.GetRecipesCrafTable(-1);
+        for (int i = 0; i < items.Count; i++)
         {
             Item item = items[i];
-            if(item.crafingIngredients.Length == 0) continue;
             Transform recipe = Instantiate(itemSlot, recipes).transform;
             recipe.name = item.ID.ToString();
             Transform icon = Instantiate(recipeIcon, recipe).transform;
@@ -490,6 +497,8 @@ public class UIManager : MonoBehaviour
         recipeDescription.gameObject.SetActive(true);
         Item item = ItemsAsset.instance.GetItem(id);
         selectedRecipeIcon.sprite = item.icon;
+        if (item.numberItem != 1) selectedRecipeNumberItems.text = item.numberItem.ToString();
+        else selectedRecipeNumberItems.text = string.Empty;
         selectedRecipeName.text = item.name;
         selectedRecipeDescription.text = item.description;
         if(CanCraft(id))
@@ -574,17 +583,31 @@ public class UIManager : MonoBehaviour
         Dictionary<int,int> items = EquipmentManager.instance.GetItemDictionary();
         for (int i = 0; i < recipes.childCount; i++)
         {
-            Transform child = recipes.GetChild(i);
-            if (CanCraft(int.Parse(child.name), items))
-            {
-                child.GetComponent<Image>().color = Color.white;
-                child.GetChild(0).GetComponent<Image>().color = Color.white;
-            }
-            else
-            {
-                child.GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
-                child.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
-            }
+            CheckRecipe(i, items);
+        }
+    }
+    private void CheckRecipe(Dictionary<int, int> items, int itemID)
+    {
+        int index = recipes.Find(itemID.ToString()).transform.GetSiblingIndex();
+        CheckRecipe(index, items);
+    }
+    private void CheckRecipe(int childIndex, Dictionary<int, int> items)
+    {
+        Transform child = recipes.GetChild(childIndex);
+        Image backgroundItem = child.GetComponent<Image>();
+        if (CanCraft(int.Parse(child.name), items))
+        {
+            if (backgroundItem.color == Color.white) return;
+            backgroundItem.color = Color.white;
+            child.GetChild(0).GetComponent<Image>().color = Color.white;
+            child.SetAsFirstSibling();
+        }
+        else
+        {
+            if (backgroundItem.color != Color.white) return;
+            backgroundItem.color = new Color(1, 1, 1, 0.5f);
+            child.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
+            child.SetAsLastSibling();
         }
     }
     private bool CanCraft(int ID,Dictionary<int,int> items)
@@ -604,7 +627,46 @@ public class UIManager : MonoBehaviour
     public void Craft()
     {
         EquipmentManager.instance.Craft(selectedRecipe);
+        Sounds.instance.Click();
+        Dictionary<int, int> items = EquipmentManager.instance.GetItemDictionary();
+        CheckRecipe(items,selectedRecipe);
+        SelectRecipe(selectedRecipe);
     }
-
-
+    public void CheckRecipesWithItem(int id,bool increasedItemCount)
+    {
+        if (equipment.gameObject.activeSelf)
+        {
+            int counter = EquipmentManager.instance.CountItems(id);
+            ReadOnlyCollection<Item> items = ItemsAsset.instance.GetRecipesCrafTable(-1);
+            Dictionary<int, int> eq = EquipmentManager.instance.GetItemDictionary();
+            foreach (var item in items)
+            {
+                foreach (var ingredient in item.crafingIngredients)
+                {
+                    if (UpdateCheck(item.ID,ingredient, counter, id, eq, increasedItemCount)) break;
+                }
+            }
+        }
+    }
+    private bool UpdateCheck(int idRecipe, Item.CrafingIngredient ingredient,int counter,int id, Dictionary<int, int> eq,bool increasedItemCount)
+    {
+        if (ingredient.itemID == id)
+        {
+            if (increasedItemCount && ingredient.number <= counter)
+            {
+                CheckRecipe(eq, idRecipe);
+                return true;
+            }
+            else if(!increasedItemCount && ingredient.number > counter)
+            {
+                CheckRecipe(eq, idRecipe);
+                return true;
+            }         
+        }
+        return false;
+    }
+    public bool WindowsAreClosed()
+    {
+        return openWindows.Count == 0;
+    }
 }

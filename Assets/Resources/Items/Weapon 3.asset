@@ -18,6 +18,8 @@ MonoBehaviour:
   stackMax: 50
   icon: {fileID: 1848595146, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   crafingIngredients: []
+  craftTables: ffffffff
+  numberItem: 1
   durability: 50
   weaponImage: {fileID: 1329098765, guid: 9bd43db772e8f024da4e01c9497295f8, type: 3}
   hitBoxPoints:

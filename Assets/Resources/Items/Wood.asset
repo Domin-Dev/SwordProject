@@ -20,3 +20,5 @@ MonoBehaviour:
   crafingIngredients:
   - itemID: 103
     number: 0
+  craftTables: ffffffff
+  numberItem: 1

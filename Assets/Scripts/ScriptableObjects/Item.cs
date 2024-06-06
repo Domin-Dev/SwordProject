@@ -14,6 +14,8 @@ public class Item : ScriptableObject
 
     [Header("Craft recipe")]
     public CrafingIngredient[] crafingIngredients;
+    public int[] craftTables;
+    public int numberItem = 1;
     public virtual ItemStats GetItemStats()
     {
         return new ItemStats(ID);

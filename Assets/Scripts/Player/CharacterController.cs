@@ -66,11 +66,11 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     {
         //  if (!IsOwner) return;
         sightDir = MyTools.GetMouseWorldPosition();  
-        heroStateMachine.currentState.FrameUpdate();
+        if(UIManager.instance.WindowsAreClosed())heroStateMachine.currentState.FrameUpdate();
     }
     private void FixedUpdate()
     {
-        heroStateMachine.currentState.FrameFixedUpdate();
+        if(UIManager.instance.WindowsAreClosed()) heroStateMachine.currentState.FrameFixedUpdate();
     }
    
     public void UpdateFlip()

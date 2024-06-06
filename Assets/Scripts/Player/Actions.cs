@@ -45,8 +45,9 @@ public class Actions : MonoBehaviour
     }
     private void Update()
     {
+        if(UIManager.instance.WindowsAreClosed()){ 
         Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-        if(pos != lastPos)
+        if (pos != lastPos)
         {
             lastPos = pos;
             pointerTransform.position = grid.GetPosition(pos);
@@ -57,9 +58,10 @@ public class Actions : MonoBehaviour
             GridObject gridObject = grid.GetValueByXY(pos).gridObject;
             if (gridObject != null && gridObject is GridDoor)
             {
-                Door(gridObject as GridDoor,pos);
+                Door(gridObject as GridDoor, pos);
             }
         }
+    }
     }
 
     private void Door(GridDoor gridDoor,Vector2 position)

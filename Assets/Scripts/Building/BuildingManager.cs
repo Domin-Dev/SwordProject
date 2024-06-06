@@ -67,7 +67,7 @@ public class BuildingManager : MonoBehaviour
     {
         if (buildingMode)
         {
-            if (selectedObjectID > 0)
+            if (selectedObjectID > 0 && UIManager.instance.WindowsAreClosed())
             {
                 Vector2 pos = Actions.GetMousePosXY();
                 if (lastPos != pos) Plan(pos);
@@ -88,30 +88,6 @@ public class BuildingManager : MonoBehaviour
                     planObject.GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetBuildingObjectSprite(selectedObjectID,rotation%rotationStates);
 
                 }
-            }
-            else if (selectedObjectID == 0)
-            {
-                Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-
-                if (pos != startPos)
-                {
-                    startPos = pos;
-                    UpdateBar();
-                }
-
-                //if (Input.GetMouseButtonDown(0))
-                //{
-                //    var obj = grid.GetValueByXY(startPos);
-                //    if (obj.IsBuildObject() && obj.gridObject as ObjectPlan != null)
-                //    {
-                //        if ((obj.gridObject as ObjectPlan).Building(40) >= 1)
-                //        {
-                //            (obj.gridObject as ObjectPlan).objectTransform.GetComponent<SpriteRenderer>().color = Color.white;
-                //        }
-                //        UpdateBar();
-                //        Sounds.instance.Hammer();
-                //    }
-                //}
             }
         }
     }
@@ -304,7 +280,6 @@ public class BuildingManager : MonoBehaviour
         }
         return neighbors;
     }
-
     public void ChangeSprite(Vector2 posXY, int index)
     {
         GridObject gridObject = grid.GetValueByXY(posXY).gridObject;
