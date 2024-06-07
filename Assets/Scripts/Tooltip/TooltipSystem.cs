@@ -16,7 +16,7 @@ public class TooltipSystem : MonoBehaviour
 
     public static void Show(string content,string header = "")
     {
-        timer = Timer.Create(0.45f,() => { current.tooltip.SetText(content, header); });
+        timer = Timer.Create(0.45f,() => { current.tooltip.SetText(content, header); return false;});
     }
     public static void ShowInstant(string content, string header = "")
     {

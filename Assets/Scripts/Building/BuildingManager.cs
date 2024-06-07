@@ -74,6 +74,7 @@ public class BuildingManager : MonoBehaviour
                 if (Input.GetMouseButtonDown(0))
                 {
                     build(pos);
+                    planObject.gameObject.SetActive(false);
                 }
                 if (Input.GetKeyDown(KeyCode.R) && rotationStates > 0)
                 {
@@ -288,7 +289,7 @@ public class BuildingManager : MonoBehaviour
         PolygonCollider2D polygonCollider2D = gridObject.objectTransform.GetComponentInChildren<PolygonCollider2D>();
         polygonCollider2D.points = variant.hitbox;
         polygonCollider2D.usedByComposite = false;
-        Timer.Create(2f, () => { polygonCollider2D.usedByComposite = true; });
+        Timer.Create(2f, () => { polygonCollider2D.usedByComposite = true; return false; });
         ChangePositionPivot(gridObject.objectTransform, gridObject.objectTransform.GetChild(0).TransformPoint(0, variant.minY, 0));
     }
 }

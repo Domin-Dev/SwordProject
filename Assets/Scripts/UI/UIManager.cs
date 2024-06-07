@@ -84,6 +84,8 @@ public class UIManager : MonoBehaviour
     private EquipmentGrid mainEquipmentGrid;
 
     private List<Transform> openWindows = new List<Transform>();
+
+    public event EventHandler windowOpen;
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -163,7 +165,6 @@ public class UIManager : MonoBehaviour
             {
                 Image ammo = ammoBar.GetChild(i).GetComponent<Image>();
                 ammo.color = Color.black;
-                Debug.Log(i);
             }
         }
         else if (lastAmmoCount < e.currentCount)
@@ -391,6 +392,7 @@ public class UIManager : MonoBehaviour
         }
         else
         {
+            windowOpen(this,null);
             openWindows.Add(equipment);
             ClearRecipe();
             CheckRecipes();
@@ -475,9 +477,15 @@ public class UIManager : MonoBehaviour
         else return null;
     }
 
+
+    Dictionary<int, Transform> itemRecipes;
     private void LoadRecipes()
-    {
+    { 
         ReadOnlyCollection<Item> items = ItemsAsset.instance.GetRecipesCrafTable(-1);
+        itemRecipes = new Dictionary<int, Transform>();
+        craftButton.onClick.AddListener(() => { Craft();});
+        craftButton.GetComponent<ButtonHold>().action = () => { Craft(); };
+
         for (int i = 0; i < items.Count; i++)
         {
             Item item = items[i];
@@ -487,6 +495,7 @@ public class UIManager : MonoBehaviour
             icon.GetComponent<Image>().sprite = item.icon;
             icon.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
             recipe.AddComponent<Recipe>().SetID(item.ID);
+            itemRecipes.Add(item.ID, recipe);
         }
     }
 
@@ -508,6 +517,7 @@ public class UIManager : MonoBehaviour
         else
         {
             craftButton.interactable= false;
+            craftButton.GetComponent<ButtonHold>().Cancel();
         }
 
         LoadIngredients(item);
@@ -581,21 +591,16 @@ public class UIManager : MonoBehaviour
     private void CheckRecipes()
     {
         Dictionary<int,int> items = EquipmentManager.instance.GetItemDictionary();
-        for (int i = 0; i < recipes.childCount; i++)
+        foreach (var item in itemRecipes)
         {
-            CheckRecipe(i, items);
+            CheckRecipe(item.Key, items);
         }
     }
-    private void CheckRecipe(Dictionary<int, int> items, int itemID)
+    private void CheckRecipe(int id, Dictionary<int, int> items)
     {
-        int index = recipes.Find(itemID.ToString()).transform.GetSiblingIndex();
-        CheckRecipe(index, items);
-    }
-    private void CheckRecipe(int childIndex, Dictionary<int, int> items)
-    {
-        Transform child = recipes.GetChild(childIndex);
+        Transform child = itemRecipes[id];
         Image backgroundItem = child.GetComponent<Image>();
-        if (CanCraft(int.Parse(child.name), items))
+        if (CanCraft(int.Parse(child.name),items))
         {
             if (backgroundItem.color == Color.white) return;
             backgroundItem.color = Color.white;
@@ -629,7 +634,7 @@ public class UIManager : MonoBehaviour
         EquipmentManager.instance.Craft(selectedRecipe);
         Sounds.instance.Click();
         Dictionary<int, int> items = EquipmentManager.instance.GetItemDictionary();
-        CheckRecipe(items,selectedRecipe);
+        CheckRecipe(selectedRecipe, items);
         SelectRecipe(selectedRecipe);
     }
     public void CheckRecipesWithItem(int id,bool increasedItemCount)
@@ -654,12 +659,12 @@ public class UIManager : MonoBehaviour
         {
             if (increasedItemCount && ingredient.number <= counter)
             {
-                CheckRecipe(eq, idRecipe);
+                CheckRecipe(idRecipe, eq);
                 return true;
             }
             else if(!increasedItemCount && ingredient.number > counter)
             {
-                CheckRecipe(eq, idRecipe);
+                CheckRecipe(idRecipe, eq);
                 return true;
             }         
         }

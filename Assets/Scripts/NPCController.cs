@@ -54,7 +54,7 @@ public class NPCController : MonoBehaviour, ILifePoints,IUsesWeapons
     {
         CoolDownUpdate();
         heroStateMachine.currentState.FrameUpdate();
-        if(target != null)attackModule.Updateflip(target.position);
+        if(target != null) attackModule.Updateflip(target.position);
     }
     private void FixedUpdate()
     {

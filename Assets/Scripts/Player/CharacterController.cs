@@ -44,6 +44,17 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
         buildingState = new BuildingState(this, heroStateMachine);
     }
 
+    private void SetUpUI()
+    {
+        UIManager.instance.windowOpen += WindowOpen;
+    }
+
+    private void WindowOpen(object sender, EventArgs e)
+    {
+        rigidbody2D.velocity = Vector2.zero;
+        animator.SetBool("Idle", true);
+    }
+
     #endregion
 
     private CharacterSpriteController characterSpriteController;
@@ -55,7 +66,8 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
         handsController = GetComponent<HandsController>();
         animator = GetComponent<Animator>();   
         sortingGroup = GetComponent<SortingGroup>();
-        handsController.SetController(this,"Enemy");  
+        handsController.SetController(this,"Enemy");
+        SetUpUI();
         SetStateMachine();
     }
     private void Start()
@@ -107,6 +119,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
             }
             else
             {
+                GridVisualization.instance.PlayerMovement(transform.position);
                 animator.SetBool("Idle", false);
             }
         }

@@ -19,20 +19,26 @@ public class Timer
         }
     }
 
-    private Action action;
+    private Func<bool> func;
     private float timer;
     private bool timerIsOver = false;
 
-    public static Timer Create(float time, Action action)
+
+    public static Timer Create(float time, Func<bool> func)
     {
-        Timer timer = new Timer(time, action);
+        Timer timer = new Timer(time, func);
         return timer;         
+    }
+    public static Timer Create(Func<bool> func)
+    {
+        Timer timer = new Timer(func);
+        return timer;
     }
 
     private static TimersUpdater updater;
-    public Timer(float timer,Action action)
+    public Timer(float timer, Func<bool> func)
     {
-        this.action = action;
+        this.func = func;
         this.timer = timer;
         TimersUpdater timersUpdater;
         if (updater == null)
@@ -46,6 +52,31 @@ public class Timer
         }
         timersUpdater.action += Update;        
     }
+
+    public Timer(Func<bool> func)
+    {
+        this.func = func;
+        TimersUpdater timersUpdater;
+        if (updater == null)
+        {
+            timersUpdater = new GameObject("Updater", typeof(TimersUpdater)).GetComponent<TimersUpdater>();
+            updater = timersUpdater;
+        }
+        else
+        {
+            timersUpdater = updater;
+        }
+        timersUpdater.action += UpdateFunc;
+    }
+
+    public void UpdateFunc()
+    {
+        if(func())
+        {
+            updater.action -= UpdateFunc;
+        }
+    }
+
     public void Update()
     {
         if(!timerIsOver)
@@ -54,12 +85,16 @@ public class Timer
             if (timer < 0)
             {
                 timerIsOver = true;
-                action();
+                func();
                 updater.action -= Update;
             }
         }
     }
 
+    public void UpdateAction()
+    {
+
+    }
     public void Cancel()
     {
         if(!timerIsOver)

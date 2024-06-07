@@ -29,10 +29,15 @@ public class ItemList : MonoBehaviour
         for (int i = 0; i < loadedItems.Length; i++)
         {
             Item item = loadedItems[i];
-            if(items.ContainsKey(item.ID)) Debug.LogError(item.name +" " + item.ID);
-            items.Add(item.ID, item);
+            if (!items.ContainsKey(item.ID))
+            {
+                items.Add(item.ID, item);
+            }
+            else
+            {
+                Debug.Log("Error:" + item.ID);
+            }
         }
-        Debug.Log(items.Count);
     }
 
     public static Texture2D GetIcon(Item item)

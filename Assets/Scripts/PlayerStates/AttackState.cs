@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 public class AttackState : HeroState
 {
     CharacterController controller;
@@ -12,6 +13,7 @@ public class AttackState : HeroState
         if (!controller.handsController.isGun)
         {
             controller.handsController.SetAttackVector(new Vector3(0, 0, 100), new Vector3(0.06f, 0, 0));
+            Actions.instance.Destroy(controller.handsController.selectedItem);
         }
         else
         {

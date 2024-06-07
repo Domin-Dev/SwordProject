@@ -45,23 +45,27 @@ public class Actions : MonoBehaviour
     }
     private void Update()
     {
-        if(UIManager.instance.WindowsAreClosed()){ 
-        Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-        if (pos != lastPos)
-        {
-            lastPos = pos;
-            pointerTransform.position = grid.GetPosition(pos);
-        }
-
-        if (Input.GetMouseButtonDown(1))
-        {
-            GridObject gridObject = grid.GetValueByXY(pos).gridObject;
-            if (gridObject != null && gridObject is GridDoor)
+        if(UIManager.instance.WindowsAreClosed())
+        { 
+            Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
+            if(pos != lastPos)
             {
-                Door(gridObject as GridDoor, pos);
+                lastPos = pos;
+                pointerTransform.position = grid.GetPosition(pos);
+            }
+
+            if(Input.GetMouseButtonDown(1))
+            {
+                GridObject gridObject = grid.GetValueByXY(pos).gridObject;
+                if (gridObject != null)
+                {
+                    if (gridObject is GridDoor)
+                    {
+                        Door(gridObject as GridDoor, pos);
+                    }
+                }
             }
         }
-    }
     }
 
     private void Door(GridDoor gridDoor,Vector2 position)
@@ -71,5 +75,24 @@ public class Actions : MonoBehaviour
         else
             BuildingManager.instance.ChangeSprite(position, 0);
         gridDoor.doorIsClosed = !gridDoor.doorIsClosed;
+    }
+    public void Destroy(ItemStats itemStats)
+    {
+        if (itemStats != null)
+        {
+            Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
+            GridObject gridObject = grid.GetValueByXY(pos).gridObject;
+            if (gridObject != null)
+            {
+                Sounds.instance.Shield();
+                Weapon item = ItemsAsset.instance.GetItem(itemStats.itemID) as Weapon;
+                if (item != null)
+                {
+                    gridObject.DecreaseHitPoints(item.damage);
+                    Debug.Log(gridObject.GetBarValue());
+                    Timer.Create()
+                }
+            }
+        }
     }
 }

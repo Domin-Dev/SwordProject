@@ -4,6 +4,8 @@ using UnityEngine;
 public interface IGetBarValue
 {
     public float GetBarValue();
+    public void IncreaseHitPoints(float value);
+    public void DecreaseHitPoints(float value);
 }
 public class GridDoor : GridObject
 {
@@ -25,12 +27,22 @@ public class GridObject: IGetBarValue
     public GridObject(int ID,int indexVariant,Transform obj)
     {
         this.ID = ID;
+        this.maxHitPoints = (ItemsAsset.instance.GetItem(ID) as BuildingItem).durability;
+        this.hitPoints = maxHitPoints;
         this.indexVariant = indexVariant;
         this.objectTransform = obj;
     }
     public float GetBarValue()
     {
         return hitPoints / maxHitPoints;
+    }
+    public void DecreaseHitPoints(float value)
+    {
+        hitPoints = Mathf.Clamp(hitPoints - value, 0, maxHitPoints);
+    }
+    public void IncreaseHitPoints(float value)
+    {
+        hitPoints = Mathf.Clamp(hitPoints + value, 0, maxHitPoints);
     }
 }
 

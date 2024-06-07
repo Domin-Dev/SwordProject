@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2768a2250e2de5d4aa957a906e0eb4f7, type: 3}
-  m_Name: Item
+  m_Name: PlankWall
   m_EditorClassIdentifier: 
   name: Plank Wall
   description: 
@@ -19,10 +19,10 @@ MonoBehaviour:
   icon: {fileID: -1935859808, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   crafingIngredients:
   - itemID: 22
-    number: 5
+    number: 3
   craftTables: ffffffff
-  numberItem: 1
-  durability: 0
+  numberItem: 2
+  durability: 200
   texture: {fileID: 2800000, guid: 9755133acbc71554bbe177a9cd599766, type: 3}
   objectVariants:
   - variants:

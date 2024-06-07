@@ -355,10 +355,9 @@ public class HandsController : MonoBehaviour
     public void SetAttackVector(Vector3 Angle, Vector3 position)
     {       
         canAttack = false;
-        Timer.Create(setTime, () => { canAttack = true; });
+        Timer.Create(setTime, () => { canAttack = true; return false; });
         attackItem = fliper;
         
-
         attackAngle = hand.localEulerAngles - Angle;  
         this.firstHand.AttackSwitch(true);
         lastWeaponPosition = attackItem.localPosition;

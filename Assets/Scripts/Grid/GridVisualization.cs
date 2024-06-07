@@ -311,9 +311,12 @@ public class GridVisualization: MonoBehaviour
         mesh.triangles = triangles;
         this.GetComponent<MeshFilter>().mesh = mesh;
     }
-
     private bool IsGrass(int tileID)
     {
        return TilesUV.ContainsKey(tileID) && TilesUV[tileID].uv00Grass != null;
+    }
+    public void PlayerMovement(Vector2 pos)
+    {
+       // Debug.Log(grid.GetXY(pos));
     }
 }
