@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using static UnityEngine.Rendering.DebugUI;
+using UnityEngine.Formats.Alembic.Sdk;
 
 public class Actions : MonoBehaviour
 {
@@ -86,11 +89,37 @@ public class Actions : MonoBehaviour
             {
                 Sounds.instance.Shield();
                 Weapon item = ItemsAsset.instance.GetItem(itemStats.itemID) as Weapon;
+
+                Transform obj = gridObject.objectTransform;
+                float lastRotation = transform.eulerAngles.z;
                 if (item != null)
                 {
                     gridObject.DecreaseHitPoints(item.damage);
-                    Debug.Log(gridObject.GetBarValue());
-                    Timer.Create()
+                    Timer.Create(
+                    ()=>
+                    {
+                        float scaleX = Mathf.LerpAngle(obj.localScale.x, 0.95f, Time.deltaTime * 25f);
+                        float scaleY = Mathf.LerpAngle(obj.localScale.y, 0.95f, Time.deltaTime * 18f);
+                        obj.localScale = new Vector3(scaleX, scaleY);
+                        if(obj.localScale.x < 0.955f)
+                        {
+                            return true;
+                        }
+                        return false;
+                    },
+                    ()=>
+                    {
+                        float scaleX = Mathf.LerpAngle(obj.localScale.x, 1f, Time.deltaTime * 30);
+                        float scaleY = Mathf.LerpAngle(obj.localScale.y, 1f, Time.deltaTime * 25);
+                        obj.localScale = new Vector3(scaleX, scaleY);
+                        if (obj.localScale.x > 0.99f)
+                        {
+                            obj.localScale = new Vector2(1f, 1f);
+                            return true;
+                        }
+                        return false;
+                    }
+                    );
                 }
             }
         }

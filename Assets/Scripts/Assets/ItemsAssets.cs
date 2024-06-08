@@ -135,9 +135,16 @@ public class ItemsAsset : MonoBehaviour
     }
     public TooltipInfo GetTooltipInfo(int itemID)
     {
-        Item item = GetItem(itemID);
+        return GetTooltipInfo(GetItem(itemID));
+    }
+
+    public TooltipInfo GetTooltipInfo(Item item)
+    {
         return new TooltipInfo(item.description, item.name);
     }
+
+
+
     public ItemStats GetItemStats(int itemID, int itemCount = 1)
     {
         ItemStats item = GetItem(itemID).GetItemStats();

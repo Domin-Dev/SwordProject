@@ -20,6 +20,10 @@ public class Timer
     }
 
     private Func<bool> func;
+    private Func<bool> backFunc;
+
+    bool isBack = false;
+
     private float timer;
     private bool timerIsOver = false;
 
@@ -29,9 +33,9 @@ public class Timer
         Timer timer = new Timer(time, func);
         return timer;         
     }
-    public static Timer Create(Func<bool> func)
+    public static Timer Create(Func<bool> func, Func<bool> backfunc)
     {
-        Timer timer = new Timer(func);
+        Timer timer = new Timer(func,backfunc);
         return timer;
     }
 
@@ -53,9 +57,10 @@ public class Timer
         timersUpdater.action += Update;        
     }
 
-    public Timer(Func<bool> func)
+    public Timer(Func<bool> func, Func<bool> backfunc)
     {
         this.func = func;
+        this.backFunc = backfunc;
         TimersUpdater timersUpdater;
         if (updater == null)
         {
@@ -71,9 +76,19 @@ public class Timer
 
     public void UpdateFunc()
     {
-        if(func())
+        if(!isBack)
         {
-            updater.action -= UpdateFunc;
+            if (func())
+            {
+                isBack = true;
+            }
+        }
+        else
+        {
+            if(backFunc())
+            {
+                updater.action -= UpdateFunc;
+            }
         }
     }
 
@@ -91,16 +106,19 @@ public class Timer
         }
     }
 
-    public void UpdateAction()
-    {
-
-    }
     public void Cancel()
     {
         if(!timerIsOver)
         {
             timerIsOver = true;
-            updater.action -= Update;
+            if (backFunc != null)
+            {
+                updater.action -= UpdateFunc;
+            }
+            else
+            {
+                updater.action -= Update;
+            }
         }
     }
 

@@ -23,8 +23,7 @@ public class IdleState : HeroState
         controller.UpdateFlip();
         controller.UpdateCharacterSprites();
 
-
-        if(Input.GetMouseButtonDown(0) && controller.handsController.canAttack)
+        if(Input.GetMouseButton(0) && controller.handsController.canAttack)
         {
             controller.handsController.Use();
             heroStateMachine.ChangeState(controller.attackState);

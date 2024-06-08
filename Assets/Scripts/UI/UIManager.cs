@@ -1,15 +1,12 @@
-using UnityEngine.UI;
-using UnityEngine;
-using Unity.Netcode;
-using Unity.Mathematics;
-using TMPro;
 using System;
-using UnityEditor;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using TMPro;
+using Unity.Mathematics;
+using Unity.Netcode;
 using Unity.VisualScripting;
-using System.Linq;
-using static UnityEditor.Experimental.AssetDatabaseExperimental.AssetDatabaseCounters;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class EquipmentGrid
 {
@@ -61,12 +58,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] Transform recipeDescription;
     [SerializeField] Transform recipes;
     [SerializeField] GameObject recipeIcon;
-    [SerializeField] Image selectedRecipeIcon;
-    [SerializeField] TextMeshProUGUI selectedRecipeNumberItems;
-    [SerializeField] TextMeshProUGUI selectedRecipeName;
-    [SerializeField] TextMeshProUGUI selectedRecipeDescription;
     [SerializeField] Transform ingredients;
-    [SerializeField] Button craftButton;
     #endregion
 
     private const float buttonScale = 1f;
@@ -99,6 +91,30 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         UpdateButtonSize();
+    }
+
+
+    public void FixedUpdate()
+    {
+        MultiCraft();
+    }
+
+
+    private int i = 0;
+    private int k = 0;
+    private bool isHold;
+    private void MultiCraft()
+    {
+        if (isHold)
+        {
+            i++;
+            k++;
+            if (i >= (7 - k / 20) + 1)
+            {
+                Craft(selectedID);
+                i = 0;
+            }
+        }
     }
 
     private void SetGrids()
@@ -394,7 +410,7 @@ public class UIManager : MonoBehaviour
         {
             windowOpen(this,null);
             openWindows.Add(equipment);
-            ClearRecipe();
+            SelectItem(-1);
             CheckRecipes();
         }
     }
@@ -477,14 +493,12 @@ public class UIManager : MonoBehaviour
         else return null;
     }
 
-
     Dictionary<int, Transform> itemRecipes;
     private void LoadRecipes()
     { 
         ReadOnlyCollection<Item> items = ItemsAsset.instance.GetRecipesCrafTable(-1);
         itemRecipes = new Dictionary<int, Transform>();
-        craftButton.onClick.AddListener(() => { Craft();});
-        craftButton.GetComponent<ButtonHold>().action = () => { Craft(); };
+      //  craftButton.GetComponent<ButtonHold>().action = () => { Craft(); };
 
         for (int i = 0; i < items.Count; i++)
         {
@@ -493,60 +507,15 @@ public class UIManager : MonoBehaviour
             recipe.name = item.ID.ToString();
             Transform icon = Instantiate(recipeIcon, recipe).transform;
             icon.GetComponent<Image>().sprite = item.icon;
+            if(item.numberItem != 1) icon.GetComponentInChildren<TextMeshProUGUI>().text = item.numberItem.ToString();
             icon.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
             recipe.AddComponent<Recipe>().SetID(item.ID);
             itemRecipes.Add(item.ID, recipe);
         }
     }
 
-    int selectedRecipe;
-    public void SelectRecipe(int id)
-    {
-        selectedRecipe = id;
-        recipeDescription.gameObject.SetActive(true);
-        Item item = ItemsAsset.instance.GetItem(id);
-        selectedRecipeIcon.sprite = item.icon;
-        if (item.numberItem != 1) selectedRecipeNumberItems.text = item.numberItem.ToString();
-        else selectedRecipeNumberItems.text = string.Empty;
-        selectedRecipeName.text = item.name;
-        selectedRecipeDescription.text = item.description;
-        if(CanCraft(id))
-        {
-            craftButton.interactable = true;
-        }
-        else
-        {
-            craftButton.interactable= false;
-            craftButton.GetComponent<ButtonHold>().Cancel();
-        }
-
-        LoadIngredients(item);
-    }
-    private void LoadIngredients(Item item)
-    {
-        for (int i = 0; i < 8; i++)
-        {
-            Transform slot = ingredients.GetChild(i);
-            if (item.crafingIngredients.Length > i)
-            {
-                slot.gameObject.SetActive(true);
-                Item.CrafingIngredient ingredient = item.crafingIngredients[i];          
-                Sprite sprite = ItemsAsset.instance.GetIcon(ingredient.itemID);
-                slot.GetChild(0).GetComponent<Image>().sprite = sprite;
-                slot.GetComponentInChildren<TextMeshProUGUI>().text = ingredient.number.ToString();
-            }
-            else
-            {
-                slot.gameObject.SetActive(false);
-            }
-        }        
-    }
-    public void ClearRecipe()
-    {
-        recipeDescription.gameObject.SetActive(false);
-    }
-
     string lastValue = string.Empty;
+    int selectedID = -1;
     private bool CheckLastValue(string value)
     {
         return  (value.Length == 0 && lastValue.Length == 0) || 
@@ -605,14 +574,14 @@ public class UIManager : MonoBehaviour
             if (backgroundItem.color == Color.white) return;
             backgroundItem.color = Color.white;
             child.GetChild(0).GetComponent<Image>().color = Color.white;
-            child.SetAsFirstSibling();
+           // child.SetAsFirstSibling();
         }
         else
         {
             if (backgroundItem.color != Color.white) return;
             backgroundItem.color = new Color(1, 1, 1, 0.5f);
             child.GetChild(0).GetComponent<Image>().color = new Color(1, 1, 1, 0.5f);
-            child.SetAsLastSibling();
+           // child.SetAsLastSibling();
         }
     }
     private bool CanCraft(int ID,Dictionary<int,int> items)
@@ -629,13 +598,71 @@ public class UIManager : MonoBehaviour
     {
        return CanCraft(ID, EquipmentManager.instance.GetItemDictionary());
     }
-    public void Craft()
+    public void Craft(int id)
     {
-        EquipmentManager.instance.Craft(selectedRecipe);
-        Sounds.instance.Click();
-        Dictionary<int, int> items = EquipmentManager.instance.GetItemDictionary();
-        CheckRecipe(selectedRecipe, items);
-        SelectRecipe(selectedRecipe);
+        if (selectedID != id)
+        {
+            SelectItem(id);
+            return;
+        }
+
+
+        if (CanCraft(id))
+        {
+            EquipmentManager.instance.Craft(id);
+            Sounds.instance.Click();
+            Dictionary<int, int> items = EquipmentManager.instance.GetItemDictionary();
+            CheckRecipe(id, items);      
+        }
+    }
+    public void LoadIngredients(int id)
+    {
+        Item item = ItemsAsset.instance.GetItem(id);
+        if (item != null)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                if (item.crafingIngredients.Length > i)
+                {
+                    Transform child = ingredients.GetChild(i);
+                    Item.CrafingIngredient crafingIngredient = item.crafingIngredients[i];
+                    Item ingredient = ItemsAsset.instance.GetItem(crafingIngredient.itemID);
+                    child.gameObject.SetActive(true);
+                    child.GetChild(0).GetComponent<Image>().sprite = ingredient.icon;
+                    child.GetChild(0).GetComponentInChildren<TextMeshProUGUI>().text = crafingIngredient.number.ToString();
+                    child.GetChild(1).GetComponent<TextMeshProUGUI>().text = ingredient.name;
+                }
+                else
+                {
+                    ingredients.GetChild(i).gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    private void SelectItem(int id)
+    {
+        if (id >= 0)
+        {
+            if (itemRecipes.ContainsKey(selectedID)) itemRecipes[selectedID].GetComponent<Image>().sprite = unSelected;
+            selectedID = id;
+            LoadIngredients(id);
+            itemRecipes[id].GetComponent<Image>().sprite = selected;
+        }
+        else
+        {
+            if (itemRecipes.ContainsKey(selectedID)) itemRecipes[selectedID].GetComponent<Image>().sprite = unSelected;
+            selectedID = id;
+            ClearIngredients();
+        }
+    }
+    public void ClearIngredients()
+    {
+        selectedID = -1;
+        for (int i = 0; i < 5; i++)
+        {
+            ingredients.GetChild(i).gameObject.SetActive(false);
+        }
     }
     public void CheckRecipesWithItem(int id,bool increasedItemCount)
     {
@@ -673,5 +700,26 @@ public class UIManager : MonoBehaviour
     public bool WindowsAreClosed()
     {
         return openWindows.Count == 0;
+    }
+
+    Timer timer;
+
+    public void ButtonIsHolding(bool value,int id)
+    {
+        if(value)
+        {
+            k = 0;
+            timer = Timer.Create(0.2f, () =>
+            {
+                SelectItem(id);
+                isHold = true;
+                return false;
+            });
+        }
+        else
+        {
+            isHold = false;
+            timer.Cancel();
+        }
     }
 }

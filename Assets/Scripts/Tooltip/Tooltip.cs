@@ -37,7 +37,6 @@ public class Tooltip : MonoBehaviour
         layoutElement.enabled = (headerLength > characterWrapLimit || contentLength > characterWrapLimit) ? true : false;     
     }
 
-
     public void Show()
     {
         isShow = true;
