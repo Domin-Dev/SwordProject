@@ -61,6 +61,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] Transform ingredients;
     #endregion
 
+    [SerializeField] Transform collectedItems;
+
     private const float buttonScale = 1f;
     private const float selectedButtonScale = 1.1f;
 
@@ -721,5 +723,51 @@ public class UIManager : MonoBehaviour
             isHold = false;
             timer.Cancel();
         }
+    }
+
+    Timer[] collectedItemTimers = new Timer[5];
+    public void NewCollectedItem(ItemStats stats)
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            Debug.Log(collectedItemTimers[i]);
+            if (collectedItemTimers[i] == null)
+            {
+                Transform item = collectedItems.GetChild(i);
+                CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
+                canvasGroup.alpha = 1f;
+                item.gameObject.SetActive(true);
+                item.SetAsLastSibling();
+                SetCollectItem(stats, item);
+                collectedItemTimers[i] = Timer.Create(1f, () => 
+                { 
+                    collectedItemTimers[i] = Timer.Create(() => 
+                    {
+                        canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha,0, Time.deltaTime * 7f);
+                        if(canvasGroup.alpha < 0.1f)
+                        {
+                            return true;
+                        }
+                        return false;
+                    },
+                    () =>
+                    {
+                        collectedItemTimers[i] = null;
+                        item.gameObject.SetActive(false);
+                        return true;
+                    });
+                    return false; 
+                });
+                break;
+            }
+        }
+    }
+
+    private void SetCollectItem(ItemStats stats,Transform obj)
+    {
+        Item item = ItemsAsset.instance.GetItem(stats.itemID);
+        obj.GetChild(0).GetComponent<TextMeshProUGUI>().text = "+"+stats.itemCount;
+        obj.GetChild(1).GetComponent<Image>().sprite = item.icon;
+        obj.GetChild(2).GetComponent<TextMeshProUGUI>().text = item.name;
     }
 }

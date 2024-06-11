@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using static UnityEngine.Rendering.DebugUI;
-using UnityEngine.Formats.Alembic.Sdk;
 
 public class Actions : MonoBehaviour
 {
@@ -84,7 +82,8 @@ public class Actions : MonoBehaviour
         if (itemStats != null)
         {
             Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-            GridObject gridObject = grid.GetValueByXY(pos).gridObject;
+            GridTile gridTile = grid.GetValueByXY(pos);
+            GridObject gridObject = gridTile.gridObject;
             if (gridObject != null)
             {
                 Sounds.instance.Shield();
@@ -94,32 +93,36 @@ public class Actions : MonoBehaviour
                 float lastRotation = transform.eulerAngles.z;
                 if (item != null)
                 {
-                    gridObject.DecreaseHitPoints(item.damage);
-                    Timer.Create(
-                    ()=>
+                    VariantItem variantItem = ItemsAsset.instance.GetItem(gridObject.ID) as VariantItem;
+                    Instantiate(variantItem.HitParticles, gridObject.objectTransform.position + (Vector3)variantItem.objectVariants[gridObject.indexVariant].variants[0].particlePoint, Quaternion.identity);
+                    if(gridTile.DecreaseHitPoints(20))
                     {
-                        float scaleX = Mathf.LerpAngle(obj.localScale.x, 0.95f, Time.deltaTime * 25f);
-                        float scaleY = Mathf.LerpAngle(obj.localScale.y, 0.95f, Time.deltaTime * 18f);
-                        obj.localScale = new Vector3(scaleX, scaleY);
-                        if(obj.localScale.x < 0.955f)
+                        Timer.Create(
+                        () =>
                         {
-                            return true;
-                        }
-                        return false;
-                    },
-                    ()=>
-                    {
-                        float scaleX = Mathf.LerpAngle(obj.localScale.x, 1f, Time.deltaTime * 30);
-                        float scaleY = Mathf.LerpAngle(obj.localScale.y, 1f, Time.deltaTime * 25);
-                        obj.localScale = new Vector3(scaleX, scaleY);
-                        if (obj.localScale.x > 0.99f)
+                            float scaleX = Mathf.LerpAngle(obj.localScale.x, 0.80f, Time.deltaTime * 20f);
+                            float scaleY = Mathf.LerpAngle(obj.localScale.y, 0.95f, Time.deltaTime * 18f);
+                            obj.localScale = new Vector3(scaleX, scaleY);
+                            if (obj.localScale.x < 0.805f)
+                            {
+                                return true;
+                            }
+                            return false;
+                        },
+                        () =>
                         {
-                            obj.localScale = new Vector2(1f, 1f);
-                            return true;
+                            float scaleX = Mathf.LerpAngle(obj.localScale.x, 1f, Time.deltaTime * 30);
+                            float scaleY = Mathf.LerpAngle(obj.localScale.y, 1f, Time.deltaTime * 25);
+                            obj.localScale = new Vector3(scaleX, scaleY);
+                            if (obj.localScale.x > 0.99f)
+                            {
+                                obj.localScale = new Vector2(1f, 1f);
+                                return true;
+                            }
+                            return false;
                         }
-                        return false;
+                        );
                     }
-                    );
                 }
             }
         }

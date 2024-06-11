@@ -9,6 +9,10 @@ public class VariantItemEditor : ItemEditor
 {
     VariantItem variantItem;
     SerializedProperty serializedProperty;
+
+    static readonly Color particlePointColor = new Color(1, 0, 0, 1);
+
+
     private void OnEnable()
     {
         variantItem = target as VariantItem;
@@ -49,6 +53,8 @@ public class VariantItemEditor : ItemEditor
 
     private void Cut(Texture2D texture, List<ObjectVariant> objectVariants, int k,int numberVariant)
     {
+        Color[] pointsColor = { particlePointColor };
+
         for (int i = 0; i < k; i++)
         {
             List<Variant> variants = new List<Variant>();
@@ -57,8 +63,9 @@ public class VariantItemEditor : ItemEditor
                 Sprite sprite = Sprite.Create(texture, new Rect(i * 27, j * 102, 27, 51), new Vector2(0.5f, 1f / 51f));
                 Sprite hitbox = Sprite.Create(texture, new Rect(i * 27, j * 102 + 51, 27, 51), Vector2.zero);
                 Cutter cutter = new Cutter(hitbox, sprite.pivot);
+                Vector2?[] points = cutter.GetPoints(pointsColor,MyTools.hitboxColor);
                 Vector2[] hitboxArray = cutter.CutHitBox(MyTools.hitboxColor);
-                variants.Add(new Variant(hitboxArray, sprite, hitboxArray[0].y));
+                variants.Add(new Variant(hitboxArray, sprite, hitboxArray[0].y, points[0].Value));
             }
 
             objectVariants.Add(new ObjectVariant(variants.ToArray()));

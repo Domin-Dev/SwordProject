@@ -5,7 +5,7 @@ public interface IGetBarValue
 {
     public float GetBarValue();
     public void IncreaseHitPoints(float value);
-    public void DecreaseHitPoints(float value);
+    public bool DecreaseHitPoints(float value);
 }
 public class GridDoor : GridObject
 {
@@ -36,9 +36,14 @@ public class GridObject: IGetBarValue
     {
         return hitPoints / maxHitPoints;
     }
-    public void DecreaseHitPoints(float value)
+    public bool DecreaseHitPoints(float value)
     {
         hitPoints = Mathf.Clamp(hitPoints - value, 0, maxHitPoints);
+        if(hitPoints == 0)
+        {
+            return false;
+        }
+        return true;
     }
     public void IncreaseHitPoints(float value)
     {

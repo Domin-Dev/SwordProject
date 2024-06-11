@@ -1,5 +1,5 @@
 ﻿
-public class GridTile
+public class GridTile: IGetBarValue
 {
     public int tileID;
     public int borders;
@@ -31,7 +31,6 @@ public class GridTile
         this.gridObject = gridObject;
         grid.TObjectChanged(x, y);
     }
-
     public bool IsBuildObject()
     {
         return gridObject != null;
@@ -40,10 +39,25 @@ public class GridTile
     {  
         return IsBuildObject() && gridObject.ID == id; 
     }
-
     public override string ToString()
     {
         return tileID.ToString();
     }
-
+    public float GetBarValue()
+    {
+       return gridObject.GetBarValue();
+    }
+    public void IncreaseHitPoints(float value)
+    {
+       gridObject.IncreaseHitPoints(value);       
+    }
+    public bool DecreaseHitPoints(float value)
+    {
+        if(!gridObject.DecreaseHitPoints(value))
+        {
+            GridVisualization.instance.DestroyObject(this);
+            return false;
+        }
+        return true;
+    }
 }

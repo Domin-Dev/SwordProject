@@ -51,4 +51,11 @@ public static class MyTools
         textMesh.color = color;
         return textMesh;
     }
+    public static  void ChangePositionPivot(Transform transform, Vector3 newPosition)
+    {
+        Transform child = transform.GetChild(0);
+        child.SetParent(null);
+        transform.position = newPosition;
+        child.SetParent(transform);
+    }
 }

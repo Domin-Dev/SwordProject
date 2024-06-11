@@ -44,6 +44,7 @@ public class BuildingManager : MonoBehaviour
 
     private void Awake()
     {
+   
         if (instance == null)
         {
             instance = this;
@@ -183,7 +184,7 @@ public class BuildingManager : MonoBehaviour
         Sounds.instance.Hammer();
         Transform obj = Instantiate(buildingPrefab,grid.GetPosition(posXY), Quaternion.identity, parent).transform;
         grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID,0,obj);
-        SetNewSprite(posXY);
+        GridVisualization.instance.SetNewSprite(posXY,selectedObjectID);
         builtObject(this, null);
     }
     private void BuildFloor(Vector2 posXY)
@@ -209,7 +210,7 @@ public class BuildingManager : MonoBehaviour
         obj.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
         obj.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
         CreateGridObject(posXY, rotation % rotationStates, obj.parent);
-        ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0));
+        MyTools.ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0));
         builtObject(this, null);
     }
     private void CreateGridObject(Vector2 posXY,int indexVariant, Transform buildingObj)
@@ -224,63 +225,6 @@ public class BuildingManager : MonoBehaviour
         }
         gridObject.gridObject = new GridObject(selectedObjectID,indexVariant, buildingObj);
     }
-    private void SetNewSprite(Vector2 positionXY)
-    {
-        bool[] neighbors = GetNeighbors(positionXY);
-        for (int i = 0; i < 4; i++)
-        {
-            if (neighbors[i]) UpdateSprite(positionXY + MyTools.directions4[i]);
-        }
-        UpdateSprite(positionXY);
-    }
-    private void UpdateSprite(Vector2 positionXY)
-    {
-        GridObject gridObject = grid.GetValueByXY(positionXY).gridObject;
-        bool[] neighbors = GetNeighbors(positionXY);
-        int value = 0;
-
-        for (int i = 0; i < neighbors.Length; i++)
-        {
-            if (neighbors[i])
-            {
-                value +=(int)math.pow(2f,i);
-            }
-        }
-
-        if (neighbors[2])
-        {
-            gridObject.objectTransform.GetComponent<SortingGroup>().sortingOrder = 1;
-        }
-        else
-        {
-            gridObject.objectTransform.GetComponent<SortingGroup>().sortingOrder = 0;
-        }
-
-        Transform child = gridObject.objectTransform.GetChild(0);
-        ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(selectedObjectID, value);
-
-        child.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
-        child.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
-        ChangePositionPivot(gridObject.objectTransform,child.TransformPoint(0, objectVariant.variants[0].minY, 0));
-    }
-    private void ChangePositionPivot(Transform transform,Vector3 newPosition)
-    {
-        Transform child = transform.GetChild(0);
-        child.SetParent(null);
-        transform.position = newPosition;
-        child.SetParent(transform);
-    }
-    private bool[] GetNeighbors(Vector2 positionXY)
-    {
-        bool[] neighbors = new bool[4];
-        for (int i = 0; i < 4; i++)
-        {
-            var obj = grid.GetValueByXY(positionXY + MyTools.directions4[i]);
-            if (obj != null && obj.IsBuildObject(selectedObjectID)) neighbors[i] = true;
-            else neighbors[i] = false;
-        }
-        return neighbors;
-    }
     public void ChangeSprite(Vector2 posXY, int index)
     {
         GridObject gridObject = grid.GetValueByXY(posXY).gridObject;
@@ -290,6 +234,6 @@ public class BuildingManager : MonoBehaviour
         polygonCollider2D.points = variant.hitbox;
         polygonCollider2D.usedByComposite = false;
         Timer.Create(2f, () => { polygonCollider2D.usedByComposite = true; return false; });
-        ChangePositionPivot(gridObject.objectTransform, gridObject.objectTransform.GetChild(0).TransformPoint(0, variant.minY, 0));
+        MyTools.ChangePositionPivot(gridObject.objectTransform, gridObject.objectTransform.GetChild(0).TransformPoint(0, variant.minY, 0));
     }
 }

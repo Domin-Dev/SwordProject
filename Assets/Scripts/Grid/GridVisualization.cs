@@ -1,11 +1,9 @@
 
 
 using System.Collections.Generic;
-using Unity.VisualScripting;
-using UnityEditor;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.U2D;
 
 
 public class TileUV
@@ -27,6 +25,7 @@ public class TileUV
 }
 public class GridVisualization: MonoBehaviour
 {
+    [SerializeField] public GameObject worldItem;
     public Grid<GridTile> grid { set; get; }
     public Dictionary<int, TileUV> TilesUV { get;private set; }
 
@@ -44,6 +43,7 @@ public class GridVisualization: MonoBehaviour
     public static GridVisualization instance { private set; get; }
     private void Awake()
     {
+        Application.targetFrameRate = 60;
         if (instance == null)
         {
             instance = this;
@@ -173,7 +173,7 @@ public class GridVisualization: MonoBehaviour
         TileUV tileUV = TilesUV[tileID];
         if (borders == 0 || tileUV.uv00Grass == null)
         {
-            if (Random.Range(1, 101) > 60)
+            if (UnityEngine.Random.Range(1, 101) > 60)
             {
                 uv11 = tileUV.uv00 + new Vector2(tileWidth, tileHeight);
                 uv00 = tileUV.uv00;
@@ -181,7 +181,7 @@ public class GridVisualization: MonoBehaviour
             else
             {
                 int variant = 0;
-                if(tileUV.variants > 1) variant = Random.Range(1, tileUV.variants);
+                if(tileUV.variants > 1) variant = UnityEngine.Random.Range(1, tileUV.variants);
 
                 uv00 = tileUV.uv00 + (new Vector2(tileWidth, 0) * variant);
                 uv11 = (tileUV.uv00 + new Vector2(tileWidth, tileHeight)) + (new Vector2(tileWidth, 0) * variant);
@@ -318,5 +318,81 @@ public class GridVisualization: MonoBehaviour
     public void PlayerMovement(Vector2 pos)
     {
        // Debug.Log(grid.GetXY(pos));
+    }
+
+    public void DestroyObject(GridTile gridTile)
+    {
+        int id = gridTile.gridObject.ID;
+        Item item = ItemsAsset.instance.GetItem(id);
+        Destroy(gridTile.gridObject.objectTransform.gameObject);
+        gridTile.gridObject = null;
+        Vector2 vector2 = new Vector2(gridTile.x, gridTile.y);
+        Vector2 target = grid.GetPosition(vector2 + new Vector2(UnityEngine.Random.Range(0f,1f), UnityEngine.Random.Range(0f, 1f)));
+        CreateWorldItem(new ItemStats(id), grid.GetPosition(vector2 + new Vector2(0,0.5f)),target);
+        if (item is Wall) UpdateNeighbors(vector2, id); 
+    }
+    public void UpdateNeighbors(Vector2 positionXY, int ID)
+    {
+        bool[] neighbors = GetNeighbors(positionXY, ID);
+        for (int i = 0; i < 4; i++)
+        {
+            if (neighbors[i]) UpdateSprite(positionXY + MyTools.directions4[i]);
+        }
+    }
+    private bool[] GetNeighbors(Vector2 positionXY, int ID)
+    {
+        bool[] neighbors = new bool[4];
+        for (int i = 0; i < 4; i++)
+        {
+            var obj = grid.GetValueByXY(positionXY + MyTools.directions4[i]);
+            if (obj != null && obj.IsBuildObject(ID)) neighbors[i] = true;
+            else neighbors[i] = false;
+        }
+        return neighbors;
+    }
+    private void UpdateSprite(Vector2 positionXY)
+    {
+        GridObject gridObject = grid.GetValueByXY(positionXY).gridObject;
+        bool[] neighbors = GetNeighbors(positionXY, gridObject.ID);
+        int value = 0;
+
+        for (int i = 0; i < neighbors.Length; i++)
+        {
+            if (neighbors[i])
+            {
+                value += (int)math.pow(2f, i);
+            }
+        }
+
+        if (neighbors[2])
+        {
+            gridObject.objectTransform.GetComponent<SortingGroup>().sortingOrder = 1;
+        }
+        else
+        {
+            gridObject.objectTransform.GetComponent<SortingGroup>().sortingOrder = 0;
+        }
+
+        Transform child = gridObject.objectTransform.GetChild(0);
+        ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(gridObject.ID, value);
+
+        child.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
+        child.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
+        MyTools.ChangePositionPivot(gridObject.objectTransform, child.TransformPoint(0, objectVariant.variants[0].minY, 0));
+    }
+
+    public void SetNewSprite(Vector2 positionXY,int id)
+    {
+        bool[] neighbors = GetNeighbors(positionXY, id);
+        for (int i = 0; i < 4; i++)
+        {
+            if (neighbors[i]) UpdateSprite(positionXY + MyTools.directions4[i]);
+        }
+        UpdateSprite(positionXY);
+    }
+
+    public void CreateWorldItem(ItemStats item,Vector2 pos,Vector2 target)
+    {
+        Instantiate(worldItem,pos,Quaternion.identity).GetComponent<WorldItem>().SetItem(item,target);
     }
 }

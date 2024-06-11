@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -372,6 +373,7 @@ public class EquipmentManager : MonoBehaviour
     {
         if (itemStats.itemCount > 0)
         {
+            UIManager.instance.NewCollectedItem(itemStats);
 
             List<SlotPosition> itemList = FindItems(itemStats.itemID);
             int stackMax = ItemsAsset.instance.GetStackMax(itemStats.itemID);
