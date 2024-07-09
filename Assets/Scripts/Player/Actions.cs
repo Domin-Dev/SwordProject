@@ -95,18 +95,31 @@ public class Actions : MonoBehaviour
                 {
                     VariantItem variantItem = ItemsAsset.instance.GetItem(gridObject.ID) as VariantItem;
                     Instantiate(variantItem.HitParticles, gridObject.objectTransform.position + (Vector3)variantItem.objectVariants[gridObject.indexVariant].variants[0].particlePoint, Quaternion.identity);
+                    GridTile[] neighbors = gridTile.GetNeighbors();
+
                     if(gridTile.DecreaseHitPoints(20))
                     {
                         Timer.Create(
                         () =>
                         {
-                            float scaleX = Mathf.LerpAngle(obj.localScale.x, 0.80f, Time.deltaTime * 20f);
-                            float scaleY = Mathf.LerpAngle(obj.localScale.y, 0.95f, Time.deltaTime * 18f);
+                            float scaleX = Mathf.LerpAngle(obj.localScale.x, 1.1f, Time.deltaTime * 20f);
+                            float scaleY = Mathf.LerpAngle(obj.localScale.y, 1.05f, Time.deltaTime * 18f);
                             obj.localScale = new Vector3(scaleX, scaleY);
-                            if (obj.localScale.x < 0.805f)
+                            if (obj.localScale.x >= 1.09f)
                             {
                                 return true;
                             }
+
+                            //for (int i = 0; i < 8; i++)
+                            //{
+                            //    if (neighbors[i] != null)
+                            //    {
+                            //        Transform obj = neighbors[i].gridObject.objectTransform;
+                            //        float X = Mathf.LerpAngle(obj.localScale.x, 1.15f, Time.deltaTime * 20f);
+                            //        float Y = Mathf.LerpAngle(obj.localScale.y, 1.05f, Time.deltaTime * 18f);
+                            //        obj.localScale = new Vector3(X, Y);
+                            //    }
+                            //}
                             return false;
                         },
                         () =>
@@ -117,8 +130,28 @@ public class Actions : MonoBehaviour
                             if (obj.localScale.x > 0.99f)
                             {
                                 obj.localScale = new Vector2(1f, 1f);
+                                for (int i = 0; i < 8; i++)
+                                {
+                                    if (neighbors[i] != null)
+                                    {
+                                        Transform obj = neighbors[i].gridObject.objectTransform;
+                                        obj.localScale = new Vector3(1f, 1f);
+                                    }
+                                }
                                 return true;
                             }
+
+                            //for (int i = 0; i < 8; i++)
+                            //{
+                            //    if (neighbors[i] != null)
+                            //    {
+                            //        Transform obj = neighbors[i].gridObject.objectTransform;
+                            //        float X = Mathf.LerpAngle(obj.localScale.x, 1f, Time.deltaTime * 20f);
+                            //        float Y = Mathf.LerpAngle(obj.localScale.y, 1f, Time.deltaTime * 18f);
+                            //        obj.localScale = new Vector3(X, Y);
+                            //    }
+                            //}
+
                             return false;
                         }
                         );

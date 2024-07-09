@@ -1,6 +1,7 @@
 using System;
 using Unity.VisualScripting;
 using UnityEngine;
+
 public class Timer
 { 
     private class TimersUpdater : MonoBehaviour
@@ -56,7 +57,6 @@ public class Timer
         }
         timersUpdater.action += Update;        
     }
-
     public Timer(Func<bool> func, Func<bool> backfunc)
     {
         this.func = func;
@@ -120,6 +120,10 @@ public class Timer
                 updater.action -= Update;
             }
         }
+    }
+    public float GetTime()
+    {
+        return timer;
     }
 
 }

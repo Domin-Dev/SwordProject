@@ -8,7 +8,7 @@ public static class MyTools
 {
 
     public readonly static Color hitboxColor = new Color(0, 1, 0, 1);
-    public readonly static string spritesPath = "Assets/Graphics/Sprites/BuildingObjets";
+    public readonly static string spritesPath = "Assets/Graphics/Sprites/BuildingObjects";
     public readonly static Vector2[] directions8 = {
         new Vector2(0, 1),
         new Vector2(1, 1),

@@ -5,6 +5,7 @@ using TMPro;
 using Unity.Mathematics;
 using Unity.Netcode;
 using Unity.VisualScripting;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -85,9 +86,9 @@ public class UIManager : MonoBehaviour
         if (instance == null) instance = this;
         else Destroy(gameObject);
 
-
         SetGrids();
         SetUpNetworkUI();
+        SetUpNotices();
         LoadRecipes();
     }
     private void Update()
@@ -422,6 +423,7 @@ public class UIManager : MonoBehaviour
         {
             item.gameObject.SetActive(false);
         }
+        isHold = false;
     }
     private void UpdateSelectedSlot(object sender, UpdateSelectedSlotInBarArgs e)
     {
@@ -725,7 +727,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    Timer[] collectedItemTimers = new Timer[5];
+    public Timer[] collectedItemTimers = new Timer[5];
+    public Transform[] notices = new Transform[5];
+
+    private void SetUpNotices()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            notices[i] = collectedItems.GetChild(i);
+        }
+    }
     public void NewCollectedItem(ItemStats stats)
     {
         for (int i = 0; i < 5; i++)
@@ -733,36 +744,54 @@ public class UIManager : MonoBehaviour
             Debug.Log(collectedItemTimers[i]);
             if (collectedItemTimers[i] == null)
             {
-                Transform item = collectedItems.GetChild(i);
-                CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
-                canvasGroup.alpha = 1f;
-                item.gameObject.SetActive(true);
-                item.SetAsLastSibling();
-                SetCollectItem(stats, item);
-                collectedItemTimers[i] = Timer.Create(1f, () => 
-                { 
-                    collectedItemTimers[i] = Timer.Create(() => 
-                    {
-                        canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha,0, Time.deltaTime * 7f);
-                        if(canvasGroup.alpha < 0.1f)
-                        {
-                            return true;
-                        }
-                        return false;
-                    },
-                    () =>
-                    {
-                        collectedItemTimers[i] = null;
-                        item.gameObject.SetActive(false);
-                        return true;
-                    });
-                    return false; 
-                });
-                break;
+                CreateNotice(stats,i);
+                return;
+            } 
+        }
+
+        int index = 0;
+        float min = collectedItemTimers[0].GetTime();
+        for (int i = 1; i < 5; i++)
+        {
+            float time = collectedItemTimers[i].GetTime();
+            if (time < min)
+            {
+                index = i;
+                min = time;
             }
         }
+        collectedItemTimers[index].Cancel();
+        CreateNotice(stats, index);
     }
 
+    private void CreateNotice(ItemStats stats,int index)
+    {
+        Transform item = notices[index];
+        CanvasGroup canvasGroup = item.GetComponent<CanvasGroup>();
+        canvasGroup.alpha = 1f;
+        item.gameObject.SetActive(true);
+        item.SetAsLastSibling();
+        SetCollectItem(stats, item);
+        collectedItemTimers[index] = Timer.Create(1f, () =>
+        {
+            collectedItemTimers[index] = Timer.Create(() =>
+            {
+                canvasGroup.alpha = Mathf.Lerp(canvasGroup.alpha, 0, Time.deltaTime * 7f);
+                if (canvasGroup.alpha < 0.1f)
+                {
+                    return true;
+                }
+                return false;
+            },
+            () =>
+            {
+                collectedItemTimers[index] = null;
+                item.gameObject.SetActive(false);
+                return true;
+            });
+            return false;
+        });
+    }
     private void SetCollectItem(ItemStats stats,Transform obj)
     {
         Item item = ItemsAsset.instance.GetItem(stats.itemID);

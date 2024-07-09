@@ -327,7 +327,7 @@ public class GridVisualization: MonoBehaviour
         Destroy(gridTile.gridObject.objectTransform.gameObject);
         gridTile.gridObject = null;
         Vector2 vector2 = new Vector2(gridTile.x, gridTile.y);
-        Vector2 target = grid.GetPosition(vector2 + new Vector2(UnityEngine.Random.Range(0f,1f), UnityEngine.Random.Range(0f, 1f)));
+        Vector2 target = grid.GetPosition(vector2 + new Vector2(UnityEngine.Random.Range(-0.5f,0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)));
         CreateWorldItem(new ItemStats(id), grid.GetPosition(vector2 + new Vector2(0,0.5f)),target);
         if (item is Wall) UpdateNeighbors(vector2, id); 
     }

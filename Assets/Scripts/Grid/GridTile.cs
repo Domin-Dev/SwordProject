@@ -1,4 +1,5 @@
 ﻿
+using UnityEngine;
 public class GridTile: IGetBarValue
 {
     public int tileID;
@@ -59,5 +60,15 @@ public class GridTile: IGetBarValue
             return false;
         }
         return true;
+    }
+    public GridTile[] GetNeighbors()
+    {
+        GridTile[] neighbors = new GridTile[8];
+        for (int i = 0; i < 8; i++)
+        {
+           var obj = grid.GetValueByXY(new Vector2(x,y) + MyTools.directions8[i]);
+           if(obj != null && obj.gridObject != null && obj.gridObject.objectTransform != null) neighbors[i] = obj;
+        }
+        return neighbors;
     }
 }
