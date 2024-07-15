@@ -1,65 +1,85 @@
 
 using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime;
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
 
+    [Header("Map Size( in chunks )")]
     [SerializeField] private int width = 256;
     [SerializeField] private int height = 256;
+    [Header("Map Generator Settings")]
     [SerializeField] private float scale = 20;
-
     [SerializeField] private float offsetX = 100f;
     [SerializeField] private float offsetY = 100f;
+    [Header("Chunk Settings")]
+    [SerializeField] private int chunkSize = 10;
 
 
     private MapGeneratorSettings mapGeneratorSettings;
     GridVisualization gridVisualization;
     Grid<GridTile> grid;
 
+    Dictionary<int,Chunk> map;
     private void Start()
     {
         gridVisualization = GridVisualization.instance;
         mapGeneratorSettings = gridVisualization.settings;
         offsetX = Random.Range(0f,99999f);
         offsetY = Random.Range(0f,99999f);
-        gridVisualization.SetGrid(GenerateMap(0.25f, new Vector2(-10, -10)));    
+        GenerateMap(0.25f, new Vector2(-10, -10));
+        gridVisualization.SetGrid(map); 
     }
 
-    private void SetValue(int x,int y,int index)
+    private void SetValue(Chunk chunk ,int x,int y,int index)
     {
-        grid.GetValue(x, y).tileID = mapGeneratorSettings.tiles[index].tileID;
+        chunk.tiles.GetValue(x, y).tileID = mapGeneratorSettings.tiles[index].tileID;
     }
-    public Grid<GridTile> GenerateMap(float cellSize, Vector2 position)
+    public void GenerateMap(float cellSize, Vector2 position)
     {
-        grid = new Grid<GridTile>(width, height, cellSize, position, (Grid<GridTile> g, int x, int y) => { return new GridTile(x, y, g); });
+        map = new Dictionary<int, Chunk>();
 
-        for (int y = 0; y < grid.height; y++)
+        for (int y = 0; y < height; y++)
         {
-            for (int x = 0; x < grid.height; x++)
+            for (int x = 0; x < width; x++)
             {
-                float value = Generate(x, y);
-                if (value > 0.65)
+                grid = new Grid<GridTile>(chunkSize, chunkSize, cellSize, position + new Vector2(x * chunkSize * cellSize, y * chunkSize * cellSize), 
+                    (Grid<GridTile> g, int x, int y) => { return new GridTile(x, y, g); });
+                map.Add(x + y * width,new Chunk(grid,new Vector2(x * chunkSize,y * chunkSize)));
+            }
+        }
+
+
+        foreach (var item in map)
+        {
+            for (int y = (int)item.Value.position.y; y < chunkSize; y++)
+            {
+                for (int x = (int)item.Value.position.x; x < chunkSize; x++)
                 {
-                    SetValue(x, y, 0);
-                }
-                else if (value > 0.3)
-                {
-                    SetValue(x, y, 1);
-                }
-                else 
-                {
-                    SetValue(x, y, 2);
+                    float value = Generate(x, y);
+                    if (value > 0.65)
+                    {
+                        SetValue(item.Value,x, y, 0);
+                    }
+                    else if (value > 0.3)
+                    {
+                        SetValue(item.Value,x, y, 1);
+                    }
+                    else
+                    {
+                        SetValue(item.Value, x, y, 2);
+                    }
                 }
             }
         }
-        return grid;
     }
 
     private float Generate(int x,int y)
     {
-        float xf = (float)x / width * scale + offsetX;
-        float yf = (float)y / height * scale + offsetY;
+        float xf = (float)x / chunkSize * scale + offsetX;
+        float yf = (float)y / chunkSize * scale + offsetY;
         float value = Mathf.PerlinNoise(xf,yf);
         return value;
     }

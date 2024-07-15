@@ -26,6 +26,8 @@ public class TileUV
 public class GridVisualization: MonoBehaviour
 {
     [SerializeField] public GameObject worldItem;
+
+    public Dictionary<int, Chunk> map;
     public Grid<GridTile> grid { set; get; }
     public Dictionary<int, TileUV> TilesUV { get;private set; }
 
@@ -112,13 +114,18 @@ public class GridVisualization: MonoBehaviour
         to.SetPixels32(0, index * height, width, height, grassColors);
         index++;
     }
-    public void SetGrid(Grid<GridTile> grid)
+    public void SetGrid(Dictionary<int, Chunk> map)
     {
-        this.grid = grid;
-        CreateMesh();
+        //   this.grid = grid;
+        this.map = map;
+        foreach (var item in map)
+        {
+            CreateMesh(item.Value.tiles,item.Value.position);
+        }
+
         grid.OnTObjectChanged += UpdatedGrid;
-        BuildingManager.instance._grid = grid;
-        Actions.instance._grid = grid;
+       // BuildingManager.instance._grid = grid;
+       // Actions.instance._grid = grid;
     }
     private void UpdatedGrid(object sender, Grid<GridTile>.OnTObjectChangedArgs e)
     {
@@ -131,6 +138,12 @@ public class GridVisualization: MonoBehaviour
         uv[index * 4 + 2] = new Vector2(uv11.x         ,uv11.y          );
         uv[index * 4 + 3] = new Vector2(uv11.x         ,uv00.y + height1);
     }
+   /// <summary>
+   /// naprawic!!!
+   /// </summary>
+   /// <param name="x"></param>
+   /// <param name="y"></param>
+   /// <param name="repeat"></param>
     public void UpdateMesh(int x,int y,bool repeat)
     {
         if (x > 0 && y > 0 && x < grid.width && y < grid.height)
@@ -141,7 +154,7 @@ public class GridVisualization: MonoBehaviour
             GridTile gridTile = grid.GetValue(x, y);
 
             Vector2 uv11, uv00;
-            int borders = CalculateBorders(x, y);
+            int borders = 0;// CalculateBorders(x, y);
 
             if (borders != gridTile.borders || repeat)
             {
@@ -197,7 +210,7 @@ public class GridVisualization: MonoBehaviour
         }  
         
     }
-    private int CalculateBorders(int x,int y)
+    private int CalculateBorders(Grid<GridTile> grid, int x,int y)
     {
         int value = 0;
         int number = 0;
@@ -263,8 +276,9 @@ public class GridVisualization: MonoBehaviour
 
         return value;
     }
-    public void CreateMesh()
+    public void CreateMesh(Grid<GridTile> grid, Vector2 pos)
     {
+
         int width = grid.width;
         int height = grid.height;
         float cellSize = grid.cellSize;
@@ -276,9 +290,9 @@ public class GridVisualization: MonoBehaviour
         Vector2[] uv = new Vector2[4 * (width * height)];
         int[] triangles = new int[6 * (width * height)];
 
-        for (int y = 0; y < height; y++)
+        for (int y = (int)pos.y; y < height; y++)
         {
-            for (int x = 0; x < width; x++)
+            for (int x = (int)pos.x; x < width; x++)
             {
                 int index = x + y * width;
                 vertices[index * 4 + 0] = new Vector3( x * cellSize,       y * cellSize);
@@ -295,10 +309,10 @@ public class GridVisualization: MonoBehaviour
                 triangles[index * 6 + 5] = index * 4 + 3;
 
 
-                GridTile gridTile =grid.GetValue(x, y);
+                GridTile gridTile = grid.GetValue(x, y);
              
                 int borders = 0;
-                if (IsGrass(gridTile.tileID)) borders = CalculateBorders(x, y);
+                if (IsGrass(gridTile.tileID)) borders = CalculateBorders(grid,x, y);
                 Vector2 uv11, uv00;
                 GetUVTile(gridTile.tileID, borders, out uv00, out uv11);
                 gridTile.borders = borders;
@@ -309,7 +323,10 @@ public class GridVisualization: MonoBehaviour
         mesh.vertices = vertices;
         mesh.uv = uv;
         mesh.triangles = triangles;
-        this.GetComponent<MeshFilter>().mesh = mesh;
+
+        MeshFilter meshFilter = new GameObject("part of map",typeof(MeshFilter)).GetComponent<MeshFilter>();
+        meshFilter.transform.parent = transform;
+        meshFilter.mesh = mesh;
     }
     private bool IsGrass(int tileID)
     {

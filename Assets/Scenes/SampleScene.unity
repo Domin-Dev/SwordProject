@@ -9027,11 +9027,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c6846d34faf2c143814b42b3316212e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 100
-  height: 100
+  width: 10
+  height: 10
   scale: 6
   offsetX: 100
   offsetY: 100
+  chunkSize: 10
 --- !u!66 &643743971
 CompositeCollider2D:
   m_ObjectHideFlags: 0
@@ -18913,7 +18914,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1017828613}
   m_Direction: 2
   m_Value: 0
-  m_Size: 1
+  m_Size: 0.00000006464219
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

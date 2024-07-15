@@ -233,7 +233,7 @@ public class BuildingManager : MonoBehaviour
         PolygonCollider2D polygonCollider2D = gridObject.objectTransform.GetComponentInChildren<PolygonCollider2D>();
         polygonCollider2D.points = variant.hitbox;
         polygonCollider2D.usedByComposite = false;
-        Timer.Create(2f, () => { polygonCollider2D.usedByComposite = true; return false; });
+        Timer.Create(2f, () => { if(polygonCollider2D != null) polygonCollider2D.usedByComposite = true; return false; });
         MyTools.ChangePositionPivot(gridObject.objectTransform, gridObject.objectTransform.GetChild(0).TransformPoint(0, variant.minY, 0));
     }
 }
