@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -28,7 +29,7 @@ public class GridVisualization: MonoBehaviour
     [SerializeField] public GameObject worldItem;
 
     public Dictionary<int, Chunk> map;
-    public Grid<GridTile> grid { set; get; }
+    public Grid<GridTile> oldGrid { set; get; }
     public Dictionary<int, TileUV> TilesUV { get;private set; }
 
     public MapGeneratorSettings settings { private set; get; }
@@ -39,10 +40,13 @@ public class GridVisualization: MonoBehaviour
     float tileWidth;//    sizeTile /t extureWidth;
     float tileHeight;//   sizeTile / textureHeight;
 
+    Texture2D mapTexture;
+
     float width1;
     float height1;
 
     public static GridVisualization instance { private set; get; }
+    [SerializeField] private Material mapMaterial;
     private void Awake()
     {
         Application.targetFrameRate = 60;
@@ -89,7 +93,7 @@ public class GridVisualization: MonoBehaviour
             TilesUV.Add(floor.ID, new TileUV(uv00,variants,grassUV));
         }
         texture.Apply(true, true);
-        GetComponent<MeshRenderer>().material.mainTexture = texture;
+        mapTexture = texture;
     }
     private int CountTextures(Floor[] array)
     {
@@ -123,7 +127,7 @@ public class GridVisualization: MonoBehaviour
             CreateMesh(item.Value.tiles,item.Value.position);
         }
 
-        grid.OnTObjectChanged += UpdatedGrid;
+      //  grid.OnTObjectChanged += UpdatedGrid;
        // BuildingManager.instance._grid = grid;
        // Actions.instance._grid = grid;
     }
@@ -146,12 +150,12 @@ public class GridVisualization: MonoBehaviour
    /// <param name="repeat"></param>
     public void UpdateMesh(int x,int y,bool repeat)
     {
-        if (x > 0 && y > 0 && x < grid.width && y < grid.height)
+        if (x > 0 && y > 0 && x < oldGrid.width && y < oldGrid.height)
         {
             Mesh mesh = this.GetComponent<MeshFilter>().mesh;
             Vector2[] uv = mesh.uv;
-            int index = x + y * grid.width;
-            GridTile gridTile = grid.GetValue(x, y);
+            int index = x + y * oldGrid.width;
+            GridTile gridTile = oldGrid.GetValue(x, y);
 
             Vector2 uv11, uv00;
             int borders = 0;// CalculateBorders(x, y);
@@ -278,21 +282,21 @@ public class GridVisualization: MonoBehaviour
     }
     public void CreateMesh(Grid<GridTile> grid, Vector2 pos)
     {
-
+        MeshFilter meshFilter = new GameObject("part of map").AddComponent<MeshFilter>();
         int width = grid.width;
         int height = grid.height;
         float cellSize = grid.cellSize;
         
         Mesh mesh = new Mesh();
 
-        transform.position = new Vector3(grid.position.x, grid.position.y, 10);
+        meshFilter.transform.position = new Vector3(grid.position.x, grid.position.y, 10);
         Vector3[] vertices = new Vector3[4 * (width * height)];
         Vector2[] uv = new Vector2[4 * (width * height)];
         int[] triangles = new int[6 * (width * height)];
 
-        for (int y = (int)pos.y; y < height; y++)
+        for (int y = 0; y < height; y++)
         {
-            for (int x = (int)pos.x; x < width; x++)
+            for (int x = 0; x < width; x++)
             {
                 int index = x + y * width;
                 vertices[index * 4 + 0] = new Vector3( x * cellSize,       y * cellSize);
@@ -324,7 +328,10 @@ public class GridVisualization: MonoBehaviour
         mesh.uv = uv;
         mesh.triangles = triangles;
 
-        MeshFilter meshFilter = new GameObject("part of map",typeof(MeshFilter)).GetComponent<MeshFilter>();
+
+        MeshRenderer  meshRenderer = meshFilter.AddComponent<MeshRenderer>();
+        meshRenderer.material = mapMaterial;
+        meshRenderer.material.mainTexture = mapTexture;
         meshFilter.transform.parent = transform;
         meshFilter.mesh = mesh;
     }
@@ -344,8 +351,8 @@ public class GridVisualization: MonoBehaviour
         Destroy(gridTile.gridObject.objectTransform.gameObject);
         gridTile.gridObject = null;
         Vector2 vector2 = new Vector2(gridTile.x, gridTile.y);
-        Vector2 target = grid.GetPosition(vector2 + new Vector2(UnityEngine.Random.Range(-0.5f,0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)));
-        CreateWorldItem(new ItemStats(id), grid.GetPosition(vector2 + new Vector2(0,0.5f)),target);
+        Vector2 target = oldGrid.GetPosition(vector2 + new Vector2(UnityEngine.Random.Range(-0.5f,0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)));
+        CreateWorldItem(new ItemStats(id), oldGrid.GetPosition(vector2 + new Vector2(0,0.5f)),target);
         if (item is Wall) UpdateNeighbors(vector2, id); 
     }
     public void UpdateNeighbors(Vector2 positionXY, int ID)
@@ -361,7 +368,7 @@ public class GridVisualization: MonoBehaviour
         bool[] neighbors = new bool[4];
         for (int i = 0; i < 4; i++)
         {
-            var obj = grid.GetValueByXY(positionXY + MyTools.directions4[i]);
+            var obj = oldGrid.GetValueByXY(positionXY + MyTools.directions4[i]);
             if (obj != null && obj.IsBuildObject(ID)) neighbors[i] = true;
             else neighbors[i] = false;
         }
@@ -369,7 +376,7 @@ public class GridVisualization: MonoBehaviour
     }
     private void UpdateSprite(Vector2 positionXY)
     {
-        GridObject gridObject = grid.GetValueByXY(positionXY).gridObject;
+        GridObject gridObject = oldGrid.GetValueByXY(positionXY).gridObject;
         bool[] neighbors = GetNeighbors(positionXY, gridObject.ID);
         int value = 0;
 

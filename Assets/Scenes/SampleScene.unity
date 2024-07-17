@@ -8965,6 +8965,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldItem: {fileID: 8553173326923410488, guid: dff186c7fab90df4a82d9b4317f7b7c0, type: 3}
+  mapMaterial: {fileID: 2100000, guid: d43aa4880e8663448a8d159ff697a36b, type: 2}
 --- !u!33 &643743968
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -9027,12 +9028,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c6846d34faf2c143814b42b3316212e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 10
-  height: 10
-  scale: 6
+  width: 40
+  height: 40
+  scale: 2
   offsetX: 100
   offsetY: 100
-  chunkSize: 10
+  chunkSize: 20
 --- !u!66 &643743971
 CompositeCollider2D:
   m_ObjectHideFlags: 0
@@ -18914,7 +18915,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1017828613}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.00000006464219
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -25929,6 +25930,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1938083280}
+  - component: {fileID: 1938083281}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -25945,7 +25947,7 @@ Transform:
   m_GameObject: {fileID: 1938083279}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.20144796, y: 0.23212719, z: -0.011792183}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -25956,6 +25958,18 @@ Transform:
   - {fileID: 643743966}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!210 &1938083281
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1938083279}
+  m_Enabled: 1
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: -1
+  m_SortAtRoot: 0
 --- !u!1 &1943578968
 GameObject:
   m_ObjectHideFlags: 0

@@ -46,27 +46,27 @@ public class Actions : MonoBehaviour
     }
     private void Update()
     {
-        if(UIManager.instance.WindowsAreClosed())
-        { 
-            Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-            if(pos != lastPos)
-            {
-                lastPos = pos;
-                pointerTransform.position = grid.GetPosition(pos);
-            }
+        //if(UIManager.instance.WindowsAreClosed())
+        //{ 
+        //   Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
+        //    if(pos != lastPos)
+        //    {
+        //        lastPos = pos;
+        //        pointerTransform.position = grid.GetPosition(pos);
+        //    }
 
-            if(Input.GetMouseButtonDown(1))
-            {
-                GridObject gridObject = grid.GetValueByXY(pos).gridObject;
-                if (gridObject != null)
-                {
-                    if (gridObject is GridDoor)
-                    {
-                        Door(gridObject as GridDoor, pos);
-                    }
-                }
-            }
-        }
+        //    if(Input.GetMouseButtonDown(1))
+        //    {
+        //        GridObject gridObject = grid.GetValueByXY(pos).gridObject;
+        //        if (gridObject != null)
+        //        {
+        //            if (gridObject is GridDoor)
+        //            {
+        //                Door(gridObject as GridDoor, pos);
+        //            }
+        //        }
+        //    }
+        //}
     }
 
     private void Door(GridDoor gridDoor,Vector2 position)

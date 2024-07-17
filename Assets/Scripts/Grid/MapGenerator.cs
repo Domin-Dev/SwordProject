@@ -29,7 +29,7 @@ public class MapGenerator : MonoBehaviour
         mapGeneratorSettings = gridVisualization.settings;
         offsetX = Random.Range(0f,99999f);
         offsetY = Random.Range(0f,99999f);
-        GenerateMap(0.25f, new Vector2(-10, -10));
+        GenerateMap(0.25f, new Vector2(-10,-10));
         gridVisualization.SetGrid(map); 
     }
 
@@ -51,14 +51,14 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-
+        
         foreach (var item in map)
         {
-            for (int y = (int)item.Value.position.y; y < chunkSize; y++)
+            for (int y = 0; y < chunkSize; y++)
             {
-                for (int x = (int)item.Value.position.x; x < chunkSize; x++)
+                for (int x = 0; x < chunkSize; x++)
                 {
-                    float value = Generate(x, y);
+                    float value = Generate(x + (int)item.Value.position.x, y + (int)item.Value.position.y);
                     if (value > 0.65)
                     {
                         SetValue(item.Value,x, y, 0);
