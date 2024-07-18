@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 
 public class TileUV
@@ -28,7 +29,8 @@ public class GridVisualization: MonoBehaviour
 {
     [SerializeField] public GameObject worldItem;
 
-    public Dictionary<int, Chunk> map;
+    public Map map;
+
     public Grid<GridTile> oldGrid { set; get; }
     public Dictionary<int, TileUV> TilesUV { get;private set; }
 
@@ -37,13 +39,12 @@ public class GridVisualization: MonoBehaviour
     int textureWidth;
     int textureHeight;
     const int sizeTile = 25;//px
-    float tileWidth;//    sizeTile /t extureWidth;
+    float tileWidth;//    sizeTile /textureWidth;
     float tileHeight;//   sizeTile / textureHeight;
-
     Texture2D mapTexture;
-
     float width1;
     float height1;
+
 
     public static GridVisualization instance { private set; get; }
     [SerializeField] private Material mapMaterial;
@@ -118,15 +119,14 @@ public class GridVisualization: MonoBehaviour
         to.SetPixels32(0, index * height, width, height, grassColors);
         index++;
     }
-    public void SetGrid(Dictionary<int, Chunk> map)
+    public void SetMap(Map map)
     {
-        //   this.grid = grid;
         this.map = map;
-        foreach (var item in map)
+
+        foreach (var item in map.chunks)
         {
             CreateMesh(item.Value.tiles,item.Value.position);
         }
-
       //  grid.OnTObjectChanged += UpdatedGrid;
        // BuildingManager.instance._grid = grid;
        // Actions.instance._grid = grid;
@@ -341,7 +341,20 @@ public class GridVisualization: MonoBehaviour
     }
     public void PlayerMovement(Vector2 pos)
     {
-       // Debug.Log(grid.GetXY(pos));
+        Debug.Log(GetXYPosition(pos) + " " + GetChunkIndex(pos));
+    }
+
+    private Vector2 GetXYPosition(Vector2 position)
+    {
+        int x = Mathf.FloorToInt((position.x - map.offset.x) / map.cellSize);
+        int y = Mathf.FloorToInt((position.y - map.offset.y) / map.cellSize);
+        return new Vector2(x, y);
+    }
+
+    public int GetChunkIndex(Vector2 position)
+    {
+        Vector2 posXY = GetXYPosition(position);
+        return (int)(posXY.x / map.chunkSize) + (int)(posXY.y / map.chunkSize) * map.widthInChunks;
     }
 
     public void DestroyObject(GridTile gridTile)
