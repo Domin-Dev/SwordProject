@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
+using static UnityEditor.PlayerSettings;
 
 
 public class TileUV
@@ -28,8 +30,12 @@ public class TileUV
 public class GridVisualization: MonoBehaviour
 {
     [SerializeField] public GameObject worldItem;
+    public const int renderChunks = 2;
 
     public Map map;
+    public Dictionary<int, Transform> loadedChunk;
+    public int lastPlayerChunk = -1;
+
 
     public Grid<GridTile> oldGrid { set; get; }
     public Dictionary<int, TileUV> TilesUV { get;private set; }
@@ -47,6 +53,7 @@ public class GridVisualization: MonoBehaviour
 
 
     public static GridVisualization instance { private set; get; }
+
     [SerializeField] private Material mapMaterial;
     private void Awake()
     {
@@ -122,15 +129,98 @@ public class GridVisualization: MonoBehaviour
     public void SetMap(Map map)
     {
         this.map = map;
+        loadedChunk = new Dictionary<int, Transform>();
+        CheckChunks(Vector2.zero);
+        //foreach (var item in map.chunks)
+        //{
+        //    CreateMesh(item.Value.tiles,item.Value.position);
+        //}
 
-        foreach (var item in map.chunks)
-        {
-            CreateMesh(item.Value.tiles,item.Value.position);
-        }
-      //  grid.OnTObjectChanged += UpdatedGrid;
-       // BuildingManager.instance._grid = grid;
+       // grid.OnTObjectChanged += UpdatedGrid;
+       //BuildingManager.instance._grid = grid;
        // Actions.instance._grid = grid;
     }
+
+    private void CheckChunks(Vector2 positionXY)
+    {
+        Vector2 posXY = GetXYPosition(positionXY);
+        int chunkIndex = GetChunkIndex(positionXY);
+        if (lastPlayerChunk != chunkIndex)
+        {
+            lastPlayerChunk = chunkIndex;
+            Vector2 posChunk = GetChunkPositionXY(chunkIndex);
+
+            for (int x = -renderChunks; x <= renderChunks; x++)
+            {
+                for (int y = -renderChunks; y<= renderChunks; y++)
+                {
+                    int value = (x + (int)posChunk.x) + (y + (int)posChunk.y) * map.widthInChunks;
+                    Debug.Log(x +  "  "  + y);
+                    TryLoadChunk((x + (int)posChunk.x) + (y + (int)posChunk.y) * map.widthInChunks);
+                }
+            }
+
+
+
+
+
+
+            //if (chunkIndex % map.widthInChunks > 0)
+            //{
+            //    TryLoadChunk(chunkIndex - 1);
+            //    TryLoadChunk(chunkIndex - map.widthInChunks - 1);
+            //    TryLoadChunk(chunkIndex + map.widthInChunks - 1);
+            //}
+            //if (chunkIndex % map.widthInChunks < map.widthInChunks - 1)
+            //{
+            //    TryLoadChunk(chunkIndex + 1);
+            //    TryLoadChunk(chunkIndex - map.widthInChunks + 1);
+            //    TryLoadChunk(chunkIndex + map.widthInChunks + 1);
+            //}
+
+            //TryLoadChunk(chunkIndex);
+            //TryLoadChunk(chunkIndex + 1);
+            //TryLoadChunk(chunkIndex + map.widthInChunks);
+            //TryLoadChunk(chunkIndex - map.widthInChunks);
+
+            TryUnloadChunks(chunkIndex);
+        }
+    }
+
+    private void TryUnloadChunks(int chunkIndex)
+    {
+        List<int> chunks = new List<int>();
+        Vector2 pos = GetChunkPositionXY(chunkIndex);
+
+        foreach (var item in loadedChunk)
+        {
+            Vector2 chunkPos = GetChunkPositionXY(item.Key);
+
+            if(math.abs(chunkPos.x - pos.x) > renderChunks || math.abs(chunkPos.y - pos.y) > renderChunks)
+            {
+                item.Value.gameObject.SetActive(false);
+                chunks.Add(item.Key);  
+            }
+        }
+
+        for (int i = 0; i < chunks.Count; i++)
+        {
+            loadedChunk.Remove(chunks[i]);
+        }
+    }
+
+    
+
+    private void TryLoadChunk(int chunkIndex)
+    {
+        if(!loadedChunk.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount) 
+        {
+            Chunk chunk = map.chunks[chunkIndex];
+            loadedChunk.Add(chunkIndex,CreateMesh(chunk.tiles, chunk.position));
+            chunk.tiles.OnTObjectChanged += UpdatedGrid;
+        }
+    }
+
     private void UpdatedGrid(object sender, Grid<GridTile>.OnTObjectChangedArgs e)
     {
        UpdateMesh(e.x, e.y,true);
@@ -280,7 +370,7 @@ public class GridVisualization: MonoBehaviour
 
         return value;
     }
-    public void CreateMesh(Grid<GridTile> grid, Vector2 pos)
+    public Transform CreateMesh(Grid<GridTile> grid, Vector2 pos)
     {
         MeshFilter meshFilter = new GameObject("part of map").AddComponent<MeshFilter>();
         int width = grid.width;
@@ -328,12 +418,13 @@ public class GridVisualization: MonoBehaviour
         mesh.uv = uv;
         mesh.triangles = triangles;
 
-
         MeshRenderer  meshRenderer = meshFilter.AddComponent<MeshRenderer>();
         meshRenderer.material = mapMaterial;
         meshRenderer.material.mainTexture = mapTexture;
         meshFilter.transform.parent = transform;
         meshFilter.mesh = mesh;
+        return meshFilter.transform;
+
     }
     private bool IsGrass(int tileID)
     {
@@ -341,22 +432,31 @@ public class GridVisualization: MonoBehaviour
     }
     public void PlayerMovement(Vector2 pos)
     {
-        Debug.Log(GetXYPosition(pos) + " " + GetChunkIndex(pos));
+        CheckChunks(pos);
     }
-
+    private Vector2 GetChunkPositionXY(int chunk)
+    {
+        int x = chunk % map.widthInChunks;
+        int y = chunk / map.widthInChunks;
+        return new Vector2(x, y);
+    }
     private Vector2 GetXYPosition(Vector2 position)
     {
         int x = Mathf.FloorToInt((position.x - map.offset.x) / map.cellSize);
         int y = Mathf.FloorToInt((position.y - map.offset.y) / map.cellSize);
         return new Vector2(x, y);
     }
-
     public int GetChunkIndex(Vector2 position)
     {
         Vector2 posXY = GetXYPosition(position);
         return (int)(posXY.x / map.chunkSize) + (int)(posXY.y / map.chunkSize) * map.widthInChunks;
     }
-
+    public Grid<GridTile> GetGridByXY(Vector2 posXY)
+    {
+        int x = (int)posXY.x % map.chunkSize;
+        int y = (int)posXY.y % map.chunkSize;
+        return map.chunks[x + y * map.widthInChunks].tiles;
+    }
     public void DestroyObject(GridTile gridTile)
     {
         int id = gridTile.gridObject.ID;
