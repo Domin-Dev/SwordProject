@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -16,10 +17,10 @@ public class GameManager : MonoBehaviour
     }
     public static GameManager instance { private set; get; }
 
-  
+
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = this;
             DontDestroyOnLoad(gameObject);
@@ -30,29 +31,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void Update()
     {
-       // grid = new Grid<GridObject>(10, 10, 0.5f, new Vector2(-2,-1),(Grid<GridObject> grid,int x,int y) => { return new GridObject(6,x,y,grid); });
-      //  grid.DebugDraw();
-      //  onValueChange += OnValue;
-      
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            Debug.Log("Debug UI");
+            var scene = SceneManager.GetSceneByBuildIndex(1);
+            if(!scene.isLoaded)
+            {
+                SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
+            }else
+            {
+                SceneManager.UnloadSceneAsync(1);
+            }
+        }
     }
-
-    private void OnValue(object s,EventArgs e)
+    private void OnValue(object s, EventArgs e)
     {
         Debug.Log("dziala");
     }
-
-    private void Update()
-    {
-        if(Input.GetMouseButtonDown(0))
-        {
-            // grid.SetValue(MyTools.GetMouseWorldPosition(), 10);
-            //  onValueChange?.Invoke(this, new ValueArgs(9,9));
-          //  grid.GetValue(MyTools.GetMouseWorldPosition())?.AddValue(5);
-        }
-        if (Input.GetMouseButtonDown(1))
-        {
-        }
-    }
 }
+

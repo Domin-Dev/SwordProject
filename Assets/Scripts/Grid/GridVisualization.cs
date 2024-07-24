@@ -7,7 +7,6 @@ using UnityEngine;
 using UnityEngine.Assertions.Must;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
-using static UnityEditor.PlayerSettings;
 
 
 public class TileUV
@@ -131,20 +130,24 @@ public class GridVisualization: MonoBehaviour
         this.map = map;
         loadedChunk = new Dictionary<int, Transform>();
         CheckChunks(Vector2.zero);
+
         //foreach (var item in map.chunks)
         //{
         //    CreateMesh(item.Value.tiles,item.Value.position);
         //}
 
-       // grid.OnTObjectChanged += UpdatedGrid;
-       //BuildingManager.instance._grid = grid;
-       // Actions.instance._grid = grid;
+        // grid.OnTObjectChanged += UpdatedGrid;
+        //BuildingManager.instance._grid = grid;
+        // Actions.instance._grid = grid;
     }
 
-    private void CheckChunks(Vector2 positionXY)
+    private void CheckChunks(Vector2 worldPosition)
     {
-        Vector2 posXY = GetXYPosition(positionXY);
-        int chunkIndex = GetChunkIndex(positionXY);
+        Vector2 positionXY = GetXYPosition(worldPosition);
+        
+        int chunkIndex = GetChunkIndexByPosition(positionXY);
+
+        Debug.Log(positionXY + " " + chunkIndex);
         if (lastPlayerChunk != chunkIndex)
         {
             lastPlayerChunk = chunkIndex;
@@ -153,36 +156,10 @@ public class GridVisualization: MonoBehaviour
             for (int x = -renderChunks; x <= renderChunks; x++)
             {
                 for (int y = -renderChunks; y<= renderChunks; y++)
-                {
-                    int value = (x + (int)posChunk.x) + (y + (int)posChunk.y) * map.widthInChunks;
-                    Debug.Log(x +  "  "  + y);
-                    TryLoadChunk((x + (int)posChunk.x) + (y + (int)posChunk.y) * map.widthInChunks);
+                {            
+                    TryLoadChunk(GetChunkIndexByCoordinates(posChunk + new Vector2(x,y)));
                 }
             }
-
-
-
-
-
-
-            //if (chunkIndex % map.widthInChunks > 0)
-            //{
-            //    TryLoadChunk(chunkIndex - 1);
-            //    TryLoadChunk(chunkIndex - map.widthInChunks - 1);
-            //    TryLoadChunk(chunkIndex + map.widthInChunks - 1);
-            //}
-            //if (chunkIndex % map.widthInChunks < map.widthInChunks - 1)
-            //{
-            //    TryLoadChunk(chunkIndex + 1);
-            //    TryLoadChunk(chunkIndex - map.widthInChunks + 1);
-            //    TryLoadChunk(chunkIndex + map.widthInChunks + 1);
-            //}
-
-            //TryLoadChunk(chunkIndex);
-            //TryLoadChunk(chunkIndex + 1);
-            //TryLoadChunk(chunkIndex + map.widthInChunks);
-            //TryLoadChunk(chunkIndex - map.widthInChunks);
-
             TryUnloadChunks(chunkIndex);
         }
     }
@@ -213,11 +190,29 @@ public class GridVisualization: MonoBehaviour
 
     private void TryLoadChunk(int chunkIndex)
     {
-        if(!loadedChunk.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount) 
+        Debug.Log(chunkIndex);
+        if(!loadedChunk.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount)
         {
             Chunk chunk = map.chunks[chunkIndex];
             loadedChunk.Add(chunkIndex,CreateMesh(chunk.tiles, chunk.position));
             chunk.tiles.OnTObjectChanged += UpdatedGrid;
+        }
+    }
+
+    private int GetChunkIndexByPosition(Vector2 position)
+    {
+        return (int)position.x / map.chunkSize + ((int)position.y/ map.chunkSize) * map.widthInChunks;
+    }
+    private int GetChunkIndexByCoordinates(Vector2 coordinates)
+    {
+        Debug.Log(coordinates);
+        if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < map.widthInChunks && coordinates.y < map.heightInChunks)
+        {
+           return (int)coordinates.x + (int)coordinates.y * map.widthInChunks;
+        }
+        else
+        {
+            return -1;
         }
     }
 
@@ -446,11 +441,7 @@ public class GridVisualization: MonoBehaviour
         int y = Mathf.FloorToInt((position.y - map.offset.y) / map.cellSize);
         return new Vector2(x, y);
     }
-    public int GetChunkIndex(Vector2 position)
-    {
-        Vector2 posXY = GetXYPosition(position);
-        return (int)(posXY.x / map.chunkSize) + (int)(posXY.y / map.chunkSize) * map.widthInChunks;
-    }
+
     public Grid<GridTile> GetGridByXY(Vector2 posXY)
     {
         int x = (int)posXY.x % map.chunkSize;

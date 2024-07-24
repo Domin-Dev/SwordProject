@@ -37,7 +37,7 @@ public class Grid<T>
         this.position = position;
         this.gridArray = new T[width, height];
        // this.textArray = new TextMesh[width, height];
-        textParent = new GameObject("Texts").transform;
+       // textParent = new GameObject("Texts").transform;
 
         for (int x = 0; x < gridArray.GetLength(0); x++)
         {

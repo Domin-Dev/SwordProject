@@ -229,7 +229,7 @@ public class EquipmentManager : MonoBehaviour
     {
         if (!ChatManager.instance.isChatting)
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1)) ChangeSelectedSlot(0);
+            if      (Input.GetKeyDown(KeyCode.Alpha1)) ChangeSelectedSlot(0);
             else if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeSelectedSlot(1);
             else if (Input.GetKeyDown(KeyCode.Alpha3)) ChangeSelectedSlot(2);
             else if (Input.GetKeyDown(KeyCode.Alpha4)) ChangeSelectedSlot(3);
