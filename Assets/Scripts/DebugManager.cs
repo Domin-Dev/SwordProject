@@ -10,25 +10,30 @@ public class DebugManager : MonoBehaviour
 {
 
     public const float updateInterval = 1f;
-    [SerializeField] TextMeshProUGUI playerPositionText;
+
     [SerializeField] TextMeshProUGUI CPUStatsText;
     [SerializeField] TextMeshProUGUI GPUStatsText;
+    [Space]
     [SerializeField] TextMeshProUGUI gameVersionText;
+    [Space]
+    [SerializeField] TextMeshProUGUI playerPositionText;
+    [SerializeField] TextMeshProUGUI chunkStatsText;
 
     private void Start()
     {
-        Debug.Log("sss");
         LoadDebugStats();
-     //   StartCoroutine(UpdateStats());
     }
 
     private void LoadDebugStats()
     {
+        StartCoroutine(UpdateStats());
+        GridVisualization.instance.onPlayerMove += UpdatePosition;
+
         gameVersionText.text = Application.productName + " " + Application.version;
-    }
-    private void OnEnable()
-    {
-        
+        SetPlayerPosition(GridVisualization.instance.playerPosition);
+        int chunkIndex = GridVisualization.instance.lastPlayerChunk;
+        SetChunk(GridVisualization.instance.get,);
+
     }
 
     private void Update()
@@ -55,5 +60,24 @@ public class DebugManager : MonoBehaviour
         GPUStatsText.text = "GPU Frame Time: " + gpuFrameTime.ToString("F2") + " ms";
 
     }
+    private void UpdatePosition(object sender, PlayerPositionArgs e)
+    {
+        SetPlayerPosition(e.playerPosition);
+        SetChunk(e.chunkCoordinates, e.chunkIndex);
+    }
 
+    private void SetPlayerPosition(Vector2 position)
+    {
+        playerPositionText.text = ($"Position: [ {(int)position.x} , {(int)position.y} ]");
+    }
+
+    private void SetChunk(Vector2 chunkCoordinates,int chunkIndex)
+    {
+        chunkStatsText.text = ($"Chunk: [ {(int)chunkCoordinates.x} , {(int)chunkCoordinates.y} ]  Index: {chunkIndex}");
+    }
+
+    private void OnDisable()
+    {
+        GridVisualization.instance.onPlayerMove -= UpdatePosition;
+    }
 }

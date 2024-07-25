@@ -1,14 +1,26 @@
 
 
+using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions.Must;
 using UnityEngine.Rendering;
-using UnityEngine.UIElements;
 
 
+public class PlayerPositionArgs : EventArgs
+{
+    public Vector2 playerPosition;
+    public int chunkIndex;
+    public Vector2 chunkCoordinates;
+    public PlayerPositionArgs(Vector2 position,int chunkIndex,Vector2 chunkCoordinates)
+    {
+        this.playerPosition = position;
+        this.chunkIndex = chunkIndex;
+        this.chunkCoordinates = chunkCoordinates;
+    }
+}
 public class TileUV
 {
     public TileUV(Vector2 uv00,int variants = 1, Vector2? uv00Grass = null)
@@ -26,15 +38,18 @@ public class TileUV
     public int variants { private set; get; }
     public Vector2? uv00Grass { private set; get; }
 }
-public class GridVisualization: MonoBehaviour
+public class GridVisualization : MonoBehaviour
 {
     [SerializeField] public GameObject worldItem;
     public const int renderChunks = 2;
 
     public Map map;
     public Dictionary<int, Transform> loadedChunk;
-    public int lastPlayerChunk = -1;
 
+    public int lastPlayerChunk { private set; get; } = -1;
+    public Vector2 playerPosition { private set; get; } = Vector2.zero;
+
+    public event EventHandler<PlayerPositionArgs> onPlayerMove;
 
     public Grid<GridTile> oldGrid { set; get; }
     public Dictionary<int, TileUV> TilesUV { get;private set; }
@@ -141,17 +156,19 @@ public class GridVisualization: MonoBehaviour
         // Actions.instance._grid = grid;
     }
 
-    private void CheckChunks(Vector2 worldPosition)
+
+    //Check current chunk
+    //return coordinates of player chunk
+    private Vector2 CheckChunks(Vector2 worldPosition)
     {
         Vector2 positionXY = GetXYPosition(worldPosition);
         
         int chunkIndex = GetChunkIndexByPosition(positionXY);
 
-        Debug.Log(positionXY + " " + chunkIndex);
         if (lastPlayerChunk != chunkIndex)
         {
             lastPlayerChunk = chunkIndex;
-            Vector2 posChunk = GetChunkPositionXY(chunkIndex);
+            Vector2 posChunk = GetChunkCoordinates(chunkIndex);
 
             for (int x = -renderChunks; x <= renderChunks; x++)
             {
@@ -161,17 +178,19 @@ public class GridVisualization: MonoBehaviour
                 }
             }
             TryUnloadChunks(chunkIndex);
+            return posChunk;
         }
+        return GetChunkCoordinates(lastPlayerChunk);
     }
 
     private void TryUnloadChunks(int chunkIndex)
     {
         List<int> chunks = new List<int>();
-        Vector2 pos = GetChunkPositionXY(chunkIndex);
+        Vector2 pos = GetChunkCoordinates(chunkIndex);
 
         foreach (var item in loadedChunk)
         {
-            Vector2 chunkPos = GetChunkPositionXY(item.Key);
+            Vector2 chunkPos = GetChunkCoordinates(item.Key);
 
             if(math.abs(chunkPos.x - pos.x) > renderChunks || math.abs(chunkPos.y - pos.y) > renderChunks)
             {
@@ -190,7 +209,6 @@ public class GridVisualization: MonoBehaviour
 
     private void TryLoadChunk(int chunkIndex)
     {
-        Debug.Log(chunkIndex);
         if(!loadedChunk.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount)
         {
             Chunk chunk = map.chunks[chunkIndex];
@@ -205,7 +223,6 @@ public class GridVisualization: MonoBehaviour
     }
     private int GetChunkIndexByCoordinates(Vector2 coordinates)
     {
-        Debug.Log(coordinates);
         if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < map.widthInChunks && coordinates.y < map.heightInChunks)
         {
            return (int)coordinates.x + (int)coordinates.y * map.widthInChunks;
@@ -425,17 +442,18 @@ public class GridVisualization: MonoBehaviour
     {
        return TilesUV.ContainsKey(tileID) && TilesUV[tileID].uv00Grass != null;
     }
-    public void PlayerMovement(Vector2 pos)
+    public void PlayerMovement(Vector2 worldPosition)
     {
-        CheckChunks(pos);
+        CheckChunks(worldPosition);
+        onPlayerMove?.Invoke(this, new PlayerPositionArgs(GetXYPosition(worldPosition),lastPlayerChunk,GetChunkCoordinates(lastPlayerChunk)));
     }
-    private Vector2 GetChunkPositionXY(int chunk)
+    public Vector2 GetChunkCoordinates(int chunk)
     {
         int x = chunk % map.widthInChunks;
         int y = chunk / map.widthInChunks;
         return new Vector2(x, y);
     }
-    private Vector2 GetXYPosition(Vector2 position)
+    public Vector2 GetXYPosition(Vector2 position)
     {
         int x = Mathf.FloorToInt((position.x - map.offset.x) / map.cellSize);
         int y = Mathf.FloorToInt((position.y - map.offset.y) / map.cellSize);
