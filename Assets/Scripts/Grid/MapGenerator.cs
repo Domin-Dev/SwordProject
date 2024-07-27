@@ -32,7 +32,7 @@ public class MapGenerator : MonoBehaviour
 
     private void SetValue(Chunk chunk ,int x,int y,int index)
     {
-        chunk.tiles.GetValue(x, y).tileID = mapGeneratorSettings.tiles[index].tileID;
+        chunk.grid[x,y].tileID = mapGeneratorSettings.tiles[index].tileID;
     }
     public Map GenerateMap(float cellSize, Vector2 offset)
     {
@@ -42,20 +42,17 @@ public class MapGenerator : MonoBehaviour
         {
             for (int x = 0; x < widthInChunks; x++)
             {
-                grid = new Grid<GridTile>(chunkSize, chunkSize, cellSize, offset + new Vector2(x * chunkSize * cellSize, y * chunkSize * cellSize), 
-                    (Grid<GridTile> g, int x, int y) => { return new GridTile(x, y, g); });
-                map.chunks.Add(x + y * widthInChunks,new Chunk(grid,new Vector2(x * chunkSize,y * chunkSize)));
+                map.chunks.Add(x + y * widthInChunks,new Chunk(chunkSize,new Vector2(x * chunkSize,y * chunkSize), offset + new Vector2(x * chunkSize * cellSize, y * chunkSize * cellSize)));
             }
         }
 
-        
         foreach (var item in map.chunks)
         {
             for (int y = 0; y < chunkSize; y++)
             {
                 for (int x = 0; x < chunkSize; x++)
                 {
-                    float value = Generate(x + (int)item.Value.position.x, y + (int)item.Value.position.y);
+                    float value = Generate(x + (int)item.Value.ChunkCoordinates.x, y + (int)item.Value.ChunkCoordinates.y);
                     if (value > 0.65)
                     {
                         SetValue(item.Value,x, y, 0);

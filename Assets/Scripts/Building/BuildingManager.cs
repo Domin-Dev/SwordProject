@@ -10,17 +10,7 @@ public class BuildingManager : MonoBehaviour
     public static BuildingManager instance { private set; get; }
 
     public event EventHandler builtObject;
-    public static Grid<GridTile> grid { private set; get; }
-    public Grid<GridTile> _grid
-    {
-        set
-        {
-            if(grid == null)
-            {
-                grid = value;
-            }
-        }
-    }
+
 
     [SerializeField] GameObject pointer;
     [SerializeField] GameObject buildingPrefab;
@@ -129,7 +119,7 @@ public class BuildingManager : MonoBehaviour
     }
     private void UpdateBar()
     {
-        var obj = grid.GetValueByXY(startPos);
+        var obj = GridVisualization.instance.GetValueByGridPosition(startPos);
         if (obj.IsBuildObject())
         {
             TurnOnBuildingBar(obj.gridObject.objectTransform.position + new Vector3(0, 0.5f), (obj.gridObject as IGetBarValue).GetBarValue());
@@ -158,8 +148,9 @@ public class BuildingManager : MonoBehaviour
     private void Plan(Vector2 pos)
     {
         lastPos = pos;
-        planObject.transform.position = grid.GetPosition(pos);
-        if (grid.GetValueByXY(pos).IsBuildObject())
+        planObject.transform.position = GridVisualization.instance.GetWorldPosition(pos);
+        var value = GridVisualization.instance.GetValueByGridPosition(pos);
+        if(value != null && value.IsBuildObject())
             planObject.gameObject.SetActive(false);
         else
             planObject.gameObject.SetActive(true);
@@ -180,19 +171,19 @@ public class BuildingManager : MonoBehaviour
     }
     private void BuildWall(Vector2 posXY)
     {
-        if (grid.GetValueByXY(posXY).IsBuildObject()) return;    
+        if (GridVisualization.instance.GetValueByGridPosition(posXY).IsBuildObject()) return;    
         Sounds.instance.Hammer();
-        Transform obj = Instantiate(buildingPrefab,grid.GetPosition(posXY), Quaternion.identity, parent).transform;
-        grid.GetValueByXY(posXY).gridObject = new GridObject(selectedObjectID,0,obj);
+        Transform obj = Instantiate(buildingPrefab,GridVisualization.instance.GetWorldPosition(posXY), Quaternion.identity, parent).transform;
+        GridVisualization.instance.GetValueByGridPosition(posXY).gridObject = new GridObject(selectedObjectID,0,obj);
         GridVisualization.instance.SetNewSprite(posXY,selectedObjectID);
         builtObject(this, null);
     }
     private void BuildFloor(Vector2 posXY)
     {
-        GridTile gridTile = grid.GetValueByXY(posXY);
+        GridTile gridTile = GridVisualization.instance.GetValueByGridPosition(posXY);
         if (gridTile.tileID != selectedObjectID)
         {
-            grid.GetValueByXY(posXY).tileID = selectedObjectID;
+            GridVisualization.instance.GetValueByGridPosition(posXY).tileID = selectedObjectID;
             GridVisualization.instance.UpdateMesh((int)posXY.x, (int)posXY.y, true);
             Sounds.instance.Hammer();
             builtObject(this, null);
@@ -200,10 +191,10 @@ public class BuildingManager : MonoBehaviour
     }
     private void BuildObject(Vector2 posXY)
     {
-        if (grid.GetValueByXY(posXY).IsBuildObject()) return;
+        if (GridVisualization.instance.GetValueByGridPosition(posXY).IsBuildObject()) return;
 
         Sounds.instance.Hammer();
-        Transform obj = Instantiate(buildingPrefab, grid.GetPosition(posXY), Quaternion.identity, parent).transform.GetChild(0);
+        Transform obj = Instantiate(buildingPrefab, GridVisualization.instance.GetWorldPosition(posXY), Quaternion.identity, parent).transform.GetChild(0);
       
         ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(selectedObjectID, rotation % rotationStates);
 
@@ -216,7 +207,7 @@ public class BuildingManager : MonoBehaviour
     private void CreateGridObject(Vector2 posXY,int indexVariant, Transform buildingObj)
     {
         Item item = ItemsAsset.instance.GetItem(selectedObjectID);
-        GridTile gridObject = grid.GetValueByXY(posXY);
+        GridTile gridObject = GridVisualization.instance.GetValueByGridPosition(posXY);
 
         switch (item)
         {
@@ -227,7 +218,7 @@ public class BuildingManager : MonoBehaviour
     }
     public void ChangeSprite(Vector2 posXY, int index)
     {
-        GridObject gridObject = grid.GetValueByXY(posXY).gridObject;
+        GridObject gridObject = GridVisualization.instance.GetValueByGridPosition(posXY).gridObject;
         Variant  variant = ItemsAsset.instance.GetObjectVariant(gridObject.ID, gridObject.indexVariant).variants[index];
         gridObject.objectTransform.GetComponentInChildren<SpriteRenderer>().sprite = variant.sprite;
         PolygonCollider2D polygonCollider2D = gridObject.objectTransform.GetComponentInChildren<PolygonCollider2D>();

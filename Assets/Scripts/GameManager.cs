@@ -35,7 +35,6 @@ public class GameManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.F1))
         {
-            Debug.Log("Debug UI");
             var scene = SceneManager.GetSceneByBuildIndex(1);
             if(!scene.isLoaded)
             {

@@ -8,18 +8,18 @@ public class Actions : MonoBehaviour
     [SerializeField] GameObject pointer;
     [SerializeField] Transform parent;
     Transform pointerTransform;
-    public static Grid<GridTile> grid { private set; get; }
+    //public static Grid<GridTile> grid { private set; get; }
     public static Actions instance { private set; get; }
-    public Grid<GridTile> _grid
-    {
-        set
-        {
-            if (grid == null)
-            {
-                grid = value;
-            }
-        }
-    }
+    //public Grid<GridTile> _grid
+    //{
+    //    set
+    //    {
+    //        if (grid == null)
+    //        {
+    //            grid = value;
+    //        }
+    //    }
+    //}
 
     Vector2 lastPos;
 
@@ -46,27 +46,27 @@ public class Actions : MonoBehaviour
     }
     private void Update()
     {
-        //if(UIManager.instance.WindowsAreClosed())
-        //{ 
-        //   Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-        //    if(pos != lastPos)
-        //    {
-        //        lastPos = pos;
-        //        pointerTransform.position = grid.GetPosition(pos);
-        //    }
+        if (UIManager.instance.WindowsAreClosed())
+        {
+            Vector2 pos = GridVisualization.instance.GetGridPosition(MyTools.GetMouseWorldPosition());
+            if (pos != lastPos)
+            {
+                lastPos = pos;
+                pointerTransform.position = GridVisualization.instance.GetWorldPosition(pos);
+            }
 
-        //    if(Input.GetMouseButtonDown(1))
-        //    {
-        //        GridObject gridObject = grid.GetValueByXY(pos).gridObject;
-        //        if (gridObject != null)
-        //        {
-        //            if (gridObject is GridDoor)
-        //            {
-        //                Door(gridObject as GridDoor, pos);
-        //            }
-        //        }
-        //    }
-        //}
+            if (Input.GetMouseButtonDown(1))
+            {
+                GridObject gridObject = GridVisualization.instance.GetValueByGridPosition(pos).gridObject;
+                if (gridObject != null)
+                {
+                    if (gridObject is GridDoor)
+                    {
+                        Door(gridObject as GridDoor, pos);
+                    }
+                }
+            }
+        }
     }
 
     private void Door(GridDoor gridDoor,Vector2 position)
@@ -81,9 +81,9 @@ public class Actions : MonoBehaviour
     {
         if (itemStats != null)
         {
-            Vector2 pos = grid.GetXY(MyTools.GetMouseWorldPosition());
-            GridTile gridTile = grid.GetValueByXY(pos);
-            GridObject gridObject = gridTile.gridObject;
+            Vector2 pos = GridVisualization.instance.GetGridPosition(MyTools.GetMouseWorldPosition());
+            GridTile gridTile = GridVisualization.instance.GetValueByGridPosition(pos);
+            GridObject gridObject = gridTile?.gridObject;
             if (gridObject != null)
             {
                 Sounds.instance.Shield();

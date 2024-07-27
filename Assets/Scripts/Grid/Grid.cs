@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using static GameManager;
+
 
 public class Grid<T>
 {
@@ -29,7 +29,7 @@ public class Grid<T>
     Transform textParent;
 
 
-    public Grid(int width, int height, float cellSize, Vector2 position, Func<Grid<T>, int, int, T> CreateTObject)
+    public Grid(int width, int height, float cellSize, Vector2 position, Func<Grid<T>, int, int, T> CreateTObject,Vector2 gridCo)
     {
         this.height = height;
         this.width = width;

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 
 public class PlayerPositionArgs : EventArgs
@@ -40,20 +40,20 @@ public class TileUV
 }
 public class GridVisualization : MonoBehaviour
 {
+    public bool LoadAllMap = true;
+
     [SerializeField] public GameObject worldItem;
     public const int renderChunks = 2;
 
     public Map map;
-    public Dictionary<int, Transform> loadedChunk;
-
+    public Dictionary<int, Transform> loadedChunks { private set; get; }
     public int lastPlayerChunk { private set; get; } = -1;
     public Vector2 playerPosition { private set; get; } = Vector2.zero;
 
     public event EventHandler<PlayerPositionArgs> onPlayerMove;
+    public event EventHandler<PlayerPositionArgs> onChangeChunk;
 
-    public Grid<GridTile> oldGrid { set; get; }
     public Dictionary<int, TileUV> TilesUV { get;private set; }
-
     public MapGeneratorSettings settings { private set; get; }
 
     int textureWidth;
@@ -71,7 +71,7 @@ public class GridVisualization : MonoBehaviour
     [SerializeField] private Material mapMaterial;
     private void Awake()
     {
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = -1;
         if (instance == null)
         {
             instance = this;
@@ -143,17 +143,20 @@ public class GridVisualization : MonoBehaviour
     public void SetMap(Map map)
     {
         this.map = map;
-        loadedChunk = new Dictionary<int, Transform>();
-        CheckChunks(Vector2.zero);
+        loadedChunks = new Dictionary<int, Transform>();
 
-        //foreach (var item in map.chunks)
-        //{
-        //    CreateMesh(item.Value.tiles,item.Value.position);
-        //}
-
-        // grid.OnTObjectChanged += UpdatedGrid;
-        //BuildingManager.instance._grid = grid;
-        // Actions.instance._grid = grid;
+        
+        if (LoadAllMap)
+        {
+            foreach (var item in map.chunks)
+            {
+                CreateMesh(item.Value);
+            }
+        }
+        else
+        {
+            CheckChunks(Vector2.zero);
+        }
     }
 
 
@@ -161,11 +164,12 @@ public class GridVisualization : MonoBehaviour
     //return coordinates of player chunk
     private Vector2 CheckChunks(Vector2 worldPosition)
     {
-        Vector2 positionXY = GetXYPosition(worldPosition);
+        Vector2 positionXY = GetGridPosition(worldPosition);
+        playerPosition = positionXY;
         
-        int chunkIndex = GetChunkIndexByPosition(positionXY);
+        int chunkIndex = GetChunkIndexByPositionXY(positionXY);
 
-        if (lastPlayerChunk != chunkIndex)
+        if (lastPlayerChunk != chunkIndex && !LoadAllMap)
         {
             lastPlayerChunk = chunkIndex;
             Vector2 posChunk = GetChunkCoordinates(chunkIndex);
@@ -178,6 +182,7 @@ public class GridVisualization : MonoBehaviour
                 }
             }
             TryUnloadChunks(chunkIndex);
+            onChangeChunk?.Invoke(this, new PlayerPositionArgs(positionXY, chunkIndex, GetChunkCoordinates(chunkIndex)));
             return posChunk;
         }
         return GetChunkCoordinates(lastPlayerChunk);
@@ -188,7 +193,7 @@ public class GridVisualization : MonoBehaviour
         List<int> chunks = new List<int>();
         Vector2 pos = GetChunkCoordinates(chunkIndex);
 
-        foreach (var item in loadedChunk)
+        foreach (var item in loadedChunks)
         {
             Vector2 chunkPos = GetChunkCoordinates(item.Key);
 
@@ -201,7 +206,7 @@ public class GridVisualization : MonoBehaviour
 
         for (int i = 0; i < chunks.Count; i++)
         {
-            loadedChunk.Remove(chunks[i]);
+            loadedChunks.Remove(chunks[i]);
         }
     }
 
@@ -209,15 +214,14 @@ public class GridVisualization : MonoBehaviour
 
     private void TryLoadChunk(int chunkIndex)
     {
-        if(!loadedChunk.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount)
+        if(!loadedChunks.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount)
         {
             Chunk chunk = map.chunks[chunkIndex];
-            loadedChunk.Add(chunkIndex,CreateMesh(chunk.tiles, chunk.position));
-            chunk.tiles.OnTObjectChanged += UpdatedGrid;
+            loadedChunks.Add(chunkIndex,CreateMesh(chunk));
         }
     }
 
-    private int GetChunkIndexByPosition(Vector2 position)
+    private int GetChunkIndexByPositionXY(Vector2 position)
     {
         return (int)position.x / map.chunkSize + ((int)position.y/ map.chunkSize) * map.widthInChunks;
     }
@@ -231,11 +235,6 @@ public class GridVisualization : MonoBehaviour
         {
             return -1;
         }
-    }
-
-    private void UpdatedGrid(object sender, Grid<GridTile>.OnTObjectChangedArgs e)
-    {
-       UpdateMesh(e.x, e.y,true);
     }
     private void UVSet(Vector2[] uv,int index, Vector2 uv00,Vector2 uv11)
     {
@@ -252,15 +251,20 @@ public class GridVisualization : MonoBehaviour
    /// <param name="repeat"></param>
     public void UpdateMesh(int x,int y,bool repeat)
     {
-        if (x > 0 && y > 0 && x < oldGrid.width && y < oldGrid.height)
+        int chunkIndex = GetChunkIndexByPositionXY(new Vector2(x, y));
+        if (x >= 0 && y >= 0 && x < map.width && y < map.height && loadedChunks.ContainsKey(chunkIndex))
         {
-            Mesh mesh = this.GetComponent<MeshFilter>().mesh;
+            int localX = x % map.chunkSize;
+            int localY = y % map.chunkSize;
+
+            GridTile[,] grid = map.chunks[chunkIndex].grid;
+            Mesh mesh = loadedChunks[chunkIndex].GetComponent<MeshFilter>().mesh;
             Vector2[] uv = mesh.uv;
-            int index = x + y * oldGrid.width;
-            GridTile gridTile = oldGrid.GetValue(x, y);
+            int index = localX + localY * map.chunkSize;
+            GridTile gridTile = grid[localX,localY];
 
             Vector2 uv11, uv00;
-            int borders = 0;// CalculateBorders(x, y);
+            int borders = CalculateBorders(x, y);
 
             if (borders != gridTile.borders || repeat)
             {
@@ -316,22 +320,22 @@ public class GridVisualization : MonoBehaviour
         }  
         
     }
-    private int CalculateBorders(Grid<GridTile> grid, int x,int y)
+    private int CalculateBorders(int x,int y)
     {
         int value = 0;
         int number = 0;
 
-        if (grid.GetValue(x, y + 1)?.tileID  == settings.grassID) { value += 1; number++; }
-        if (grid.GetValue(x + 1, y )?.tileID == settings.grassID) { value += 2; number++; }
-        if (grid.GetValue(x , y - 1)?.tileID == settings.grassID) { value += 4; number++; }
-        if (grid.GetValue(x - 1, y )?.tileID == settings.grassID) { value += 8; number++; }
+        if (GetValueByGridPosition(x, y + 1)?.tileID  == settings.grassID) { value += 1; number++; }
+        if (GetValueByGridPosition(x + 1, y )?.tileID == settings.grassID) { value += 2; number++; }
+        if (GetValueByGridPosition(x , y - 1)?.tileID == settings.grassID) { value += 4; number++; }
+        if (GetValueByGridPosition(x - 1, y )?.tileID == settings.grassID) { value += 8; number++; }
 
         if (value == 0)
         {
-            if (grid.GetValue(x + 1, y + 1)?.tileID == settings.grassID) value -= 1;
-            if (grid.GetValue(x + 1, y - 1)?.tileID == settings.grassID) value -= 2;
-            if (grid.GetValue(x - 1, y - 1)?.tileID == settings.grassID) value -= 4;
-            if (grid.GetValue(x - 1, y + 1)?.tileID == settings.grassID) value -= 8;
+            if (GetValueByGridPosition(x + 1, y + 1)?.tileID == settings.grassID) value -= 1;
+            if (GetValueByGridPosition(x + 1, y - 1)?.tileID == settings.grassID) value -= 2;
+            if (GetValueByGridPosition(x - 1, y - 1)?.tileID == settings.grassID) value -= 4;
+            if (GetValueByGridPosition(x - 1, y + 1)?.tileID == settings.grassID) value -= 8;
         }
         else if(number == 1)
         {
@@ -339,20 +343,20 @@ public class GridVisualization : MonoBehaviour
             switch (value)
             {
                 case 1:
-                    if (grid.GetValue(x - 1, y - 1)?.tileID == settings.grassID) k += 1;
-                    if (grid.GetValue(x + 1, y - 1)?.tileID == settings.grassID) k += 2;
+                    if (GetValueByGridPosition(x - 1, y - 1)?.tileID == settings.grassID) k += 1;
+                    if (GetValueByGridPosition(x + 1, y - 1)?.tileID == settings.grassID) k += 2;
                     break;
                 case 2:
-                    if (grid.GetValue(x - 1, y - 1)?.tileID == settings.grassID) k += 1;
-                    if (grid.GetValue(x - 1, y + 1)?.tileID == settings.grassID) k += 2;
+                    if (GetValueByGridPosition(x - 1, y - 1)?.tileID == settings.grassID) k += 1;
+                    if (GetValueByGridPosition(x - 1, y + 1)?.tileID == settings.grassID) k += 2;
                     break;
                 case 4:
-                    if (grid.GetValue(x - 1, y + 1)?.tileID == settings.grassID) k += 1;
-                    if (grid.GetValue(x + 1, y + 1)?.tileID == settings.grassID) k += 2;
+                    if (GetValueByGridPosition(x - 1, y + 1)?.tileID == settings.grassID) k += 1;
+                    if (GetValueByGridPosition(x + 1, y + 1)?.tileID == settings.grassID) k += 2;
                     break;
                 case 8:
-                    if (grid.GetValue(x + 1, y - 1)?.tileID == settings.grassID) k += 1;
-                    if (grid.GetValue(x + 1, y + 1)?.tileID == settings.grassID) k += 2;
+                    if (GetValueByGridPosition(x + 1, y - 1)?.tileID == settings.grassID) k += 1;
+                    if (GetValueByGridPosition(x + 1, y + 1)?.tileID == settings.grassID) k += 2;
                     break;
             }
             if (k > 0)
@@ -366,32 +370,33 @@ public class GridVisualization : MonoBehaviour
             switch (value)
             {
                 case 3:
-                    if (grid.GetValue(x - 1, y - 1)?.tileID == settings.grassID) value = 43;
+                    if (GetValueByGridPosition(x - 1, y - 1)?.tileID == settings.grassID) value = 43;
                     break;
                 case 6:
-                    if (grid.GetValue(x - 1, y + 1)?.tileID == settings.grassID) value = 44;
+                    if (GetValueByGridPosition(x - 1, y + 1)?.tileID == settings.grassID) value = 44;
                     break;
                 case 9:
-                    if (grid.GetValue(x + 1, y - 1)?.tileID == settings.grassID) value = 45;
+                    if (GetValueByGridPosition(x + 1, y - 1)?.tileID == settings.grassID) value = 45;
                     break;
                 case 12:
-                    if (grid.GetValue(x + 1, y + 1)?.tileID == settings.grassID) value = 46;
+                    if (GetValueByGridPosition(x + 1, y + 1)?.tileID == settings.grassID) value = 46;
                     break;
             }
         }
 
         return value;
     }
-    public Transform CreateMesh(Grid<GridTile> grid, Vector2 pos)
+    public Transform CreateMesh(Chunk chunk)
     {
         MeshFilter meshFilter = new GameObject("part of map").AddComponent<MeshFilter>();
-        int width = grid.width;
-        int height = grid.height;
-        float cellSize = grid.cellSize;
+        meshFilter.AddComponent<SortingGroup>().sortingOrder = -10;
+        int width = map.chunkSize;
+        int height = map.chunkSize;
+        float cellSize = map.cellSize;
         
         Mesh mesh = new Mesh();
 
-        meshFilter.transform.position = new Vector3(grid.position.x, grid.position.y, 10);
+        meshFilter.transform.position = new Vector3(chunk.position.x, chunk.position.y, 10);
         Vector3[] vertices = new Vector3[4 * (width * height)];
         Vector2[] uv = new Vector2[4 * (width * height)];
         int[] triangles = new int[6 * (width * height)];
@@ -415,10 +420,10 @@ public class GridVisualization : MonoBehaviour
                 triangles[index * 6 + 5] = index * 4 + 3;
 
 
-                GridTile gridTile = grid.GetValue(x, y);
+                GridTile gridTile = chunk.grid[x, y];
              
                 int borders = 0;
-                if (IsGrass(gridTile.tileID)) borders = CalculateBorders(grid,x, y);
+                if (IsGrass(gridTile.tileID)) borders = CalculateBorders(x + (int)chunk.ChunkCoordinates.x, y + (int)chunk.ChunkCoordinates.y);
                 Vector2 uv11, uv00;
                 GetUVTile(gridTile.tileID, borders, out uv00, out uv11);
                 gridTile.borders = borders;
@@ -445,7 +450,7 @@ public class GridVisualization : MonoBehaviour
     public void PlayerMovement(Vector2 worldPosition)
     {
         CheckChunks(worldPosition);
-        onPlayerMove?.Invoke(this, new PlayerPositionArgs(GetXYPosition(worldPosition),lastPlayerChunk,GetChunkCoordinates(lastPlayerChunk)));
+        onPlayerMove?.Invoke(this, new PlayerPositionArgs(GetGridPosition(worldPosition), lastPlayerChunk, GetChunkCoordinates(lastPlayerChunk)));
     }
     public Vector2 GetChunkCoordinates(int chunk)
     {
@@ -453,18 +458,42 @@ public class GridVisualization : MonoBehaviour
         int y = chunk / map.widthInChunks;
         return new Vector2(x, y);
     }
-    public Vector2 GetXYPosition(Vector2 position)
+    public Vector2 GetGridPosition(Vector2 position)
     {
         int x = Mathf.FloorToInt((position.x - map.offset.x) / map.cellSize);
         int y = Mathf.FloorToInt((position.y - map.offset.y) / map.cellSize);
         return new Vector2(x, y);
     }
 
-    public Grid<GridTile> GetGridByXY(Vector2 posXY)
+    public void TileChanged(int x,int y)
+    {
+        UpdateMesh(x,y,true);
+    }
+    public GridTile GetValueByGridPosition(Vector2 gridPosition)
+    {
+        int chunkIndex =  GetChunkIndexByPositionXY(gridPosition);
+        if (gridPosition.x >= 0 && gridPosition.y >= 0)
+        {
+            return map.chunks[chunkIndex].grid[(int)gridPosition.x % map.chunkSize, (int)gridPosition.y % map.chunkSize];
+        }
+        return null;
+    }
+    public GridTile GetValueByGridPosition(int x,int y)
+    {
+        return GetValueByGridPosition(new Vector2(x, y));
+    }
+    public Vector2 GetWorldPosition(Vector2 gridPosition)
+    {
+        return map.offset + gridPosition * map.cellSize + new Vector2(map.cellSize / 2, 0);
+    }
+
+
+
+    public GridTile[,] GetGridByXY(Vector2 posXY)
     {
         int x = (int)posXY.x % map.chunkSize;
         int y = (int)posXY.y % map.chunkSize;
-        return map.chunks[x + y * map.widthInChunks].tiles;
+        return map.chunks[x + y * map.widthInChunks].grid;
     }
     public void DestroyObject(GridTile gridTile)
     {
@@ -473,8 +502,9 @@ public class GridVisualization : MonoBehaviour
         Destroy(gridTile.gridObject.objectTransform.gameObject);
         gridTile.gridObject = null;
         Vector2 vector2 = new Vector2(gridTile.x, gridTile.y);
-        Vector2 target = oldGrid.GetPosition(vector2 + new Vector2(UnityEngine.Random.Range(-0.5f,0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)));
-        CreateWorldItem(new ItemStats(id), oldGrid.GetPosition(vector2 + new Vector2(0,0.5f)),target);
+        Vector2 target = GetWorldPosition(vector2 + new Vector2(UnityEngine.Random.Range(-0.5f,0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)));
+        Debug.Log(target);
+        CreateWorldItem(new ItemStats(id), GetWorldPosition(vector2 + new Vector2(0,0.5f)),target);
         if (item is Wall) UpdateNeighbors(vector2, id); 
     }
     public void UpdateNeighbors(Vector2 positionXY, int ID)
@@ -490,7 +520,7 @@ public class GridVisualization : MonoBehaviour
         bool[] neighbors = new bool[4];
         for (int i = 0; i < 4; i++)
         {
-            var obj = oldGrid.GetValueByXY(positionXY + MyTools.directions4[i]);
+            var obj = GetValueByGridPosition(positionXY + MyTools.directions4[i]);
             if (obj != null && obj.IsBuildObject(ID)) neighbors[i] = true;
             else neighbors[i] = false;
         }
@@ -498,7 +528,7 @@ public class GridVisualization : MonoBehaviour
     }
     private void UpdateSprite(Vector2 positionXY)
     {
-        GridObject gridObject = oldGrid.GetValueByXY(positionXY).gridObject;
+        GridObject gridObject = GetValueByGridPosition(positionXY).gridObject;
         bool[] neighbors = GetNeighbors(positionXY, gridObject.ID);
         int value = 0;
 
@@ -526,7 +556,6 @@ public class GridVisualization : MonoBehaviour
         child.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
         MyTools.ChangePositionPivot(gridObject.objectTransform, child.TransformPoint(0, objectVariant.variants[0].minY, 0));
     }
-
     public void SetNewSprite(Vector2 positionXY,int id)
     {
         bool[] neighbors = GetNeighbors(positionXY, id);
@@ -536,7 +565,6 @@ public class GridVisualization : MonoBehaviour
         }
         UpdateSprite(positionXY);
     }
-
     public void CreateWorldItem(ItemStats item,Vector2 pos,Vector2 target)
     {
         Instantiate(worldItem,pos,Quaternion.identity).GetComponent<WorldItem>().SetItem(item,target);
