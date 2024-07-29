@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
+using static UnityEditor.Progress;
 
 
 public class PlayerPositionArgs : EventArgs
@@ -158,8 +159,6 @@ public class GridVisualization : MonoBehaviour
             CheckChunks(Vector2.zero);
         }
     }
-
-
     //Check current chunk
     //return coordinates of player chunk
     private Vector2 CheckChunks(Vector2 worldPosition)
@@ -187,7 +186,6 @@ public class GridVisualization : MonoBehaviour
         }
         return GetChunkCoordinates(lastPlayerChunk);
     }
-
     private void TryUnloadChunks(int chunkIndex)
     {
         List<int> chunks = new List<int>();
@@ -199,7 +197,7 @@ public class GridVisualization : MonoBehaviour
 
             if(math.abs(chunkPos.x - pos.x) > renderChunks || math.abs(chunkPos.y - pos.y) > renderChunks)
             {
-                item.Value.gameObject.SetActive(false);
+                UnloadChunk(item.Key);
                 chunks.Add(item.Key);  
             }
         }
@@ -209,18 +207,59 @@ public class GridVisualization : MonoBehaviour
             loadedChunks.Remove(chunks[i]);
         }
     }
-
-    
-
+    private void UnloadChunk(int index)
+    {
+        if(loadedChunks[index] != null) Destroy(loadedChunks[index].gameObject);
+        var grid = map.chunks[index].grid;
+        for (int x = 0; x < map.chunkSize; x++)
+        {
+            for (int y = 0; y < map.chunkSize; y++)
+            {
+                var value = grid[x, y].gridObject;
+                if (value != null && value.objectTransform != null)
+                {
+                    Destroy(value.objectTransform.gameObject);
+                }
+            }
+        }
+    }
     private void TryLoadChunk(int chunkIndex)
     {
         if(!loadedChunks.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount)
         {
-            Chunk chunk = map.chunks[chunkIndex];
-            loadedChunks.Add(chunkIndex,CreateMesh(chunk));
+            LoadChunk(chunkIndex);
         }
     }
+    private void LoadChunk(int chunkIndex)
+    {
+        Chunk chunk = map.chunks[chunkIndex];
+        loadedChunks.Add(chunkIndex, CreateMesh(chunk));
+        for (int x = 0; x < map.chunkSize; x++)
+        {
+            for (int y = 0; y < map.chunkSize; y++)
+            {
+                var value = chunk.grid[x, y].gridObject;
+                if (value != null)
+                {
+                    BuildingManager.instance.LoadObject(value,chunk.ChunkGridPosition + new Vector2(x,y));
+                }
+            }
+        }
 
+        for (int x = 0; x < map.chunkSize; x++)
+        {
+            for (int y = 0; y < map.chunkSize; y++)
+            {
+                var value = chunk.grid[x, y].gridObject;
+                if (value != null)
+                {
+                    SetNewSprite(chunk.ChunkGridPosition + new Vector2(x, y), value.ID);
+                }
+            }
+        }
+
+
+    }
     private int GetChunkIndexByPositionXY(Vector2 position)
     {
         return (int)position.x / map.chunkSize + ((int)position.y/ map.chunkSize) * map.widthInChunks;
@@ -423,7 +462,7 @@ public class GridVisualization : MonoBehaviour
                 GridTile gridTile = chunk.grid[x, y];
              
                 int borders = 0;
-                if (IsGrass(gridTile.tileID)) borders = CalculateBorders(x + (int)chunk.ChunkCoordinates.x, y + (int)chunk.ChunkCoordinates.y);
+                if (IsGrass(gridTile.tileID)) borders = CalculateBorders(x + (int)chunk.ChunkGridPosition.x, y + (int)chunk.ChunkGridPosition.y);
                 Vector2 uv11, uv00;
                 GetUVTile(gridTile.tileID, borders, out uv00, out uv11);
                 gridTile.borders = borders;
@@ -464,7 +503,6 @@ public class GridVisualization : MonoBehaviour
         int y = Mathf.FloorToInt((position.y - map.offset.y) / map.cellSize);
         return new Vector2(x, y);
     }
-
     public void TileChanged(int x,int y)
     {
         UpdateMesh(x,y,true);
@@ -472,7 +510,7 @@ public class GridVisualization : MonoBehaviour
     public GridTile GetValueByGridPosition(Vector2 gridPosition)
     {
         int chunkIndex =  GetChunkIndexByPositionXY(gridPosition);
-        if (gridPosition.x >= 0 && gridPosition.y >= 0)
+        if (gridPosition.x >= 0 && gridPosition.y >= 0 && gridPosition.x < map.width && gridPosition.y < map.height)
         {
             return map.chunks[chunkIndex].grid[(int)gridPosition.x % map.chunkSize, (int)gridPosition.y % map.chunkSize];
         }
@@ -486,9 +524,6 @@ public class GridVisualization : MonoBehaviour
     {
         return map.offset + gridPosition * map.cellSize + new Vector2(map.cellSize / 2, 0);
     }
-
-
-
     public GridTile[,] GetGridByXY(Vector2 posXY)
     {
         int x = (int)posXY.x % map.chunkSize;

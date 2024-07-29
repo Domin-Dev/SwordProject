@@ -178,6 +178,24 @@ public class BuildingManager : MonoBehaviour
         GridVisualization.instance.SetNewSprite(posXY,selectedObjectID);
         builtObject(this, null);
     }
+    public void LoadObject(GridObject gridObject,Vector2 gridPosition)
+    {
+        Item item = ItemsAsset.instance.GetItem(gridObject.ID);
+        if (item is Wall)
+        { 
+            Transform obj = Instantiate(buildingPrefab, GridVisualization.instance.GetWorldPosition(gridPosition), Quaternion.identity, parent).transform;
+            gridObject.objectTransform = obj;
+        }
+        else if(item is BuildingObject)
+        {
+            Transform obj = Instantiate(buildingPrefab, GridVisualization.instance.GetWorldPosition(gridPosition), Quaternion.identity, parent).transform.GetChild(0);
+            ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(gridObject.ID,gridObject.indexVariant);
+            obj.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
+            obj.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
+            CreateGridObject(gridPosition, gridObject.indexVariant, obj.parent);
+            MyTools.ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0)); 
+        }
+    }
     private void BuildFloor(Vector2 posXY)
     {
         GridTile gridTile = GridVisualization.instance.GetValueByGridPosition(posXY);
@@ -214,6 +232,7 @@ public class BuildingManager : MonoBehaviour
             case DoorItem : gridObject.gridObject = new GridDoor(selectedObjectID,indexVariant, buildingObj);
                 return;
         }
+
         gridObject.gridObject = new GridObject(selectedObjectID,indexVariant, buildingObj);
     }
     public void ChangeSprite(Vector2 posXY, int index)

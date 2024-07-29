@@ -1,7 +1,12 @@
+using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class MapGenerator : MonoBehaviour
 {
+    [Header("Seed Settings")]
+    [SerializeField] private int seed;
+    [SerializeField] private bool randomSeed;
     [Header("Map Size( in chunks )")]
     [SerializeField] private int widthInChunks = 256;
     [SerializeField] private int heightInChunks = 256;
@@ -18,13 +23,22 @@ public class MapGenerator : MonoBehaviour
     GridVisualization gridVisualization;
     Grid<GridTile> grid;
 
- 
+
+    private void Awake()
+    {
+        if(randomSeed)
+        {
+            seed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
+        }
+    }
     private void Start()
     {
         gridVisualization = GridVisualization.instance;
         mapGeneratorSettings = gridVisualization.settings;
-        offsetX = Random.Range(0f,99999f);
-        offsetY = Random.Range(0f,99999f);
+
+        var rand = new System.Random(seed);
+        offsetX = rand.Next(-100000, 100000);
+        offsetY = rand.Next(-100000, 100000);
 
         var map = GenerateMap(0.25f, offset);
         gridVisualization.SetMap(map); 
@@ -34,6 +48,12 @@ public class MapGenerator : MonoBehaviour
     {
         chunk.grid[x,y].tileID = mapGeneratorSettings.tiles[index].tileID;
     }
+    
+    private void SetBuildingObject(Chunk chunk, int x, int y,int index)
+    {
+        chunk.grid[x, y].gridObject = new GridObject(index, 0, null);
+    }
+
     public Map GenerateMap(float cellSize, Vector2 offset)
     {
         Map map = new Map(offset, cellSize,chunkSize,widthInChunks,heightInChunks);
@@ -46,13 +66,15 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
+        var rand = new System.Random(seed);
+
         foreach (var item in map.chunks)
         {
             for (int y = 0; y < chunkSize; y++)
             {
                 for (int x = 0; x < chunkSize; x++)
                 {
-                    float value = Generate(x + (int)item.Value.ChunkCoordinates.x, y + (int)item.Value.ChunkCoordinates.y);
+                    float value = Generate(x + (int)item.Value.ChunkGridPosition.x, y + (int)item.Value.ChunkGridPosition.y);
                     if (value > 0.65)
                     {
                         SetValue(item.Value,x, y, 0);
@@ -65,6 +87,11 @@ public class MapGenerator : MonoBehaviour
                     {
                         SetValue(item.Value, x, y, 2);
                     }
+                    
+                    if(rand.Next(0,10) > 4)
+                    {
+                        SetBuildingObject(item.Value, x, y, 300);
+                    }
                 }
             }
         }
@@ -73,8 +100,8 @@ public class MapGenerator : MonoBehaviour
 
     private float Generate(int x,int y)
     {
-        float xf = (float)x / chunkSize * scale + offsetX;
-        float yf = (float)y / chunkSize * scale + offsetY;
+        float xf = ((float)x  + offsetX )/ chunkSize * scale;
+        float yf = ((float)y + offsetY) / chunkSize * scale;
         float value = Mathf.PerlinNoise(xf,yf);
         return value;
     }

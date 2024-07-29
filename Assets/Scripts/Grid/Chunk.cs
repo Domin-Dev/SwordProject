@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Chunk
 {
     public GridTile[,] grid;
-    public Vector2 ChunkCoordinates {  set; get; }
+    public Vector2 ChunkGridPosition {  set; get; }
     public Vector2 position {  set; get; }
 
     public Chunk(int gridSize,Vector2 chunkCoordinates, Vector2 position)
@@ -16,7 +17,7 @@ public class Chunk
                 grid[i, j] = new GridTile((int)chunkCoordinates.x + i,(int)chunkCoordinates.y + j);
             }
         }
-        this.ChunkCoordinates = chunkCoordinates;
+        this.ChunkGridPosition = chunkCoordinates;
         this.position = position;
     }
 }
