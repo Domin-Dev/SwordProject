@@ -18,19 +18,21 @@ public class GridDoor : GridObject
 public class GridObject: IGetBarValue
 {
     public int ID;
-    public int indexVariant;
+    public int variantIndex;
+    public int stateIndex;
     public Transform objectTransform;
 
     public float hitPoints;
     private float maxHitPoints;
-
-    public GridObject(int ID,int indexVariant,Transform obj)
+    
+    public GridObject(int ID,int indexVariant,Transform obj,int stateIndex = 0)
     {
         this.ID = ID;
         this.maxHitPoints = (ItemsAsset.instance.GetItem(ID) as BuildingItem).durability;
         this.hitPoints = maxHitPoints;
-        this.indexVariant = indexVariant;
+        this.variantIndex = indexVariant;
         this.objectTransform = obj;
+        this.stateIndex = stateIndex;
     }
     public float GetBarValue()
     {

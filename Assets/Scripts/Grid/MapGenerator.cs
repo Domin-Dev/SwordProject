@@ -88,7 +88,7 @@ public class MapGenerator : MonoBehaviour
                         SetValue(item.Value, x, y, 2);
                     }
                     
-                    if(rand.Next(0,10) > 4)
+                    if(rand.Next(0,100) <= 5)
                     {
                         SetBuildingObject(item.Value, x, y, 300);
                     }

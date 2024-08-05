@@ -189,10 +189,11 @@ public class BuildingManager : MonoBehaviour
         else if(item is BuildingObject)
         {
             Transform obj = Instantiate(buildingPrefab, GridVisualization.instance.GetWorldPosition(gridPosition), Quaternion.identity, parent).transform.GetChild(0);
-            ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(gridObject.ID,gridObject.indexVariant);
+            ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(gridObject.ID,gridObject.variantIndex);
             obj.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
             obj.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
-            CreateGridObject(gridPosition, gridObject.indexVariant, obj.parent);
+
+            CreateGridObject(gridObject.ID,gridPosition, gridObject.variantIndex, obj.parent);
             MyTools.ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0)); 
         }
     }
@@ -218,27 +219,27 @@ public class BuildingManager : MonoBehaviour
 
         obj.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
         obj.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
-        CreateGridObject(posXY, rotation % rotationStates, obj.parent);
+        CreateGridObject(selectedObjectID,posXY, rotation % rotationStates, obj.parent);
         MyTools.ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0));
         builtObject(this, null);
     }
-    private void CreateGridObject(Vector2 posXY,int indexVariant, Transform buildingObj)
+    private void CreateGridObject(int itemID,Vector2 posXY,int indexVariant, Transform buildingObj)
     {
-        Item item = ItemsAsset.instance.GetItem(selectedObjectID);
+        Item item = ItemsAsset.instance.GetItem(itemID);
         GridTile gridObject = GridVisualization.instance.GetValueByGridPosition(posXY);
 
         switch (item)
         {
-            case DoorItem : gridObject.gridObject = new GridDoor(selectedObjectID,indexVariant, buildingObj);
+            case DoorItem : gridObject.gridObject = new GridDoor(itemID, indexVariant, buildingObj);
                 return;
         }
 
-        gridObject.gridObject = new GridObject(selectedObjectID,indexVariant, buildingObj);
+        gridObject.gridObject = new GridObject(itemID, indexVariant, buildingObj);
     }
     public void ChangeSprite(Vector2 posXY, int index)
     {
         GridObject gridObject = GridVisualization.instance.GetValueByGridPosition(posXY).gridObject;
-        Variant  variant = ItemsAsset.instance.GetObjectVariant(gridObject.ID, gridObject.indexVariant).variants[index];
+        Variant  variant = ItemsAsset.instance.GetObjectVariant(gridObject.ID, gridObject.variantIndex).variants[index];
         gridObject.objectTransform.GetComponentInChildren<SpriteRenderer>().sprite = variant.sprite;
         PolygonCollider2D polygonCollider2D = gridObject.objectTransform.GetComponentInChildren<PolygonCollider2D>();
         polygonCollider2D.points = variant.hitbox;

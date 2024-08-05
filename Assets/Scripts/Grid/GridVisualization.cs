@@ -1,13 +1,13 @@
 
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
-using static UnityEditor.Progress;
 
 
 public class PlayerPositionArgs : EventArgs
@@ -227,10 +227,10 @@ public class GridVisualization : MonoBehaviour
     {
         if(!loadedChunks.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount)
         {
-            LoadChunk(chunkIndex);
+           StartCoroutine(LoadChunk(chunkIndex));
         }
     }
-    private void LoadChunk(int chunkIndex)
+    IEnumerator LoadChunk(int chunkIndex)
     {
         Chunk chunk = map.chunks[chunkIndex];
         loadedChunks.Add(chunkIndex, CreateMesh(chunk));
@@ -250,15 +250,17 @@ public class GridVisualization : MonoBehaviour
         {
             for (int y = 0; y < map.chunkSize; y++)
             {
-                var value = chunk.grid[x, y].gridObject;
-                if (value != null)
-                {
-                    SetNewSprite(chunk.ChunkGridPosition + new Vector2(x, y), value.ID);
-                }
+                //var value = chunk.grid[x, y].gridObject;
+                //if (value != null)
+                //{
+                //    if (ItemsAsset.instance.GetItem(value.ID) is Wall)
+                //    {
+                //        SetNewSprite(chunk.ChunkGridPosition + new Vector2(x, y), value.ID);
+                //    }
+                //}
             }
         }
-
-
+        yield return null;
     }
     private int GetChunkIndexByPositionXY(Vector2 position)
     {
@@ -586,7 +588,7 @@ public class GridVisualization : MonoBehaviour
 
         Transform child = gridObject.objectTransform.GetChild(0);
         ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(gridObject.ID, value);
-
+        Debug.Log(gridObject.ID + value);
         child.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
         child.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
         MyTools.ChangePositionPivot(gridObject.objectTransform, child.TransformPoint(0, objectVariant.variants[0].minY, 0));
