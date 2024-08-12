@@ -210,7 +210,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 6733158c9a0fd1c40b0d7f2690abc861
+      spriteID: c22531fbf7391a6448354b3cbe6c10b0
       internalID: -816809079
       vertices: []
       indices: 
@@ -231,7 +231,7 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5def49b8f64f26048ab1fd6918887370
+      spriteID: 8903cd5c9850e334aa13e7a4af2702df
       internalID: 422733017
       vertices: []
       indices: 
@@ -252,8 +252,92 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5d1917ffa74e88044ac83de4d41764d2
+      spriteID: 0d2be0e7e6e1bd3448cca70f00df2834
       internalID: -813890750
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ItemEQ_4
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 0
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 3, y: 3, z: 3, w: 3}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 238d9f74fcecd064cb4f11eb2a67229f
+      internalID: -767709765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ItemEQ_5
+      rect:
+        serializedVersion: 2
+        x: 130
+        y: 0
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 3, y: 3, z: 3, w: 3}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9bcdbbdaccc6cff44a94d8d0b6791077
+      internalID: -531249002
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ItemEQ_6
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 0
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 4, y: 4, z: 4, w: 4}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89a950eab6c2307499f771f7f1ab33a7
+      internalID: 85432009
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ItemEQ_7
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 0
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 4, y: 4, z: 4, w: 4}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6a60a605446a0fe468ca45adce8ca139
+      internalID: 1744648376
       vertices: []
       indices: 
       edges: []
@@ -273,6 +357,10 @@ TextureImporter:
       ItemEQ_1: -816809079
       ItemEQ_2: 422733017
       ItemEQ_3: -813890750
+      ItemEQ_4: -767709765
+      ItemEQ_5: -531249002
+      ItemEQ_6: 85432009
+      ItemEQ_7: 1744648376
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

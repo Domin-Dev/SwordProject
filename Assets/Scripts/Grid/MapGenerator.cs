@@ -81,11 +81,30 @@ public class MapGenerator : MonoBehaviour
 
         foreach (var item in map.chunks)
         {
+            float value = Generate((int)item.Value.ChunkGridPosition.x,(int)item.Value.ChunkGridPosition.y, offset, scale);
+
+
             for (int y = 0; y < chunkSize; y++)
             {
                 for (int x = 0; x < chunkSize; x++)
                 {
-                    GenerateTempCell(item.Value, x, y,rand);
+                    // GenerateCell(item.Value, x, y,rand);
+                    if (value >= 0.75f)
+                    { 
+                        SetValue(item.Value, x, y,8);
+                    }
+                    else if (value >= 0.5f)
+                    {
+                        SetValue(item.Value, x, y, 1);
+                    }
+                    else if (value >= 0.25f)
+                    {
+                        SetValue(item.Value, x, y, 0);
+                    }
+                    else 
+                    {
+                        SetValue(item.Value, x, y, 9);
+                    }
                 }
             }
         }
@@ -94,24 +113,30 @@ public class MapGenerator : MonoBehaviour
 
     private void GenerateCell(Chunk chunk, int x, int y, System.Random rand)
     {
-        float value = Generate(x + (int)chunk.ChunkGridPosition.x, y + (int)chunk.ChunkGridPosition.y, offset, scale);
-        if (value > 0.65)
+        //float value = Generate(x + (int)chunk.ChunkGridPosition.x, y + (int)chunk.ChunkGridPosition.y, offset, scale);
+        int posX = x + (int)chunk.ChunkGridPosition.x;
+        int posY = y + (int)chunk.ChunkGridPosition.y;
+        float rainValue = Generate(posX,posY, offsetRain, scaleRain);
+        float tempValue = Generate(posX,posY, offsetTemp, scaleTemp);
+
+
+        if (rainValue <= 0.3f && tempValue > 0.8f)
         {
-            SetValue(chunk, x, y, 0);
+            SetValue(chunk, x, y, 8);
         }
-        else if (value > 0.3)
+        else if (rainValue <= 0.3f && tempValue > 0.2f)
         {
             SetValue(chunk, x, y, 1);
         }
         else
         {
-            SetValue(chunk, x, y, 2);
+            SetValue(chunk, x, y, 0);
         }
 
-        if (rand.Next(0, 100) <= 5)
-        {
-            SetBuildingObject(chunk, x, y, 300);
-        }
+        //if (rand.Next(0, 100) <= 5)
+        //{
+        //    SetBuildingObject(chunk, x, y, 300);
+        //}
     }
 
     private void GenerateTempCell(Chunk chunk, int x, int y, System.Random rand)
