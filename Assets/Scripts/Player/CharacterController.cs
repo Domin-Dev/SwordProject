@@ -91,7 +91,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     }
     public void UpdateCharacterSprites()
     {
-        characterSpriteController.UpdateSprite(moveDir, (sightDir - (Vector2)center.position).normalized);
+       // characterSpriteController.UpdateSprite(moveDir, (sightDir - (Vector2)center.position).normalized);
     }
 
     #region Movement
