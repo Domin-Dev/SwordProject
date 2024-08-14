@@ -6,6 +6,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CharacterEditorSettings", menuName = "GameAsset/CharacterEditorSettings")]
 public class CharacterEditorSettings : ScriptableObject
 {
+    [SerializeField] public Color skinColor;
+
+
     [SerializeField] public States[] eyes;
     [SerializeField] public States head;
 }

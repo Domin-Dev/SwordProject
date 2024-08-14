@@ -1,7 +1,18 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
+
+public class ColorArgs : EventArgs
+{ 
+    public Color color;
+    public ColorArgs(Color color)
+    {
+        this.color = color; 
+    }
+}
 
 public class ColorPicker : MonoBehaviour
 {
@@ -18,7 +29,7 @@ public class ColorPicker : MonoBehaviour
     int valueS = 50;
     int valueV = 50;
 
-    public Color color1;
+    public event EventHandler<ColorArgs> newColor;
 
     void Start()
     {
@@ -69,7 +80,8 @@ public class ColorPicker : MonoBehaviour
     {
         UpdateBarV();
         UpdateBarS();
-        color1 = Color.HSVToRGB(valueH / 360f, valueS / 100f, valueV / 100f);
+        Color color = Color.HSVToRGB(valueH / 360f, valueS / 100f, valueV / 100f);
+        newColor?.Invoke(this,new ColorArgs(color));
     }
 
     private void OnValueHChanged(float value)

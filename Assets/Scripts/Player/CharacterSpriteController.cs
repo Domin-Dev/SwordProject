@@ -5,8 +5,12 @@ using UnityEngine.U2D;
 
 public class CharacterSpriteController : MonoBehaviour
 {
-    [SerializeField] SpriteRenderer head;
-    [SerializeField] SpriteRenderer body;
+    [SerializeField] public SpriteRenderer head;
+    [SerializeField] public SpriteRenderer eyes;
+    [SerializeField] public SpriteRenderer mouth;
+    [SerializeField] public SpriteRenderer hair;
+
+    [SerializeField] public SpriteRenderer body;
 
     [SerializeField] Sprite[] bodySprites;
     [SerializeField] Sprite[] headSprites;
