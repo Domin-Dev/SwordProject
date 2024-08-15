@@ -10,6 +10,9 @@ public class CharacterSpriteController : MonoBehaviour
     [SerializeField] public SpriteRenderer mouth;
     [SerializeField] public SpriteRenderer hair;
 
+    [SerializeField] public SpriteRenderer handL;
+    [SerializeField] public SpriteRenderer handR;
+
     [SerializeField] public SpriteRenderer body;
 
     [SerializeField] Sprite[] bodySprites;
