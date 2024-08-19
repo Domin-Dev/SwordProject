@@ -14,6 +14,7 @@ public class CharacterSpriteController : MonoBehaviour
     [SerializeField] public SpriteRenderer handR;
 
     [SerializeField] public SpriteRenderer body;
+    [SerializeField] public SpriteRenderer underwear;
 
     [SerializeField] Sprite[] bodySprites;
     [SerializeField] Sprite[] headSprites;

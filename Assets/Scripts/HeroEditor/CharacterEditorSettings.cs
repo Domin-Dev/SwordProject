@@ -8,6 +8,7 @@ public class CharacterEditorSettings : ScriptableObject
 {
     [SerializeField] public Color[] skinColors;
     [SerializeField] public Color[] hairColors;
+    [SerializeField] public Color[] clothesColors;
 
     [SerializeField] public States[] eyes;
     [SerializeField] public States head;
