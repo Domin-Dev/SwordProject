@@ -37,9 +37,9 @@ public class VariantItemEditor : ItemEditor
 
         List<ObjectVariant> objectVariants = new List<ObjectVariant>();
 
-        if(!AssetDatabase.IsValidFolder($"{MyTools.spritesPath}/{variantItem.name}"))
+        if(!AssetDatabase.IsValidFolder($"{MyTools.buildingObjectsSpritesPath}/{variantItem.name}"))
         {
-            AssetDatabase.CreateFolder($"{MyTools.spritesPath}", variantItem.name);
+            AssetDatabase.CreateFolder($"{MyTools.buildingObjectsSpritesPath}", variantItem.name);
         }
 
         Cut(texture,objectVariants, k,h/2);
@@ -72,7 +72,7 @@ public class VariantItemEditor : ItemEditor
 
             for (int j = 0; j < numberVariant; j++)
             {
-                AssetDatabase.CreateAsset(variants[j].sprite, $"{MyTools.spritesPath}/{variantItem.name}/{variantItem.name}_{i+k*j}.asset");
+                AssetDatabase.CreateAsset(variants[j].sprite, $"{MyTools.buildingObjectsSpritesPath}/{variantItem.name}/{variantItem.name}_{i+k*j}.asset");
             }
         }
     }

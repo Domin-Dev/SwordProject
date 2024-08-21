@@ -24,6 +24,7 @@ public class HeroEditor: MonoBehaviour
 
     private Image skinColorSelected;
     private Image hairColorSelected;
+    private Image underwearColorSelected;
 
     private void Start()
     {
@@ -35,6 +36,9 @@ public class HeroEditor: MonoBehaviour
     }
     private void LoadColors()
     {
+        ChangeSkinColor(characterEditorSettings.skinColors[1]);
+        ChangeHairColor(characterEditorSettings.hairColors[1]);
+        ChangeUnderwearColor(characterEditorSettings.clothesColors[1]);
         for (int i = 0; i < characterEditorSettings.skinColors.Length; i++)
         {
             Transform transform = Instantiate(colorToSelectPrefab, skinColors).transform;
@@ -66,8 +70,8 @@ public class HeroEditor: MonoBehaviour
             transform.GetComponent<Button>().onClick.AddListener(() =>
             {
                 Image selectedColor = transform.GetComponent<Image>();
-                ChangeHairColor(selectedColor.color);
-                SelectNew(selectedColor, ref hairColorSelected);
+                ChangeUnderwearColor(selectedColor.color);
+                SelectNew(selectedColor, ref underwearColorSelected);
             });
         }
     }
@@ -93,6 +97,11 @@ public class HeroEditor: MonoBehaviour
     {
         ChangeColor(characterSpriteController.hair, color);
         ChangeColor(characterSpriteController.eyes, color, 0.6f);
+    }
+
+    private void ChangeUnderwearColor(Color color)
+    {
+        ChangeColor(characterSpriteController.underwear, color);
     }
     private void ChangeSkinColor(Color color)
     {

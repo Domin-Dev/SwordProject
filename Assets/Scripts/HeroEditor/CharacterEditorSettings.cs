@@ -10,8 +10,9 @@ public class CharacterEditorSettings : ScriptableObject
     [SerializeField] public Color[] hairColors;
     [SerializeField] public Color[] clothesColors;
 
-    [SerializeField] public States[] eyes;
-    [SerializeField] public States head;
+
+    [SerializeField] public Texture2D hairstylesTexture;
+    [SerializeField] public States[] hairstyles;
 }
 
 [System.Serializable]

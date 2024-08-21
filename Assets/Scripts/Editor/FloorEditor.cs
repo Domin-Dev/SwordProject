@@ -21,16 +21,16 @@ public class FloorEditor : ItemEditor
     {
         int k = texture.width / 25;
         List<Sprite> objectVariants = new List<Sprite>();
-        if (!AssetDatabase.IsValidFolder($"{MyTools.spritesPath}/{floor.name}"))
+        if (!AssetDatabase.IsValidFolder($"{MyTools.buildingObjectsSpritesPath}/{floor.name}"))
         {
-            AssetDatabase.CreateFolder($"{MyTools.spritesPath}", floor.name);
+            AssetDatabase.CreateFolder($"{MyTools.buildingObjectsSpritesPath}", floor.name);
         }
 
         for (int i = 0; i < k; i++)
         {
             Sprite sprite = Sprite.Create(texture, new Rect(i * 25, 0, 25, 25), new Vector2(0.5f,0.5f));
             objectVariants.Add(sprite);
-            AssetDatabase.CreateAsset(sprite, $"{MyTools.spritesPath}/{floor.name}/{floor.name}_{i}.asset");
+            AssetDatabase.CreateAsset(sprite, $"{MyTools.buildingObjectsSpritesPath}/{floor.name}/{floor.name}_{i}.asset");
         }
         AssetDatabase.SaveAssets();
        // floor.sprites = objectVariants.ToArray();
