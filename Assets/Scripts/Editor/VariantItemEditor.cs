@@ -47,7 +47,6 @@ public class VariantItemEditor : ItemEditor
         variantItem.objectVariants = objectVariants.ToArray();
         AssetDatabase.SaveAssets();
         EditorUtility.SetDirty(variantItem);
-
     }
 
 

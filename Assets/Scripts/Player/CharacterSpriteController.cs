@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.U2D;
 
 public class CharacterSpriteController : MonoBehaviour
@@ -19,9 +20,16 @@ public class CharacterSpriteController : MonoBehaviour
     [SerializeField] Sprite[] bodySprites;
     [SerializeField] Sprite[] headSprites;
 
+    private CharacterEditorSettings characterEditorSettings;
 
     private Vector2 lastMoveDir = Vector2.zero;
-    private Vector2 lastSightDir = Vector2.zero;   
+    private Vector2 lastSightDir = Vector2.zero;
+
+    public int hairstyleIndex = 1;
+    private void Start()
+    {
+        characterEditorSettings = Resources.Load<CharacterEditorSettings>("CharacterParts/CharacterEditorSettings");  
+    }
     public void UpdateSprite(Vector2 moveDir, Vector2 sightDir)
     {
         if(lastMoveDir != moveDir)
@@ -54,28 +62,46 @@ public class CharacterSpriteController : MonoBehaviour
         if (angle >= 20 && angle <= 160)SetSpriteHead(0);
         else if (angle > 160 && angle < 200)SetSpriteHead(2);
         else if (angle >= 200 && angle <= 340)SetSpriteHead(1);
-        else SetSpriteHead(3);
-        
+        else SetSpriteHead(3); 
     }
-
+    // indexs: 0 - down, 1 - up, 2 - rigth, 3 - left
     private void SetSpriteHead(int index)
     {
-        head.sprite = headSprites[index];
-        if (index == 1)
+        if (index > 1)
         {
-            head.sortingOrder = 100;
-            body.sortingOrder = 30;
+            head.sprite = characterEditorSettings.heads[1];
         }
         else
         {
-            head.sortingOrder = 5;
-            body.sortingOrder = 0;
+            head.sprite = characterEditorSettings.heads[0];
+        }
+        eyes.sprite = characterEditorSettings.eyes[index];
+        mouth.sprite = characterEditorSettings.mouth[index];
+        hair.sprite = characterEditorSettings.hairstyles[hairstyleIndex].sprites[index];
+
+        if (index == 1)
+        {
+            head.GetComponent<SortingGroup>().sortingOrder = 100;
+            body.GetComponent<SortingGroup>().sortingOrder = 20;
+        }
+        else
+        {
+            head.GetComponent<SortingGroup>().sortingOrder = 5;
+            body.GetComponent<SortingGroup>().sortingOrder = 0;
         }
         if (lastMoveDir == Vector2.zero) SetSpriteBody(index);
     }
-
+    // indexs: 0 - down, 1 - up, 2 - rigth, 3 - left
     private void SetSpriteBody(int index)
     {
-        body.sprite = bodySprites[index];
+        if (index > 1)
+        {
+            body.sprite = characterEditorSettings.bodies[1];
+        }
+        else
+        {
+            body.sprite = characterEditorSettings.bodies[0];
+        }
+        underwear.sprite = characterEditorSettings.underwear[index];
     }
 }

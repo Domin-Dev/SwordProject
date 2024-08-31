@@ -11,13 +11,15 @@ public class HeroEditor: MonoBehaviour
     [SerializeField] private ColorPicker colorPicker;
     [SerializeField] private GameObject colorToSelectPrefab;
     [Space]
+
     [SerializeField] private Transform skinColors;
     [SerializeField] private Transform hairColors;
     [SerializeField] private Transform underwearColors;
+    [SerializeField] private Switch hairSwitch;
+    [SerializeField] private Button saveButton;
 
     [SerializeField] private Sprite selected;
     [SerializeField] private Sprite unselected;
-
 
     private CharacterEditorSettings characterEditorSettings;
     private CharacterSpriteController characterSpriteController;
@@ -31,8 +33,13 @@ public class HeroEditor: MonoBehaviour
         characterSpriteController = FindObjectOfType<CharacterSpriteController>();
         colorPicker.newColor += NewColor;
         characterEditorSettings = Resources.Load<CharacterEditorSettings>("CharacterParts/CharacterEditorSettings");
-        LoadColors();
+        saveButton.onClick.AddListener(() =>
+        {
+            this.gameObject.SetActive(false);
+        });
 
+        hairSwitch.SetUpSwitch(0, characterEditorSettings.hairstyles.Length, "Hairstyle");
+        LoadColors();
     }
     private void LoadColors()
     {
@@ -74,6 +81,14 @@ public class HeroEditor: MonoBehaviour
                 SelectNew(selectedColor, ref underwearColorSelected);
             });
         }
+
+        hairSwitch.OnChangedValue += ChangeHair;
+    }
+
+    private void ChangeHair(object sender, SwitchArgs e)
+    {
+        characterSpriteController.hair.sprite = characterEditorSettings.hairstyles[e.newValue].sprites[0];
+        characterSpriteController.hairstyleIndex = e.newValue;
     }
 
     private void NewColor(object sender, ColorArgs e)
@@ -118,6 +133,8 @@ public class HeroEditor: MonoBehaviour
         materialPropertyBlock.SetFloat("_DarkValue", darkValue);
         spriteRenderer.SetPropertyBlock(materialPropertyBlock);
     }
+
+
 
 }
 

@@ -13,6 +13,13 @@ public class CharacterEditorSettings : ScriptableObject
 
     [SerializeField] public Texture2D hairstylesTexture;
     [SerializeField] public States[] hairstyles;
+    [Space]
+    [SerializeField] public Sprite[] bodies;
+    [SerializeField] public Sprite[] heads;
+    [SerializeField] public Sprite[] eyes;
+    [SerializeField] public Sprite[] mouth;
+
+    [SerializeField] public Sprite[] underwear;
 }
 
 [System.Serializable]

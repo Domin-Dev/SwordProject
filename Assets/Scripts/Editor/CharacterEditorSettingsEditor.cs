@@ -37,11 +37,11 @@ public class CharacterEditorSettingsEditor : Editor
                 Sprite sprite = Sprite.Create(texture, new Rect(j * hairstyleWidth,i * hairstyleWidth, hairstyleWidth, hairstyleHeight), new Vector2(0.5f, 0.5f));
                 AssetDatabase.CreateAsset(sprite, $"{MyTools.hairstylesSpritesPath}/{i}/Hairstyle{j}_{i}.asset");
                 states.sprites[j] = sprite;
-                Debug.Log("dziala");
             }
             statesList.Add(states);
         }
-        AssetDatabase.SaveAssets();
         settings.hairstyles = statesList.ToArray();
+        AssetDatabase.SaveAssets();
+        EditorUtility.SetDirty(settings);
     }
 }

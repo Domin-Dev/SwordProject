@@ -15,6 +15,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     [SerializeField] private Transform center;
 
 
+
     private Animator animator;
     private SortingGroup sortingGroup;
     private float speed = 1f;
@@ -26,7 +27,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 
     private bool isRepulsed = false;
     public HandsController handsController { private set; get; }
-
+    private CharacterEditorSettings settings;
 
 
     #region StateMachine
@@ -91,7 +92,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
     }
     public void UpdateCharacterSprites()
     {
-       // characterSpriteController.UpdateSprite(moveDir, (sightDir - (Vector2)center.position).normalized);
+        characterSpriteController.UpdateSprite(moveDir, (sightDir - (Vector2)center.position).normalized);
     }
 
     #region Movement

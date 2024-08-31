@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SwitchArgs : EventArgs
 {
-    int newValue;
+    public int newValue;
     public SwitchArgs(int newValue)
     {
         this.newValue = newValue;
@@ -17,11 +18,13 @@ public class Switch : MonoBehaviour
 {
     [SerializeField] private Button left;
     [SerializeField] private Button rigth;
-
-    private int value = 0;
-    private int minValue;
-    private int maxValue;
-    private string nameSwitch;
+    [SerializeField] private TextMeshProUGUI text;
+    [Space]
+    [SerializeField] private int value = 0;
+    [Space]
+    [SerializeField] private int minValue;
+    [SerializeField] private int maxValue;
+    [SerializeField] private string nameSwitch;
 
     public event EventHandler<SwitchArgs> OnChangedValue;
 
@@ -36,6 +39,13 @@ public class Switch : MonoBehaviour
         {
             IncreaseValue();
         });
+
+        OnChangedValue += ChangSwitchText;
+    }
+
+    private void ChangSwitchText(object sender, SwitchArgs e)
+    {
+        text.text = nameSwitch + " " + e.newValue.ToString();
     }
 
     public void SetUpSwitch(int minValue,int maxValue,string nameSwitch)
@@ -49,7 +59,7 @@ public class Switch : MonoBehaviour
     {
         if(value == minValue)
         {
-            value = maxValue;
+            value = maxValue - 1;
         }
         else
         {
