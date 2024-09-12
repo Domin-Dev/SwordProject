@@ -1,3 +1,4 @@
+using System.Data;
 using UnityEngine;
 
 public class WorldItem : MonoBehaviour
@@ -60,22 +61,22 @@ public class WorldItem : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.transform.parent != null && collision.transform.parent.CompareTag("Player"))
+        if (collision.transform.parent != null && collision.transform.parent.CompareTag("Player"))
         {
             timerFollow = Timer.Create(() =>
             {
                 Vector2 pos = Vector2.Lerp(transform.position, collision.transform.position, Time.deltaTime * 13f);
                 transform.position = pos;
-                if (Vector2.Distance(transform.position,collision.transform.position) < 0.16f)
+                if (Vector2.Distance(transform.position, collision.transform.position) < 0.16f)
                 {
                     AddItem();
                     return true;
                 }
                 return false;
-            },()=>
+            }, () =>
             {
                 return false;
-            }); 
+            });
         }
     }
 
@@ -92,7 +93,9 @@ public class WorldItem : MonoBehaviour
         if (EquipmentManager.instance.AddNewItem(itemStats))
         {
             Sounds.instance.Click();
+            Debug.Log(timerFollow);
             if(timerFollow != null) timerFollow.Cancel();
+            
             if(timer != null) timer.Cancel();
             if(timerTransform != null) timerTransform.Cancel();
             Destroy(gameObject);

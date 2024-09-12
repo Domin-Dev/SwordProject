@@ -125,10 +125,6 @@ public class ItemsAsset : MonoBehaviour
     {
         return items.ContainsKey(itemId);
     }
-    public Sprite[] GetGarmentSprites(int itemID)
-    {
-        return (items[itemID] as Garment).GetArray();
-    }
     public Item GetItem(int itemID)
     {
         return items[itemID];

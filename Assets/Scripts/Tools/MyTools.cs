@@ -9,7 +9,11 @@ public static class MyTools
 
     public readonly static Color hitboxColor = new Color(0, 1, 0, 1);
     public readonly static string buildingObjectsSpritesPath = "Assets/Graphics/Sprites/BuildingObjects";
+    public readonly static string clothesSpritesPath = "Assets/Graphics/Sprites/Clothes";
     public readonly static string hairstylesSpritesPath = "Assets/Graphics/Sprites/HairStyles";
+
+
+
     public readonly static Vector2[] directions8 = {
         new Vector2(0, 1),
         new Vector2(1, 1),

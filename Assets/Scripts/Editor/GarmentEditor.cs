@@ -1,35 +1,42 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
 [CustomEditor(typeof(Garment),false)]
-public class GarmentEditor : Editor
+public class GarmentEditor : ItemEditor
 {
+   
+
+    Garment settings;
     public override void OnInspectorGUI()
     {
-        Garment item = (Garment)target;
-
-        ItemEditor.IconField(item);
-
-
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.PrefixLabel("Garment Images");
-
-        EditorGUILayout.BeginVertical();
-            EditorGUILayout.PrefixLabel("Top");
-            item.top = (Sprite)EditorGUILayout.ObjectField(item.top, typeof(Sprite), false, GUILayout.Width(75), GUILayout.Height(75));
-            EditorGUILayout.PrefixLabel("Rigth");
-            item.rigth = (Sprite)EditorGUILayout.ObjectField(item.rigth, typeof(Sprite), false, GUILayout.Width(75), GUILayout.Height(75));
-        EditorGUILayout.EndVertical();
-
-        EditorGUILayout.BeginVertical();
-            EditorGUILayout.PrefixLabel("Bottom");
-            item.bottom = (Sprite)EditorGUILayout.ObjectField(item.bottom, typeof(Sprite), false, GUILayout.Width(75), GUILayout.Height(75));
-            EditorGUILayout.PrefixLabel("Left");
-            item.left = (Sprite)EditorGUILayout.ObjectField(item.left, typeof(Sprite), false, GUILayout.Width(75), GUILayout.Height(75));
-        EditorGUILayout.EndVertical();
-
-        EditorGUILayout.EndHorizontal();
-       
+        settings = (Garment)target;
+        if (GUILayout.Button("Cut Sprites"))
+        {
+            CutSprites(settings.texture);
+        }
         base.OnInspectorGUI();
+    }
+    private void CutSprites(Texture2D texture)
+    {
+        int id = settings.ID;
+        int size = texture.height;
+
+        List<Sprite> spites = new List<Sprite>();
+       
+        if (!AssetDatabase.IsValidFolder($"{MyTools.clothesSpritesPath}/{id}"))
+        {
+            AssetDatabase.CreateFolder($"{MyTools.clothesSpritesPath}", id.ToString());
+        }
+        for (int j = 0; j < 4; j++)
+        {
+            Sprite sprite = Sprite.Create(texture, new Rect(j * size, 0, size, size), new Vector2(0.5f, 0.5f));
+            AssetDatabase.CreateAsset(sprite, $"{MyTools.clothesSpritesPath}/{id}/Hairstyle{j}_{id}.asset");
+            spites.Add(sprite);
+        }
+        
+        settings.sprites = spites.ToArray();
+        AssetDatabase.SaveAssets();
+        EditorUtility.SetDirty(settings);
     }
 }

@@ -115,7 +115,7 @@ MonoBehaviour:
   - {fileID: -1089325345, guid: e04fdf2470f2104488650f880baedcdd, type: 3}
   eyes:
   - {fileID: 152164605, guid: 252d4632a9d83ea4995de033188507da, type: 3}
-  - {fileID: 0}
+  - {fileID: -1934792104, guid: 252d4632a9d83ea4995de033188507da, type: 3}
   - {fileID: -1581739709, guid: 252d4632a9d83ea4995de033188507da, type: 3}
   - {fileID: -638399970, guid: 252d4632a9d83ea4995de033188507da, type: 3}
   mouth:

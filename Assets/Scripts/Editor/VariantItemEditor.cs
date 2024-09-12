@@ -8,15 +8,12 @@ using UnityEngine;
 public class VariantItemEditor : ItemEditor
 {
     VariantItem variantItem;
-    SerializedProperty serializedProperty;
-
     static readonly Color particlePointColor = new Color(1, 0, 0, 1);
 
 
     private void OnEnable()
     {
         variantItem = target as VariantItem;
-        serializedProperty = serializedObject.FindProperty("objectVariants");
     }
     public override void OnInspectorGUI()
     {
