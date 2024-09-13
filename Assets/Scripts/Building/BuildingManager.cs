@@ -111,6 +111,7 @@ public class BuildingManager : MonoBehaviour
         planObject = Instantiate(buildingPrefab, Vector2.zero, Quaternion.identity, parent).transform.GetChild(0);
         planObject.GetComponent<Collider2D>().enabled = false;
         planObject.GetComponent<SpriteRenderer>().color = planColor;
+        planObject.gameObject.SetActive(false);
     }
     private void SetUpPointer()
     {

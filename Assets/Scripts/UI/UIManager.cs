@@ -44,6 +44,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform equipmentItemSlots;
     [SerializeField] private Transform equipmentItemBar;
     [SerializeField] private Transform equipmentDragItems;
+    [SerializeField] private Transform equipmentClothes;
     [Space(20f)]
     #endregion
     #region Stats UI
@@ -73,14 +74,16 @@ public class UIManager : MonoBehaviour
     public Transform itemParent { get { return equipmentDragItems; } }
     public static UIManager instance { private set; get; }
 
-
     private EquipmentGrid barGrid;
     private EquipmentGrid equipmentBarGrid;
     private EquipmentGrid mainEquipmentGrid;
+    private EquipmentGrid clothesGrid;
 
     private List<Transform> openWindows = new List<Transform>();
 
     public event EventHandler windowOpen;
+
+    private CharacterSpriteController characterSpriteController;
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -90,6 +93,7 @@ public class UIManager : MonoBehaviour
         SetUpNetworkUI();
         SetUpNotices();
         LoadRecipes();
+        characterSpriteController = FindObjectOfType<CharacterSpriteController>();
     }
     private void Update()
     {
@@ -124,8 +128,8 @@ public class UIManager : MonoBehaviour
     {
         barGrid = new EquipmentGrid(mainItemBar, 0);
         equipmentBarGrid = new EquipmentGrid(equipmentItemBar, 0);
-
         mainEquipmentGrid = new EquipmentGrid(equipmentItemSlots, 1);
+        clothesGrid = new EquipmentGrid(equipmentClothes, 2);
     }
     private void SetUpNetworkUI()
     {
@@ -159,13 +163,20 @@ public class UIManager : MonoBehaviour
         eqManager.RemoveMainBarItem += RemoveMainBarItem;
         eqManager.UpdateMainBarItemCount += UpdateMainBarItemCount;
         eqManager.UpdateItemLifeBar += UpdateItemLifeBar;
+        eqManager.TurnPlaceholder += TurnPlaceholder;
        
 
         LoadSlots(mainEquipmentGrid,EquipmentManager.SlotCount, false);
         LoadSlots(equipmentBarGrid,EquipmentManager.BarSlotCount, true);
         LoadSlots(barGrid,EquipmentManager.BarSlotCount,true);
-        
+        LoadClothesSlots(clothesGrid); 
     }
+
+    private void TurnPlaceholder(object sender, PlaceholderArgs e)
+    {
+        SwitchPlaceholder(e.turn, GetGrid(e.slotPosition.gridIndex).GetChild(e.slotPosition.slotIndex));
+    }
+
     public void SetUpUIPlayer(HandsController handsController)
     {
         handsController.SetAmmoBar += SetAmmoBar;
@@ -341,14 +352,59 @@ public class UIManager : MonoBehaviour
         slot.gameObject.SetActive(false);
         Destroy(slot.gameObject);
     }
+
+    private void SwitchPlaceholder(bool turnOn,Transform parentSlot)
+    {
+        for (int i = 0; i < parentSlot.childCount; i++)
+        {
+            if(parentSlot.GetChild(i).CompareTag("Placeholder"))
+            {
+                if(turnOn)
+                {
+                    parentSlot.GetChild(i).gameObject.SetActive(true);
+                }
+                else
+                {
+                    parentSlot.GetChild(i).gameObject.SetActive(false);
+                }
+                return;
+            }
+        }
+    }
+
+    private Transform GetGrid(int gridIndex)
+    {
+        switch(gridIndex)
+        {
+            case 0: return equipmentItemBar;
+            case 1: return equipmentItemSlots;
+            case 2: return equipmentClothes;
+        }
+        return null;
+    }
+
     private void MoveItemUI(object sender, MoveItemUIArgs e)
     {
         Transform gridFrom, gridTo;
         if (e.from.gridIndex == 0) gridFrom = equipmentItemBar;
-        else gridFrom = equipmentItemSlots;
+        else
+        {
+            gridFrom = equipmentItemSlots;
+            if(e.from.gridIndex == 2) 
+            {
+                SwitchPlaceholder(false, gridFrom.GetChild(e.from.slotIndex));
+            }
+        }
 
         if (e.to.gridIndex == 0) gridTo = equipmentItemBar;
-        else gridTo = equipmentItemSlots;
+        else
+        {
+            gridTo = equipmentItemSlots;
+            if(e.to.gridIndex == 2)
+            {
+                SwitchPlaceholder(true, gridFrom.GetChild(e.to.slotIndex));
+            }
+        }
 
         if (e.to.gridIndex == 0 || e.from.gridIndex == 0) MoveMainBarItem(this, new MoveItemArgs(e.from, e.to));
 
@@ -363,7 +419,14 @@ public class UIManager : MonoBehaviour
     {
         Transform gridUI;
         if (e.position.gridIndex == 0) gridUI = equipmentItemBar;
-        else gridUI = equipmentItemSlots;
+        else
+        {
+            gridUI = equipmentItemSlots;
+            if (e.position.gridIndex == 2)
+            {
+                SwitchPlaceholder(false,gridUI.GetChild(e.position.slotIndex));
+            }
+        }
 
         NewItemUI(gridUI, e);
         if(e.position.gridIndex == 0 && !e.isDrag)
@@ -397,6 +460,7 @@ public class UIManager : MonoBehaviour
         {
             transform.GetComponent<DragDrop>().enabled = false;
         }
+
     }
     private void OpenEquipment(object sender, BoolArgs e)
     {
@@ -449,6 +513,15 @@ public class UIManager : MonoBehaviour
             currentSlotUI.localScale = new Vector3(scale, scale,1);
         }
     }
+
+    private void LoadClothesSlots(EquipmentGrid grid)
+    {
+        for (int i = 0; i < grid.gridTransform.childCount; i++)
+        {
+            grid.gridTransform.GetChild(i).GetComponent<DropSlot>().SetSlotPosition(i, grid.gridIndex);
+
+        }
+    }
     private void LoadSlots(EquipmentGrid equipmentGrid,int number,bool numbering)
     {
         bool isMainBar = equipmentGrid == barGrid;
@@ -473,6 +546,8 @@ public class UIManager : MonoBehaviour
                 Transform slot = Instantiate(itemSlot, equipmentGrid.gridTransform).transform;
                 slot.AddComponent<DropSlot>().SetSlotPosition(i, equipmentGrid.gridIndex);
             }
+
+
         }
     }
     private Transform GetItem(SlotPosition position)
@@ -741,7 +816,6 @@ public class UIManager : MonoBehaviour
     {
         for (int i = 0; i < 5; i++)
         {
-            Debug.Log(collectedItemTimers[i]);
             if (collectedItemTimers[i] == null)
             {
                 CreateNotice(stats,i);

@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler
 {
     private RectTransform rectTransform;
-    private Transform parent;
+    public Transform parent;
     private CanvasGroup canvasGroup;
 
     private bool isInSlot;

@@ -58,7 +58,7 @@ public class CharacterController: NetworkBehaviour, ILifePoints, IUsesWeapons
 
     #endregion
 
-    private CharacterSpriteController characterSpriteController;
+    public CharacterSpriteController characterSpriteController { private set; get; }
 
     private void Awake()
     {

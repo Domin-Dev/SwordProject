@@ -13,6 +13,7 @@ TagManager:
   - Items
   - Bar
   - Horse
+  - Placeholder
   layers:
   - Default
   - TransparentFX

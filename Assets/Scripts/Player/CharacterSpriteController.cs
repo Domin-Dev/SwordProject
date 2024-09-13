@@ -32,7 +32,7 @@ public class CharacterSpriteController : MonoBehaviour
     }
     public void UpdateSprite(Vector2 moveDir, Vector2 sightDir)
     {
-        if(lastMoveDir != moveDir)
+        if (lastMoveDir != moveDir)
         {
             lastMoveDir = moveDir;
             ChangeBodySprites(moveDir);

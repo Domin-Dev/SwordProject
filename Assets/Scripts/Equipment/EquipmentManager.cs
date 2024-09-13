@@ -163,6 +163,19 @@ public class UpdateAmmoBarArgs : EventArgs
         this.currentCount = currentCount;
     }
 }
+
+public class PlaceholderArgs : EventArgs
+{
+    public bool turn;
+    public SlotPosition slotPosition;
+
+    public PlaceholderArgs(bool turn, SlotPosition slotPosition)
+    {
+        this.turn = turn;
+        this.slotPosition = slotPosition;
+    }
+}
+
 public class EquipmentManager : MonoBehaviour
 {
     //UI
@@ -182,6 +195,8 @@ public class EquipmentManager : MonoBehaviour
     public event EventHandler<PositionArgs> RemoveMainBarItem;
     public event EventHandler<UpdateItemCountArgs> UpdateMainBarItemCount;
 
+    public event EventHandler<PlaceholderArgs> TurnPlaceholder;
+
     public event EventHandler<LifeBarArgs> UpdateItemLifeBar;
 
     public event EventHandler<ItemStatsArgs> UpdateItemInHand;
@@ -194,14 +209,15 @@ public class EquipmentManager : MonoBehaviour
 
     public static readonly int BarSlotCount = 10;
     public static readonly int SlotCount = 30;
-
+    public static readonly int clothesCount = 8;
 
     private ItemStats[] equipment = new ItemStats[SlotCount];
     private ItemStats[] equipmentBar = new ItemStats[BarSlotCount];
+    private ItemStats[] clothes = new ItemStats[clothesCount];
 
     private SlotPosition selectedSlotInEQ;
     private ItemStats selectedItemStats;
-    public PointerEventData.InputButton input;
+    [HideInInspector]public PointerEventData.InputButton input;
 
     public static EquipmentManager instance { private set; get; }
 
@@ -286,12 +302,12 @@ public class EquipmentManager : MonoBehaviour
         { 
             if (itemStats != null)
             {
-                // itemStats.itemCount += selectedItemStats.itemCount;
                 PutItems(selectedItemStats, SlotPosition.NullSlot, selectedSlotInEQ);
                 if (selectedSlotInEQ.gridIndex == 0) UpdateMainItemCount(selectedSlotInEQ, GetItemStats(selectedSlotInEQ).itemCount);
             }
             else
             {
+                Debug.Log(selectedSlotInEQ.gridIndex);
                 SetItemStats(selectedSlotInEQ, selectedItemStats);
                 if (selectedSlotInEQ.gridIndex == 0) NewMainBarItemUI(GetItemStats(selectedSlotInEQ),selectedSlotInEQ);
                 NewItemUI(selectedItemStats, selectedSlotInEQ, true);
@@ -468,13 +484,10 @@ public class EquipmentManager : MonoBehaviour
     }
     public bool IsFreeSlot(SlotPosition position)
     {
-        if (position.gridIndex == 0)
+        var grid = GetGrid(position.gridIndex);
+        if(grid != null)
         {
-            if(equipmentBar[position.slotIndex] == null) return true;
-        }
-        else if(position.gridIndex == 1)
-        {
-            if(equipment[position.slotIndex] == null) return true;
+            return grid[position.slotIndex] == null; 
         }
         return false;
     }   
@@ -490,6 +503,10 @@ public class EquipmentManager : MonoBehaviour
             if (target.gridIndex == 0)
             {
                 NewMainBarItemUI(selectedItemStats, target);
+            }
+            else if(target.gridIndex == 2)
+            {
+                TurnPlaceholder(this, new PlaceholderArgs(false, target));
             }
         }
         else if(!target.Compare(selectedSlotInEQ))
@@ -525,7 +542,6 @@ public class EquipmentManager : MonoBehaviour
             if (!IsFreeSlot(selectedSlotInEQ))
             {
                 PutItems(selectedItemStats, SlotPosition.NullSlot, target);
-            //    GetItemStats(selectedSlotInEQ).itemCount += selectedItemStats.itemCount;
                 RemoveDragItem();
             }
             else SetItemStats(selectedSlotInEQ, selectedItemStats);
@@ -537,6 +553,11 @@ public class EquipmentManager : MonoBehaviour
         if (IsSlotInHand(target) || IsSlotInHand(selectedSlotInEQ))
         {
             UpdateItemInHand(this, new ItemStatsArgs(GetItemStats(new SlotPosition(0, slotInHand))));
+        }
+
+        if(IsFreeSlot(selectedSlotInEQ) &&  selectedSlotInEQ.gridIndex == 2)
+        {
+            TurnPlaceholder(this, new PlaceholderArgs(true,selectedSlotInEQ));
         }
 
         ClearSelectedSlot();
@@ -583,7 +604,6 @@ public class EquipmentManager : MonoBehaviour
         ItemStats itemStats = GetItemStats(target);
         if(itemStats == null)
         {
-            Debug.Log(target.ToString());
             itemStats = SetItemStats(target, new ItemStats(item.itemID,0));
             NewItemUI(itemStats,target, false);
         }
@@ -664,9 +684,9 @@ public class EquipmentManager : MonoBehaviour
     }
     private void ClearSlot(SlotPosition position)
     {
-        GetArray(position.gridIndex)[position.slotIndex] = null; 
+        GetGrid(position.gridIndex)[position.slotIndex] = null; 
     }     
-    private ItemStats[] GetArray(int gridIndex)
+    private ItemStats[] GetGrid(int gridIndex)
     {
         switch (gridIndex)
         { 
@@ -674,26 +694,28 @@ public class EquipmentManager : MonoBehaviour
                 return equipmentBar;
             case 1:
                 return equipment;
+            case 2:
+                return clothes;
         }
         return null;
     }
     private ItemStats GetItemStats(SlotPosition position)
     {
-       if(position.slotIndex >= 0) return GetArray(position.gridIndex)[position.slotIndex];
+       if(position.slotIndex >= 0) return GetGrid(position.gridIndex)[position.slotIndex];
        else return null;
     }
     public ItemStats GetItemStatsValue(SlotPosition position)
     {
         if (position.slotIndex >= 0)
         {
-            ItemStats itemStats = GetArray(position.gridIndex)[position.slotIndex];
+            ItemStats itemStats = GetGrid(position.gridIndex)[position.slotIndex];
             return itemStats.Clon();
         }
         else return null;
     }
     private ItemStats SetItemStats(SlotPosition position,ItemStats itemStats)
     {
-      return GetArray(position.gridIndex)[position.slotIndex] = itemStats;
+      return GetGrid(position.gridIndex)[position.slotIndex] = itemStats;
     }
     private void UpdateCount(SlotPosition position)
     {

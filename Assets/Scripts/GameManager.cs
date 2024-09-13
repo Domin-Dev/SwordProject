@@ -39,7 +39,8 @@ public class GameManager : MonoBehaviour
             if(!scene.isLoaded)
             {
                 SceneManager.LoadSceneAsync(1, LoadSceneMode.Additive);
-            }else
+            }
+            else
             {
                 SceneManager.UnloadSceneAsync(1);
             }
