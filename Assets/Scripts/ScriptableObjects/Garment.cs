@@ -9,6 +9,7 @@ public class Garment : Item
     public GarmentType type;
     public Texture2D texture;
     public Sprite[] sprites;
+    
 }
 
 public enum GarmentType

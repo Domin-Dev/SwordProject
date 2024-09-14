@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.U2D;
+using static UnityEditor.Progress;
 
 public class CharacterSpriteController : MonoBehaviour
 {
@@ -16,6 +17,11 @@ public class CharacterSpriteController : MonoBehaviour
 
     [SerializeField] public SpriteRenderer body;
     [SerializeField] public SpriteRenderer underwear;
+    [Space]
+    [SerializeField] public SpriteRenderer[] clothes;
+    [Space]
+
+    [SerializeField] int[] clothesID = new int[8];
 
     [SerializeField] Sprite[] bodySprites;
     [SerializeField] Sprite[] headSprites;
@@ -26,9 +32,19 @@ public class CharacterSpriteController : MonoBehaviour
     private Vector2 lastSightDir = Vector2.zero;
 
     public int hairstyleIndex = 1;
+
     private void Start()
     {
-        characterEditorSettings = Resources.Load<CharacterEditorSettings>("CharacterParts/CharacterEditorSettings");  
+        characterEditorSettings = Resources.Load<CharacterEditorSettings>("CharacterParts/CharacterEditorSettings");
+        ClearArray();
+    }
+
+    private void ClearArray()
+    {
+        for (int i = 0; i < clothesID.Length; i++)
+        {
+            clothesID[i] = -1;
+        }
     }
     public void UpdateSprite(Vector2 moveDir, Vector2 sightDir)
     {
@@ -43,6 +59,24 @@ public class CharacterSpriteController : MonoBehaviour
             lastSightDir = sightDir;
             ChangeHeadSprites(sightDir);
         }
+    }
+
+    public void RefreshSprites()
+    {
+        ChangeBodySprites(lastMoveDir);
+        ChangeHeadSprites(lastSightDir);
+    }
+
+    public void SetClothes(int garmentType,int itemID)
+    {
+        clothesID[garmentType] = itemID;
+        RefreshSprites();
+    }
+
+    public void RemoveClothes(int garmentType)
+    {
+        clothesID[garmentType] = -1;
+        clothes[garmentType].sprite = CharacterEditorSettings.emptySprite;
     }
 
     private void ChangeBodySprites(Vector2 dir)
@@ -78,6 +112,14 @@ public class CharacterSpriteController : MonoBehaviour
         eyes.sprite = characterEditorSettings.eyes[index];
         mouth.sprite = characterEditorSettings.mouth[index];
         hair.sprite = characterEditorSettings.hairstyles[hairstyleIndex].sprites[index];
+        for (int i = 0; i < 2; i++)
+        {
+            if (clothesID[i] >= 0)
+            {
+                clothes[i].sprite = ((Garment)ItemsAsset.instance.GetItem(clothesID[i])).sprites[index];
+            }
+        }
+
 
         if (index == 1)
         {
@@ -103,5 +145,12 @@ public class CharacterSpriteController : MonoBehaviour
             body.sprite = characterEditorSettings.bodies[0];
         }
         underwear.sprite = characterEditorSettings.underwear[index];
+        for (int i = 2; i < 8; i++)
+        {
+            if (clothesID[i] >= 0)
+            {
+                clothes[i].sprite = ((Garment)ItemsAsset.instance.GetItem(clothesID[i])).sprites[index];
+            }
+        }
     }
 }

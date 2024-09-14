@@ -49,6 +49,12 @@ public class ItemsAsset : MonoBehaviour
         }
         return itemList.ToArray();
     }
+
+    public bool CheckItemType<T>(int itemID) where T : Item
+    {
+        var item = GetItem(itemID);
+        return item is T;
+    }
     public Sprite GetBuildingObjectSprite(int id, int index)
     {
         if (items.ContainsKey(id))
@@ -205,4 +211,6 @@ public class ItemsAsset : MonoBehaviour
             return null;
         }
     }
+
+
 }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -19,7 +19,7 @@ public struct SlotPosition
 
     public bool Compare(SlotPosition slotPosition)
     {
-        if(slotPosition.gridIndex == gridIndex && slotPosition.slotIndex == slotIndex) return true;
+        if (slotPosition.gridIndex == gridIndex && slotPosition.slotIndex == slotIndex) return true;
         else return false;
     }
 
@@ -35,7 +35,7 @@ public class TooltipInfo
 {
     public string content;
     public string header;
-    public TooltipInfo(string content,string header)
+    public TooltipInfo(string content, string header)
     {
         this.content = content;
         this.header = header;
@@ -70,11 +70,11 @@ public class CreateItemArgs : EventArgs
     public ItemStats itemStats;
     public SlotPosition position;
     public bool isDrag;
-    public CreateItemArgs(ItemStats itemStats,SlotPosition slotPosition,bool isDrag)
+    public CreateItemArgs(ItemStats itemStats, SlotPosition slotPosition, bool isDrag)
     {
-       this.isDrag = isDrag;
-       this.itemStats = itemStats;
-       this.position = slotPosition;
+        this.isDrag = isDrag;
+        this.itemStats = itemStats;
+        this.position = slotPosition;
     }
 }
 public class MoveItemUIArgs : EventArgs
@@ -95,13 +95,13 @@ public class PositionArgs : EventArgs
     public PositionArgs(SlotPosition position)
     {
         this.position = position;
-    } 
+    }
 }
 public class UpdateItemCountArgs : PositionArgs
 {
     public int count;
 
-    public UpdateItemCountArgs(SlotPosition position, int count):base(position)
+    public UpdateItemCountArgs(SlotPosition position, int count) : base(position)
     {
         this.count = count;
     }
@@ -121,13 +121,13 @@ public class MoveItemArgs : EventArgs
     public MoveItemArgs(SlotPosition from, SlotPosition to)
     {
         this.from = from;
-        this.to = to;   
+        this.to = to;
     }
 }
 public class ItemStatsArgs : EventArgs
 {
     public ItemStats item;
-    
+
     public ItemStatsArgs(ItemStats item)
     {
         this.item = item;
@@ -135,7 +135,7 @@ public class ItemStatsArgs : EventArgs
 }
 public class LifeBarArgs : PositionArgs
 {
-   public float barValue;
+    public float barValue;
     public LifeBarArgs(SlotPosition slotPosition, float barValue) : base(slotPosition)
     {
         this.barValue = barValue;
@@ -147,7 +147,7 @@ public class SetAmmoBarArgs : EventArgs
     public int currentCount;
     public AmmoType type;
 
-    public SetAmmoBarArgs(int magazineCapacity,int currentCount, AmmoType ammoType)
+    public SetAmmoBarArgs(int magazineCapacity, int currentCount, AmmoType ammoType)
     {
         this.magazineCapacity = magazineCapacity;
         this.currentCount = currentCount;
@@ -178,13 +178,12 @@ public class PlaceholderArgs : EventArgs
 
 public class EquipmentManager : MonoBehaviour
 {
-    //UI
     public event EventHandler<UpdateSelectedSlotInBarArgs> UpdateSelectedSlotInBar;
     public event EventHandler<BoolArgs> OpenEquipmentUI;
 
     public event EventHandler<CreateItemArgs> CreateItemUI;
-    public event EventHandler<MoveItemUIArgs> MoveItemUI;   
-    public event EventHandler<PositionArgs> RemoveItemUI;  
+    public event EventHandler<MoveItemUIArgs> MoveItemUI;
+    public event EventHandler<PositionArgs> RemoveItemUI;
     public event EventHandler<UpdateItemCountArgs> UpdateItemCount;
 
     public event EventHandler<ItemCountArgs> UpdateDragItemCount;
@@ -211,20 +210,32 @@ public class EquipmentManager : MonoBehaviour
     public static readonly int SlotCount = 30;
     public static readonly int clothesCount = 8;
 
+    public static readonly GarmentType[] clothesSlots =
+    {
+        GarmentType.headwear,
+        GarmentType.faceCover,
+        GarmentType.outerwear,
+        GarmentType.shirt,
+        GarmentType.pants,
+        GarmentType.belt,
+        GarmentType.accessory,
+        GarmentType.bag
+    };
+
     private ItemStats[] equipment = new ItemStats[SlotCount];
     private ItemStats[] equipmentBar = new ItemStats[BarSlotCount];
     private ItemStats[] clothes = new ItemStats[clothesCount];
 
     private SlotPosition selectedSlotInEQ;
     private ItemStats selectedItemStats;
-    [HideInInspector]public PointerEventData.InputButton input;
-
+    [HideInInspector] public PointerEventData.InputButton input;
     public static EquipmentManager instance { private set; get; }
 
+    private CharacterSpriteController characterSpriteController;
 
     private void Awake()
     {
-        if(instance == null)
+        if (instance == null)
         {
             instance = this;
         }
@@ -236,16 +247,18 @@ public class EquipmentManager : MonoBehaviour
     }
     private void Start()
     {
-        UIManager.instance.SetUpUIEquipment(this);          
-        selectedSlotInEQ = new SlotPosition(-1,-1);
+        UIManager.instance.SetUpUIEquipment(this);
+        selectedSlotInEQ = new SlotPosition(-1, -1);
         ChangeSelectedSlot(0);
+        characterSpriteController = FindObjectOfType<CharacterSpriteController>();
+
     }
 
     private void Update()
     {
         if (!ChatManager.instance.isChatting)
         {
-            if      (Input.GetKeyDown(KeyCode.Alpha1)) ChangeSelectedSlot(0);
+            if (Input.GetKeyDown(KeyCode.Alpha1)) ChangeSelectedSlot(0);
             else if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeSelectedSlot(1);
             else if (Input.GetKeyDown(KeyCode.Alpha3)) ChangeSelectedSlot(2);
             else if (Input.GetKeyDown(KeyCode.Alpha4)) ChangeSelectedSlot(3);
@@ -272,7 +285,7 @@ public class EquipmentManager : MonoBehaviour
             {
                 BackSlot();
             }
-        }    
+        }
     }
     public void SetUpEvent(HandsController handsController)
     {
@@ -282,8 +295,8 @@ public class EquipmentManager : MonoBehaviour
 
     private void BuiltObject(object sender, EventArgs e)
     {
-        if(DecreaseItemCount(new SlotPosition(0, slotInHand), 1) <= 0)
-        UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[slotInHand]));
+        if (DecreaseItemCount(new SlotPosition(0, slotInHand), 1) <= 0)
+            UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[slotInHand]));
     }
 
     private void UseSelectedItem(object sender, EventArgs e)
@@ -292,14 +305,14 @@ public class EquipmentManager : MonoBehaviour
         if (item != null)
         {
             item.Use();
-            UpdateItemLifeBar(this, new LifeBarArgs(new SlotPosition(0,slotInHand), item.GetLifePointsInPercent()));
-        } 
+            UpdateItemLifeBar(this, new LifeBarArgs(new SlotPosition(0, slotInHand), item.GetLifePointsInPercent()));
+        }
     }
     public void UnselectedSlot()
     {
         ItemStats itemStats = GetItemStats(selectedSlotInEQ);
-        if(itemStats == null || itemStats.itemID == selectedItemStats.itemID)
-        { 
+        if (itemStats == null || itemStats.itemID == selectedItemStats.itemID)
+        {
             if (itemStats != null)
             {
                 PutItems(selectedItemStats, SlotPosition.NullSlot, selectedSlotInEQ);
@@ -307,12 +320,12 @@ public class EquipmentManager : MonoBehaviour
             }
             else
             {
-                Debug.Log(selectedSlotInEQ.gridIndex);
+
                 SetItemStats(selectedSlotInEQ, selectedItemStats);
-                if (selectedSlotInEQ.gridIndex == 0) NewMainBarItemUI(GetItemStats(selectedSlotInEQ),selectedSlotInEQ);
+                if (selectedSlotInEQ.gridIndex == 0) NewMainBarItemUI(GetItemStats(selectedSlotInEQ), selectedSlotInEQ);
                 NewItemUI(selectedItemStats, selectedSlotInEQ, true);
             }
-        } 
+        }
         else
         {
             AddNewItem(selectedItemStats);
@@ -332,13 +345,13 @@ public class EquipmentManager : MonoBehaviour
         selectedSlotInEQ = slotPosition;
         selectedItemStats = GetItemStats(slotPosition);
         ClearSlot(slotPosition);
-        if(slotPosition.gridIndex == 0)  RemoveMainBarItemUI(slotPosition);
+        if (slotPosition.gridIndex == 0) RemoveMainBarItemUI(slotPosition);
     }
     public void SelectedSlotTakeHalf(SlotPosition slotPosition)
     {
         ItemStats itemStats = GetItemStats(slotPosition);
         selectedSlotInEQ = slotPosition;
-        if(itemStats.itemCount == 1)
+        if (itemStats.itemCount == 1)
         {
             SelectedSlotTakeAll(slotPosition);
             return;
@@ -354,7 +367,7 @@ public class EquipmentManager : MonoBehaviour
     }
     private void NextSlot()
     {
-        if(slotInHand == BarSlotCount - 1)
+        if (slotInHand == BarSlotCount - 1)
         {
             ChangeSelectedSlot(0);
         }
@@ -376,13 +389,13 @@ public class EquipmentManager : MonoBehaviour
     }
     private void ChangeSelectedSlot(int newSlot)
     {
-        newSlot = math.clamp(newSlot, 0, BarSlotCount -1);
+        newSlot = math.clamp(newSlot, 0, BarSlotCount - 1);
         if (slotInHand != newSlot)
         {
             UpdateSelectedSlotInBarArgs args = new UpdateSelectedSlotInBarArgs(slotInHand, newSlot);
             UpdateSelectedSlotInBar(this, args);
             slotInHand = newSlot;
-            UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[newSlot]));    
+            UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[newSlot]));
         }
     }
     public bool AddNewItem(ItemStats itemStats)
@@ -410,7 +423,7 @@ public class EquipmentManager : MonoBehaviour
                         else
                         {
                             IncreaseItemCount(itemList[i], itemStats.itemCount);
-                            UIManager.instance.CheckRecipesWithItem(itemStats.itemID,true);
+                            UIManager.instance.CheckRecipesWithItem(itemStats.itemID, true);
                             return true;
                         }
 
@@ -450,7 +463,7 @@ public class EquipmentManager : MonoBehaviour
                         itemStats.itemCount -= stackMax;
                         ItemStats newItem = itemStats.Clon();
                         newItem.itemCount = stackMax;
-                    
+
                         equipment[i] = newItem;
                         NewItemUI(newItem, new SlotPosition(1, i), false);
                     }
@@ -467,15 +480,15 @@ public class EquipmentManager : MonoBehaviour
         }
         return false;
     }
-    public void NewItemUI(ItemStats itemStats,SlotPosition slotPosition,bool isDrag)
+    public void NewItemUI(ItemStats itemStats, SlotPosition slotPosition, bool isDrag)
     {
         if (slotPosition.Compare(new SlotPosition(0, slotInHand)))
         {
             UpdateItemInHand(this, new ItemStatsArgs(equipmentBar[slotInHand]));
         }
 
-        CreateItemArgs args = new CreateItemArgs(itemStats,slotPosition,isDrag);
-        CreateItemUI(this,args);
+        CreateItemArgs args = new CreateItemArgs(itemStats, slotPosition, isDrag);
+        CreateItemUI(this, args);
     }
     public void NewMainBarItemUI(ItemStats itemStats, SlotPosition slotPosition)
     {
@@ -485,18 +498,25 @@ public class EquipmentManager : MonoBehaviour
     public bool IsFreeSlot(SlotPosition position)
     {
         var grid = GetGrid(position.gridIndex);
-        if(grid != null)
+        if (grid != null)
         {
-            return grid[position.slotIndex] == null; 
+            return grid[position.slotIndex] == null;
         }
         return false;
-    }   
+    }
     private bool IsSlotInHand(SlotPosition slotPosition)
     {
         return slotPosition.Compare(new SlotPosition(0, slotInHand));
     }
     public void MoveSelectedItem(SlotPosition target)
     {
+        if (target.gridIndex == 2 && !IsGarment(target, selectedItemStats) || (selectedSlotInEQ.gridIndex == 2 && !IsTheType(target)))
+        {
+            UnselectedSlot();
+            MoveSelectedItemEnd(target);
+            return;
+        }
+
         if (IsFreeSlot(target))
         {
             SetItemStats(target, selectedItemStats);
@@ -504,24 +524,24 @@ public class EquipmentManager : MonoBehaviour
             {
                 NewMainBarItemUI(selectedItemStats, target);
             }
-            else if(target.gridIndex == 2)
+            else if (target.gridIndex == 2)
             {
                 TurnPlaceholder(this, new PlaceholderArgs(false, target));
             }
         }
-        else if(!target.Compare(selectedSlotInEQ))
+        else if (!target.Compare(selectedSlotInEQ))
         {
             ItemStats itemStatsTarget = GetItemStats(target);
             int maxStack = ItemsAsset.instance.GetStackMax(itemStatsTarget.itemID);
-            if(selectedItemStats.itemID != itemStatsTarget.itemID || maxStack == 1)
-            {  
-                if(IsFreeSlot(selectedSlotInEQ))
-                {                   
+            if (selectedItemStats.itemID != itemStatsTarget.itemID || maxStack == 1)
+            {
+                if (IsFreeSlot(selectedSlotInEQ))
+                {
                     SetItemStats(target, selectedItemStats);
                     SetItemStats(selectedSlotInEQ, itemStatsTarget);
                     MoveItemUIArgs moveItemUIArgs = new MoveItemUIArgs(target, selectedSlotInEQ);
-                    MoveItemUI(this, moveItemUIArgs); 
-                    if(target.gridIndex == 0)
+                    MoveItemUI(this, moveItemUIArgs);
+                    if (target.gridIndex == 0)
                     {
                         NewMainBarItemUI(selectedItemStats, target);
                     }
@@ -531,9 +551,9 @@ public class EquipmentManager : MonoBehaviour
                     UnselectedSlot();
                 }
             }
-            else 
+            else
             {
-                PutItems(selectedItemStats, new SlotPosition(-1,-1), target);
+                PutItems(selectedItemStats, new SlotPosition(-1, -1), target);
                 RemoveDragItem();
             }
         }
@@ -549,19 +569,50 @@ public class EquipmentManager : MonoBehaviour
             UpdateCount(target);
         }
 
+        MoveSelectedItemEnd(target);
+    }
+    private bool IsGarment(SlotPosition target, ItemStats itemStats)
+    {
+        if (itemStats == null) return false;
+        if (ItemsAsset.instance.CheckItemType<Garment>(itemStats.itemID))
+        {
+            Garment garment = (Garment)ItemsAsset.instance.GetItem(itemStats.itemID);
+            if (garment.type == clothesSlots[target.slotIndex])
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    private bool IsTheType(SlotPosition slotPosition)
+    {
+        ItemStats itemStats = GetItemStats(slotPosition);
+        if(itemStats == null) return true;
+
+        Garment garment = (Garment)ItemsAsset.instance.GetItem(itemStats.itemID);
+        if(garment != null && (int)garment.type == selectedSlotInEQ.slotIndex)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private void MoveSelectedItemEnd(SlotPosition target)
+    {
         if (IsSlotInHand(target) || IsSlotInHand(selectedSlotInEQ))
         {
             UpdateItemInHand(this, new ItemStatsArgs(GetItemStats(new SlotPosition(0, slotInHand))));
         }
 
-        if(IsFreeSlot(selectedSlotInEQ) &&  selectedSlotInEQ.gridIndex == 2)
+        if (IsFreeSlot(selectedSlotInEQ) && selectedSlotInEQ.gridIndex == 2)
         {
-            TurnPlaceholder(this, new PlaceholderArgs(true,selectedSlotInEQ));
+            TurnPlaceholder(this, new PlaceholderArgs(true, selectedSlotInEQ));
         }
 
         ClearSelectedSlot();
     }
+
     public void PutOneItem(SlotPosition position)
     {
         int stackMax = ItemsAsset.instance.GetStackMax(selectedItemStats.itemID);
@@ -595,17 +646,17 @@ public class EquipmentManager : MonoBehaviour
             }
             else
             {
-                UpdateDragCount(selectedItemStats.itemCount);  
+                UpdateDragCount(selectedItemStats.itemCount);
             }
         }
     }
-    private void PutItems(ItemStats item,SlotPosition lastPosition, SlotPosition target)
+    private void PutItems(ItemStats item, SlotPosition lastPosition, SlotPosition target)
     {
         ItemStats itemStats = GetItemStats(target);
-        if(itemStats == null)
+        if (itemStats == null)
         {
-            itemStats = SetItemStats(target, new ItemStats(item.itemID,0));
-            NewItemUI(itemStats,target, false);
+            itemStats = SetItemStats(target, new ItemStats(item.itemID, 0));
+            NewItemUI(itemStats, target, false);
         }
 
         int stackMax = ItemsAsset.instance.GetStackMax(item.itemID);
@@ -629,7 +680,7 @@ public class EquipmentManager : MonoBehaviour
             FindSlotForIt(item, lastPosition);
         }
     }
-    private void FindSlotForIt(ItemStats itemStats,SlotPosition lastPosition)
+    private void FindSlotForIt(ItemStats itemStats, SlotPosition lastPosition)
     {
         if (itemStats != null)
         {
@@ -638,15 +689,15 @@ public class EquipmentManager : MonoBehaviour
             if (!lastPosition.Compare(SlotPosition.NullSlot) && ((item != null && item.itemID == itemStats.itemID) || item == null))
             {
                 PutItems(itemStats, new SlotPosition(-1, -1), lastPosition);
-            } 
+            }
             else
             {
-                AddNewItem(itemStats);           
+                AddNewItem(itemStats);
             }
         }
     }
     public void CollectAll(SlotPosition position)
-    {        
+    {
         ItemStats itemStats = GetItemStats(position);
         if (itemStats != null)
         {
@@ -654,7 +705,7 @@ public class EquipmentManager : MonoBehaviour
             int free = stackMax - itemStats.itemCount;
 
             if (free <= 0) return;
-        
+
             List<SlotPosition> items = FindItems(itemStats.itemID);
             foreach (SlotPosition itemPosition in items)
             {
@@ -684,12 +735,12 @@ public class EquipmentManager : MonoBehaviour
     }
     private void ClearSlot(SlotPosition position)
     {
-        GetGrid(position.gridIndex)[position.slotIndex] = null; 
-    }     
+        GetGrid(position.gridIndex)[position.slotIndex] = null;
+    }
     private ItemStats[] GetGrid(int gridIndex)
     {
         switch (gridIndex)
-        { 
+        {
             case 0:
                 return equipmentBar;
             case 1:
@@ -701,8 +752,8 @@ public class EquipmentManager : MonoBehaviour
     }
     private ItemStats GetItemStats(SlotPosition position)
     {
-       if(position.slotIndex >= 0) return GetGrid(position.gridIndex)[position.slotIndex];
-       else return null;
+        if (position.slotIndex >= 0) return GetGrid(position.gridIndex)[position.slotIndex];
+        else return null;
     }
     public ItemStats GetItemStatsValue(SlotPosition position)
     {
@@ -713,16 +764,28 @@ public class EquipmentManager : MonoBehaviour
         }
         else return null;
     }
-    private ItemStats SetItemStats(SlotPosition position,ItemStats itemStats)
+    private ItemStats SetItemStats(SlotPosition position, ItemStats itemStats)
     {
-      return GetGrid(position.gridIndex)[position.slotIndex] = itemStats;
+        if (position.gridIndex == 2)
+        {
+            Garment garment = (Garment)ItemsAsset.instance.GetItem(itemStats.itemID);
+            characterSpriteController.SetClothes((int)garment.type, garment.ID);
+        }
+        else if (selectedSlotInEQ.gridIndex == 2)
+        {
+            Garment garment = (Garment)ItemsAsset.instance.GetItem(itemStats.itemID);
+            characterSpriteController.RemoveClothes((int)garment.type);
+        }
+
+
+        return GetGrid(position.gridIndex)[position.slotIndex] = itemStats;
     }
     private void UpdateCount(SlotPosition position)
     {
-        UpdateItemCountArgs updateItemCountArgs = new UpdateItemCountArgs(position, GetItemStats(position).itemCount);  
+        UpdateItemCountArgs updateItemCountArgs = new UpdateItemCountArgs(position, GetItemStats(position).itemCount);
         UpdateItemCount(this, updateItemCountArgs);
     }
-    private void UpdateMainItemCount(SlotPosition position,int count)
+    private void UpdateMainItemCount(SlotPosition position, int count)
     {
         UpdateItemCountArgs updateItemCountArgs = new UpdateItemCountArgs(position, count);
         UpdateMainBarItemCount(this, updateItemCountArgs);
@@ -739,21 +802,21 @@ public class EquipmentManager : MonoBehaviour
     }
     private void RemoveDragItem()
     {
-        RemoveDragItemUI(this,null);
+        RemoveDragItemUI(this, null);
     }
     public bool IsNotSelected()
     {
-        return selectedSlotInEQ.Compare(new SlotPosition(-1, -1));  
+        return selectedSlotInEQ.Compare(new SlotPosition(-1, -1));
     }
     private List<SlotPosition> FindItems(int ItemId)
     {
         List<SlotPosition> items = new List<SlotPosition>();
 
         for (int i = 0; i < equipmentBar.Length; i++)
-        {          
+        {
             if (equipmentBar[i] != null && equipmentBar[i].itemID == ItemId)
             {
-                items.Add(new SlotPosition(0,i));
+                items.Add(new SlotPosition(0, i));
             }
         }
 
@@ -771,13 +834,13 @@ public class EquipmentManager : MonoBehaviour
     {
         RemoveMainBarItem(this, new PositionArgs(position));
     }
-    private void IncreaseItemCount(SlotPosition position,int value) 
+    private void IncreaseItemCount(SlotPosition position, int value)
     {
         GetItemStats(position).itemCount += value;
         UpdateCount(position);
     }
 
-    private void DecreaseItemCount(int itemID,int value = 1)
+    private void DecreaseItemCount(int itemID, int value = 1)
     {
         var list = FindItems(itemID);
         for (int i = 0; i < list.Count; i++)
@@ -795,7 +858,7 @@ public class EquipmentManager : MonoBehaviour
         {
             ClearSlot(position);
             RemoveItem(position);
-            UIManager.instance.CheckRecipesWithItem(itemStats.itemID,false);
+            UIManager.instance.CheckRecipesWithItem(itemStats.itemID, false);
             return balance;
         }
         itemStats.itemCount = balance;
@@ -859,15 +922,15 @@ public class EquipmentManager : MonoBehaviour
         DecreaseItemCount(Find(ammoID));
         ammoCount--;
         return ammoCount;
-    } 
-    public Dictionary<int,int> GetItemDictionary()
+    }
+    public Dictionary<int, int> GetItemDictionary()
     {
-        Dictionary<int,int> items = new Dictionary<int,int>();
+        Dictionary<int, int> items = new Dictionary<int, int>();
         AddItemsToDictionary(items, equipment);
         AddItemsToDictionary(items, equipmentBar);
         return items;
     }
-    private void AddItemsToDictionary(Dictionary<int,int> items, ItemStats[] itemStats)
+    private void AddItemsToDictionary(Dictionary<int, int> items, ItemStats[] itemStats)
     {
         foreach (var item in itemStats)
         {

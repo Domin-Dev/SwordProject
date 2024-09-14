@@ -5,7 +5,6 @@ using TMPro;
 using Unity.Mathematics;
 using Unity.Netcode;
 using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -99,13 +98,10 @@ public class UIManager : MonoBehaviour
     {
         UpdateButtonSize();
     }
-
-
     public void FixedUpdate()
     {
         MultiCraft();
     }
-
 
     private int i = 0;
     private int k = 0;
@@ -318,9 +314,8 @@ public class UIManager : MonoBehaviour
     }
     private void UpdateItemCount(object sender, UpdateItemCountArgs e)
     {
-        Transform grid;
-        if (e.position.gridIndex == 0) grid = equipmentItemBar;
-        else grid = equipmentItemSlots;
+        Transform grid = GetGrid(e.position.gridIndex);
+        
         UpdateCount(grid, e);
         if(e.position.gridIndex == 0)
         {
@@ -385,26 +380,18 @@ public class UIManager : MonoBehaviour
 
     private void MoveItemUI(object sender, MoveItemUIArgs e)
     {
-        Transform gridFrom, gridTo;
-        if (e.from.gridIndex == 0) gridFrom = equipmentItemBar;
-        else
+        Transform gridFrom = GetGrid(e.from.gridIndex);
+        Transform gridTo = GetGrid(e.to.gridIndex);
+        
+        if(e.from.gridIndex == 2) 
         {
-            gridFrom = equipmentItemSlots;
-            if(e.from.gridIndex == 2) 
-            {
-                SwitchPlaceholder(false, gridFrom.GetChild(e.from.slotIndex));
-            }
+            SwitchPlaceholder(false, gridFrom.GetChild(e.from.slotIndex));
         }
-
-        if (e.to.gridIndex == 0) gridTo = equipmentItemBar;
-        else
+        if(e.to.gridIndex == 2)
         {
-            gridTo = equipmentItemSlots;
-            if(e.to.gridIndex == 2)
-            {
-                SwitchPlaceholder(true, gridFrom.GetChild(e.to.slotIndex));
-            }
+            SwitchPlaceholder(true, gridFrom.GetChild(e.to.slotIndex));
         }
+      
 
         if (e.to.gridIndex == 0 || e.from.gridIndex == 0) MoveMainBarItem(this, new MoveItemArgs(e.from, e.to));
 
@@ -417,15 +404,10 @@ public class UIManager : MonoBehaviour
     }
     private void CreateItemUI(object sender, CreateItemArgs e)
     {
-        Transform gridUI;
-        if (e.position.gridIndex == 0) gridUI = equipmentItemBar;
-        else
+        Transform gridUI = GetGrid(e.position.gridIndex);
+        if (e.position.gridIndex == 2)
         {
-            gridUI = equipmentItemSlots;
-            if (e.position.gridIndex == 2)
-            {
-                SwitchPlaceholder(false,gridUI.GetChild(e.position.slotIndex));
-            }
+            SwitchPlaceholder(false,gridUI.GetChild(e.position.slotIndex));
         }
 
         NewItemUI(gridUI, e);
@@ -519,7 +501,6 @@ public class UIManager : MonoBehaviour
         for (int i = 0; i < grid.gridTransform.childCount; i++)
         {
             grid.gridTransform.GetChild(i).GetComponent<DropSlot>().SetSlotPosition(i, grid.gridIndex);
-
         }
     }
     private void LoadSlots(EquipmentGrid equipmentGrid,int number,bool numbering)
