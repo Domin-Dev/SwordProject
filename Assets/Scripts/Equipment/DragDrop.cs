@@ -72,13 +72,21 @@ public class DragDrop : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDrag
 
             if (!isInSlot)
             {
-                EquipmentManager.instance.UnselectedSlot();
-                if (parent != null)
+                if(!UIManager.instance.mouseIsOverEQUI)
                 {
-                    transform.SetParent(parent);
-                    transform.SetAsFirstSibling();
+                    EquipmentManager.instance.ThrowItem();
+                    Destroy(gameObject);
                 }
-                rectTransform.anchoredPosition = Vector2.zero;
+                else
+                {
+                    EquipmentManager.instance.UnselectedSlot();
+                    if (parent != null)
+                    {
+                        transform.SetParent(parent);
+                        transform.SetAsFirstSibling();
+                    }
+                    rectTransform.anchoredPosition = Vector2.zero;
+                }
             }
             else
             {

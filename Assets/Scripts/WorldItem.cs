@@ -7,8 +7,13 @@ public class WorldItem : MonoBehaviour
     Timer timer;
     Timer timerTransform;
     Timer timerFollow;
+
+    Vector2 position;
+
+    public int itemChunkIndex;
     private void SetUp(Vector2 target)
     {
+        position = target;
         transform.localScale = new Vector2(0, 0);
         timer = Timer.Create
         (() =>
@@ -53,15 +58,16 @@ public class WorldItem : MonoBehaviour
         }
         );
     }
-    public void SetItem(ItemStats itemStats,Vector2 target)
+    public void SetItem(ItemStats itemStats,Vector2 target,int itemChunkIndex)
     {
         this.itemStats = itemStats;
+        this.itemChunkIndex = itemChunkIndex;
         GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetIcon(itemStats.itemID);
         SetUp(target);
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.transform.parent != null && collision.transform.parent.CompareTag("Player"))
+        if (collision.transform.parent != null && collision.transform.parent.CompareTag("Player") && timerTransform.IsEnd())
         {
             timerFollow = Timer.Create(() =>
             {
@@ -79,7 +85,6 @@ public class WorldItem : MonoBehaviour
             });
         }
     }
-
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.transform.parent != null && collision.transform.parent.CompareTag("Player"))
@@ -87,18 +92,19 @@ public class WorldItem : MonoBehaviour
             if (timerFollow != null) timerFollow.Cancel();
         }
     }
-
     private void AddItem()
     {
         if (EquipmentManager.instance.AddNewItem(itemStats))
         {
             Sounds.instance.Click();
-            Debug.Log(timerFollow);
-            if(timerFollow != null) timerFollow.Cancel();
-            
-            if(timer != null) timer.Cancel();
-            if(timerTransform != null) timerTransform.Cancel();
-            Destroy(gameObject);
+            GridVisualization.instance.RemoveWorldItem(position, itemChunkIndex);
         }
+    }
+
+    public void ClearTimers()
+    {
+        if (timerFollow != null) timerFollow.Cancel();
+        if (timer != null) timer.Cancel();
+        if (timerTransform != null) timerTransform.Cancel();
     }
 }

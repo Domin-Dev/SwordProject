@@ -2,8 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.U2D;
-using static UnityEditor.Progress;
 
 public class CharacterSpriteController : MonoBehaviour
 {
@@ -37,6 +35,11 @@ public class CharacterSpriteController : MonoBehaviour
     {
         characterEditorSettings = Resources.Load<CharacterEditorSettings>("CharacterParts/CharacterEditorSettings");
         ClearArray();
+    }
+
+    public Vector2 GetThrowDir(float multiplier)
+    {
+        return (Vector2)transform.position + lastSightDir * multiplier;
     }
 
     private void ClearArray()

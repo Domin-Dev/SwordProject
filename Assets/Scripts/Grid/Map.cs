@@ -25,11 +25,8 @@ public class Map
 
     public Dictionary<int,Chunk> chunks;
    
-
     public Map(Vector2 offset, float cellSize, int chunkSize,int widthInChunks, int heightInChunks)
     {
-        
-       
         chunks = new Dictionary<int, Chunk>();
         this.offset = offset;
         this.cellSize = cellSize;  
@@ -41,8 +38,7 @@ public class Map
         width = chunkSize * widthInChunks;
         height = chunkSize * heightInChunks;
 
-        chunkSizeOnWorldScale = chunkSize * cellSize;
-       
+        chunkSizeOnWorldScale = chunkSize * cellSize;     
     }
 }
 

@@ -7,7 +7,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.UIElements;
+
 
 
 public class PlayerPositionArgs : EventArgs
@@ -65,7 +65,6 @@ public class GridVisualization : MonoBehaviour
     Texture2D mapTexture;
     float width1;
     float height1;
-
 
     public static GridVisualization instance { private set; get; }
 
@@ -145,7 +144,6 @@ public class GridVisualization : MonoBehaviour
     {
         this.map = map;
         loadedChunks = new Dictionary<int, Transform>();
-
         
         if (LoadAllMap)
         {
@@ -210,7 +208,9 @@ public class GridVisualization : MonoBehaviour
     private void UnloadChunk(int index)
     {
         if(loadedChunks[index] != null) Destroy(loadedChunks[index].gameObject);
-        var grid = map.chunks[index].grid;
+        Chunk chunk = map.chunks[index];
+        var grid = chunk.grid;
+
         for (int x = 0; x < map.chunkSize; x++)
         {
             for (int y = 0; y < map.chunkSize; y++)
@@ -222,6 +222,15 @@ public class GridVisualization : MonoBehaviour
                 }
             }
         }
+
+        for (int i = 0; i < chunk.items.Count; i++)
+        {
+            var item = chunk.items[i];
+            if (item != null && item.worldItem != null)
+            {
+                UnloadWorldItem(item);
+            }
+        } 
     }
     private void TryLoadChunk(int chunkIndex)
     {
@@ -246,20 +255,15 @@ public class GridVisualization : MonoBehaviour
             }
         }
 
-        for (int x = 0; x < map.chunkSize; x++)
+        for (int i = 0; i < chunk.items.Count; i++)
         {
-            for (int y = 0; y < map.chunkSize; y++)
+            var value = chunk.items[i];
+            if(value != null)
             {
-                //var value = chunk.grid[x, y].gridObject;
-                //if (value != null)
-                //{
-                //    if (ItemsAsset.instance.GetItem(value.ID) is Wall)
-                //    {
-                //        SetNewSprite(chunk.ChunkGridPosition + new Vector2(x, y), value.ID);
-                //    }
-                //}
+                LoadWorldItem(i,chunk);
             }
         }
+
         yield return null;
     }
     private int GetChunkIndexByPositionXY(Vector2 position)
@@ -538,9 +542,9 @@ public class GridVisualization : MonoBehaviour
         Item item = ItemsAsset.instance.GetItem(id);
         Destroy(gridTile.gridObject.objectTransform.gameObject);
         gridTile.gridObject = null;
+
         Vector2 vector2 = new Vector2(gridTile.x, gridTile.y);
         Vector2 target = GetWorldPosition(vector2 + new Vector2(UnityEngine.Random.Range(-0.5f,0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)));
-        Debug.Log(target);
         CreateWorldItem(new ItemStats(id), GetWorldPosition(vector2 + new Vector2(0,0.5f)),target);
         if (item is Wall) UpdateNeighbors(vector2, id); 
     }
@@ -588,7 +592,6 @@ public class GridVisualization : MonoBehaviour
 
         Transform child = gridObject.objectTransform.GetChild(0);
         ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(gridObject.ID, value);
-        Debug.Log(gridObject.ID + value);
         child.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
         child.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
         MyTools.ChangePositionPivot(gridObject.objectTransform, child.TransformPoint(0, objectVariant.variants[0].minY, 0));
@@ -604,6 +607,34 @@ public class GridVisualization : MonoBehaviour
     }
     public void CreateWorldItem(ItemStats item,Vector2 pos,Vector2 target)
     {
-        Instantiate(worldItem,pos,Quaternion.identity).GetComponent<WorldItem>().SetItem(item,target);
+        int gridIndex = GetChunkIndexByCoordinates(new Vector2(target.x, target.y));
+        
+        Transform wItem = Instantiate(worldItem, pos, Quaternion.identity,transform).transform;
+        int itemChunkIndex = map.chunks[gridIndex].AddItem(new ChunkItem(item, target,wItem));
+        wItem.GetComponent<WorldItem>().SetItem(item, target, itemChunkIndex);
+    }
+
+    private void LoadWorldItem(int itemChunkIndex,Chunk chunk)
+    {
+        var item = chunk.items[itemChunkIndex];
+        Transform wItem = Instantiate(worldItem, item.position, Quaternion.identity, transform).transform;
+        item.worldItem = wItem;
+        wItem.GetComponent<WorldItem>().SetItem(item.item, item.position, itemChunkIndex);
+    }
+
+
+    public void UnloadWorldItem(ChunkItem chunkItem)
+    {
+        chunkItem.worldItem.GetComponent<WorldItem>().ClearTimers();
+        Destroy(chunkItem.worldItem.gameObject);
+    }
+    public void RemoveWorldItem(Vector2 pos,int itemChunkIndex) 
+    {
+        int gridIndex = GetChunkIndexByCoordinates(new Vector2(pos.x, pos.y));
+        Chunk chunk = map.chunks[gridIndex];
+        Transform worldItem = chunk.items[itemChunkIndex].worldItem;
+        worldItem.GetComponent<WorldItem>().ClearTimers();
+        Destroy(worldItem.gameObject);
+        chunk.RemoveItem(itemChunkIndex);
     }
 }

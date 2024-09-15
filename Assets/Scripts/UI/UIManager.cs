@@ -73,6 +73,8 @@ public class UIManager : MonoBehaviour
     public Transform itemParent { get { return equipmentDragItems; } }
     public static UIManager instance { private set; get; }
 
+    public bool mouseIsOverEQUI = false;
+
     private EquipmentGrid barGrid;
     private EquipmentGrid equipmentBarGrid;
     private EquipmentGrid mainEquipmentGrid;

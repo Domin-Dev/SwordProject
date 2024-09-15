@@ -22,7 +22,7 @@ public class MapGenerator : MonoBehaviour
     [Header("Chunk Settings")]
     [SerializeField] private int chunkSize = 10;
 
-    private static readonly Vector2 gridOffset = new Vector2(-1,-1); 
+    private static readonly Vector2 gridOffset = new Vector2(0,0); 
 
     private MapGeneratorSettings mapGeneratorSettings;
     GridVisualization gridVisualization;
@@ -110,7 +110,6 @@ public class MapGenerator : MonoBehaviour
         }
         return map;
     }
-
     private void GenerateCell(Chunk chunk, int x, int y, System.Random rand)
     {
         //float value = Generate(x + (int)chunk.ChunkGridPosition.x, y + (int)chunk.ChunkGridPosition.y, offset, scale);

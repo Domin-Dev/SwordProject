@@ -287,6 +287,7 @@ public class EquipmentManager : MonoBehaviour
             }
         }
     }
+
     public void SetUpEvent(HandsController handsController)
     {
         handsController.UseItem += UseSelectedItem;
@@ -958,6 +959,16 @@ public class EquipmentManager : MonoBehaviour
             Item.CrafingIngredient ingredient = item.crafingIngredients[i];
             DecreaseItemCount(ingredient.itemID, ingredient.number);
         }
+    }
+
+    public void ThrowItem()
+    {      
+        if(selectedSlotInEQ.gridIndex == 2)
+        {
+            TurnPlaceholder(this, new PlaceholderArgs(true, selectedSlotInEQ));
+        }
+        GridVisualization.instance.CreateWorldItem(selectedItemStats, (Vector2)characterSpriteController.transform.position , characterSpriteController.GetThrowDir(UnityEngine.Random.Range(0.25f,0.5f)));  
+        ClearSelectedSlot();
     }
 
 }

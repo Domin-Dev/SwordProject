@@ -88,6 +88,7 @@ public class Timer
             if(backFunc())
             {
                 updater.action -= UpdateFunc;
+                timerIsOver = true;
             }
         }
     }
@@ -126,4 +127,8 @@ public class Timer
         return timer;
     }
 
+    public bool IsEnd()
+    {
+        return timerIsOver;
+    }
 }
