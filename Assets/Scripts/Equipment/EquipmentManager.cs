@@ -403,7 +403,6 @@ public class EquipmentManager : MonoBehaviour
     {
         if (itemStats.itemCount > 0)
         {
-            UIManager.instance.NewCollectedItem(itemStats);
 
             List<SlotPosition> itemList = FindItems(itemStats.itemID);
             int stackMax = ItemsAsset.instance.GetStackMax(itemStats.itemID);
@@ -425,6 +424,7 @@ public class EquipmentManager : MonoBehaviour
                         {
                             IncreaseItemCount(itemList[i], itemStats.itemCount);
                             UIManager.instance.CheckRecipesWithItem(itemStats.itemID, true);
+                            UIManager.instance.NewCollectedItem(itemStats);
                             return true;
                         }
 
@@ -450,6 +450,7 @@ public class EquipmentManager : MonoBehaviour
                         equipmentBar[i] = itemStats;
                         NewItemUI(itemStats, new SlotPosition(0, i), false);
                         UIManager.instance.CheckRecipesWithItem(itemStats.itemID, true);
+                        UIManager.instance.NewCollectedItem(itemStats);
                         return true;
                     }
                 }
@@ -473,6 +474,7 @@ public class EquipmentManager : MonoBehaviour
                         equipment[i] = itemStats;
                         NewItemUI(itemStats, new SlotPosition(1, i), false);
                         UIManager.instance.CheckRecipesWithItem(itemStats.itemID, true);
+                        UIManager.instance.NewCollectedItem(itemStats);
                         return true;
                     }
                 }
