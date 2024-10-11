@@ -152,7 +152,6 @@ public class DebugManager : MonoBehaviour
             if(!GridVisualization.instance.loadedChunks.ContainsKey(value.Key))
             {
                 freeLines.Add(value.Key);
-                Debug.Log(value.Key);
             }
         }
         foreach (var value in GridVisualization.instance.loadedChunks)

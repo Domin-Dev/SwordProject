@@ -969,6 +969,7 @@ public class EquipmentManager : MonoBehaviour
         {
             TurnPlaceholder(this, new PlaceholderArgs(true, selectedSlotInEQ));
         }
+        
         GridVisualization.instance.CreateWorldItem(selectedItemStats, (Vector2)characterSpriteController.transform.position , characterSpriteController.GetThrowDir(UnityEngine.Random.Range(0.25f,0.5f)));  
         ClearSelectedSlot();
     }

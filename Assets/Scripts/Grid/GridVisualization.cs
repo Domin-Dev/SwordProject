@@ -255,6 +255,18 @@ public class GridVisualization : MonoBehaviour
             }
         }
 
+        for (int x = 0; x < map.chunkSize; x++)
+        {
+            for (int y = 0; y < map.chunkSize; y++)
+            {
+                var value = chunk.grid[x, y].gridObject;
+                if(value != null)
+                {
+                    SetNewSprite(GetCoordinatesByLocalChunkCoordinates(chunkIndex,x,y),value.ID);
+                }
+            }
+        }
+
         for (int i = 0; i < chunk.items.Count; i++)
         {
             var value = chunk.items[i];
@@ -274,13 +286,26 @@ public class GridVisualization : MonoBehaviour
     {
         if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < map.widthInChunks && coordinates.y < map.heightInChunks)
         {
-           return (int)coordinates.x + (int)coordinates.y * map.widthInChunks;
+           return (int)coordinates.x   + (int)coordinates.y * map.widthInChunks;
         }
         else
         {
             return -1;
         }
     }
+
+    private int GetChunkIndexByWorldPosition(Vector2 worldPosition)
+    {
+        if (worldPosition.x >= 0 && worldPosition.y >= 0 && worldPosition.x < map.mapWidthOnWorldScale && worldPosition.y < map.mapHeightOnWorldScale)
+        {
+            return (int)(worldPosition.x / map.chunkSizeOnWorldScale) + (int)(worldPosition.y / map.chunkSizeOnWorldScale) * map.widthInChunks;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
     private void UVSet(Vector2[] uv,int index, Vector2 uv00,Vector2 uv11)
     {
         uv[index * 4]     = new Vector2(uv00.x + width1,uv00.y + height1);
@@ -333,6 +358,17 @@ public class GridVisualization : MonoBehaviour
             }
         }
     }
+
+    public Vector2 GetCoordinatesByLocalChunkCoordinates(int chunkIndex,Vector2 localCoordinates)
+    {
+        Vector2 pos = GetChunkCoordinates(chunkIndex);
+        return new Vector2(pos.x * map.chunkSize + localCoordinates.x, pos.y * map.chunkSize + localCoordinates.y);
+    }
+    public Vector2 GetCoordinatesByLocalChunkCoordinates(int chunkIndex, int x ,int y)
+    {
+        return GetCoordinatesByLocalChunkCoordinates(chunkIndex, new Vector2(x, y));
+    }
+
     private void GetUVTile(int tileID,int borders,out Vector2 uv00, out Vector2 uv11)
     {
         uv00 = Vector2.zero;
@@ -516,7 +552,7 @@ public class GridVisualization : MonoBehaviour
     public GridTile GetValueByGridPosition(Vector2 gridPosition)
     {
         int chunkIndex =  GetChunkIndexByPositionXY(gridPosition);
-        if (gridPosition.x >= 0 && gridPosition.y >= 0 && gridPosition.x < map.width && gridPosition.y < map.height)
+        if(loadedChunks.ContainsKey(chunkIndex) && gridPosition.x >= 0 && gridPosition.y >= 0 && gridPosition.x < map.width && gridPosition.y < map.height)
         {
             return map.chunks[chunkIndex].grid[(int)gridPosition.x % map.chunkSize, (int)gridPosition.y % map.chunkSize];
         }
@@ -569,7 +605,12 @@ public class GridVisualization : MonoBehaviour
     }
     private void UpdateSprite(Vector2 positionXY)
     {
-        GridObject gridObject = GetValueByGridPosition(positionXY).gridObject;
+        var gridTile = GetValueByGridPosition(positionXY);
+        Debug.Log(gridTile);
+        if (gridTile == null) return;
+        GridObject gridObject = gridTile.gridObject;
+        if (gridObject == null) return;
+        Debug.Log(gridTile.ToString());
         bool[] neighbors = GetNeighbors(positionXY, gridObject.ID);
         int value = 0;
 
@@ -598,6 +639,7 @@ public class GridVisualization : MonoBehaviour
     }
     public void SetNewSprite(Vector2 positionXY,int id)
     {
+        Debug.Log(positionXY);
         bool[] neighbors = GetNeighbors(positionXY, id);
         for (int i = 0; i < 4; i++)
         {
@@ -607,8 +649,9 @@ public class GridVisualization : MonoBehaviour
     }
     public void CreateWorldItem(ItemStats item,Vector2 pos,Vector2 target)
     {
-        int gridIndex = GetChunkIndexByCoordinates(new Vector2(target.x, target.y));
-        
+        Debug.Log(target);
+        int gridIndex = GetChunkIndexByWorldPosition(new Vector2(target.x, target.y));
+        Debug.Log(gridIndex);
         Transform wItem = Instantiate(worldItem, pos, Quaternion.identity,transform).transform;
         int itemChunkIndex = map.chunks[gridIndex].AddItem(new ChunkItem(item, target,wItem));
         wItem.GetComponent<WorldItem>().SetItem(item, target, itemChunkIndex);
@@ -630,7 +673,7 @@ public class GridVisualization : MonoBehaviour
     }
     public void RemoveWorldItem(Vector2 pos,int itemChunkIndex) 
     {
-        int gridIndex = GetChunkIndexByCoordinates(new Vector2(pos.x, pos.y));
+        int gridIndex = GetChunkIndexByWorldPosition(new Vector2(pos.x, pos.y));
         Chunk chunk = map.chunks[gridIndex];
         Transform worldItem = chunk.items[itemChunkIndex].worldItem;
         worldItem.GetComponent<WorldItem>().ClearTimers();

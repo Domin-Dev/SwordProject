@@ -172,7 +172,8 @@ public class BuildingManager : MonoBehaviour
     }
     private void BuildWall(Vector2 posXY)
     {
-        if (GridVisualization.instance.GetValueByGridPosition(posXY).IsBuildObject()) return;    
+        var gridTile = GridVisualization.instance.GetValueByGridPosition(posXY);
+        if (gridTile == null || gridTile.IsBuildObject()) return;    
         Sounds.instance.Hammer();
         Transform obj = Instantiate(buildingPrefab,GridVisualization.instance.GetWorldPosition(posXY), Quaternion.identity, parent).transform;
         GridVisualization.instance.GetValueByGridPosition(posXY).gridObject = new GridObject(selectedObjectID,0,obj);
@@ -186,6 +187,7 @@ public class BuildingManager : MonoBehaviour
         { 
             Transform obj = Instantiate(buildingPrefab, GridVisualization.instance.GetWorldPosition(gridPosition), Quaternion.identity, parent).transform;
             gridObject.objectTransform = obj;
+
         }
         else if(item is BuildingObject)
         {

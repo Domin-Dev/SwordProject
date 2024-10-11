@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class WorldItem : MonoBehaviour
 {
-    public ItemStats itemStats;
+    ItemStats itemStats;
     Timer timer;
     Timer timerTransform;
     Timer timerFollow;
@@ -13,6 +13,7 @@ public class WorldItem : MonoBehaviour
     public int itemChunkIndex;
     private void SetUp(Vector2 target)
     {
+        GetComponent<Collider2D>().enabled = false;
         position = target;
         transform.localScale = new Vector2(0, 0);
         timer = Timer.Create
@@ -48,6 +49,7 @@ public class WorldItem : MonoBehaviour
             transform.position = pos;
             if (Vector2.Distance(transform.position,target) < 0.03f)
             {
+                this.GetComponent<Collider2D>().enabled = true;
                 return true;
             }
             return false;
@@ -62,12 +64,12 @@ public class WorldItem : MonoBehaviour
     {
         this.itemStats = itemStats;
         this.itemChunkIndex = itemChunkIndex;
-        GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetIcon(itemStats.itemID);
+        transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = ItemsAsset.instance.GetIcon(itemStats.itemID);
         SetUp(target);
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.transform.parent != null && collision.transform.parent.CompareTag("Player") && timerTransform.IsEnd())
+        if (collision.transform.parent != null && collision.transform.parent.CompareTag("Player") )
         {
             timerFollow = Timer.Create(() =>
             {

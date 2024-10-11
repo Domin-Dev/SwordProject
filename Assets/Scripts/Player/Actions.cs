@@ -57,12 +57,16 @@ public class Actions : MonoBehaviour
 
             if (Input.GetMouseButtonDown(1))
             {
-                GridObject gridObject = GridVisualization.instance.GetValueByGridPosition(pos).gridObject;
-                if (gridObject != null)
+                var tile = GridVisualization.instance.GetValueByGridPosition(pos);
+                if (tile != null)
                 {
-                    if (gridObject is GridDoor)
+                    GridObject gridObject = tile.gridObject;
+                    if (gridObject != null)
                     {
-                        Door(gridObject as GridDoor, pos);
+                        if (gridObject is GridDoor)
+                        {
+                            Door(gridObject as GridDoor, pos);
+                        }
                     }
                 }
             }

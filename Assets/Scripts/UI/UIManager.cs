@@ -84,7 +84,6 @@ public class UIManager : MonoBehaviour
 
     public event EventHandler windowOpen;
 
-    private CharacterSpriteController characterSpriteController;
     private void Awake()
     {
         if (instance == null) instance = this;
@@ -94,7 +93,6 @@ public class UIManager : MonoBehaviour
         SetUpNetworkUI();
         SetUpNotices();
         LoadRecipes();
-        characterSpriteController = FindObjectOfType<CharacterSpriteController>();
     }
     private void Update()
     {
@@ -456,6 +454,7 @@ public class UIManager : MonoBehaviour
         {
             TooltipSystem.Hide();
             openWindows.Remove(equipment);
+            if(timer != null) timer.Cancel();
         }
         else
         {

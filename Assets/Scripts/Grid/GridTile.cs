@@ -18,6 +18,8 @@ public class GridTile: IGetBarValue
         this.x = x;
         this.y = y;
     }
+
+
     public void ChangeTileType(int tileID)
     {
         this.tileID = tileID;
@@ -38,7 +40,7 @@ public class GridTile: IGetBarValue
     }
     public override string ToString()
     {
-        return tileID.ToString();
+        return $"Position : [{x},{y}]";
     }
     public float GetBarValue()
     {
@@ -67,4 +69,6 @@ public class GridTile: IGetBarValue
         }
         return neighbors;
     }
+
+    
 }

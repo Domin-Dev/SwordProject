@@ -18,10 +18,11 @@ public class Map
     /// <summary>
     /// in XY Cells
     /// </summary> 
-    public int height { private set; get; }
+    public int height { private set; get; } 
 
     public float chunkSizeOnWorldScale { private set; get; }
-
+    public float mapWidthOnWorldScale { private set; get; }
+    public float mapHeightOnWorldScale { private set; get; }
 
     public Dictionary<int,Chunk> chunks;
    
@@ -38,7 +39,10 @@ public class Map
         width = chunkSize * widthInChunks;
         height = chunkSize * heightInChunks;
 
-        chunkSizeOnWorldScale = chunkSize * cellSize;     
+        chunkSizeOnWorldScale = chunkSize * cellSize;
+        mapHeightOnWorldScale = heightInChunks * chunkSizeOnWorldScale;
+        mapWidthOnWorldScale = width * chunkSizeOnWorldScale;
+
     }
 }
 
