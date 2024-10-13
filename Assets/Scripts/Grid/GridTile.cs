@@ -7,6 +7,13 @@ public class GridTile: IGetBarValue
     public GridObject gridObject;
     public int x, y;
 
+    //pathfinding
+    public int gCost;
+    public int hCost;
+    public int fCost;
+
+    public GridTile cameFrom;
+
     public enum TileType
     {
 
@@ -17,6 +24,15 @@ public class GridTile: IGetBarValue
         this.borders = 0;
         this.x = x;
         this.y = y;
+
+        gCost = int.MaxValue;
+        cameFrom = null;
+        CalculateFCost();
+    }
+
+    public void CalculateFCost()
+    {
+        fCost = hCost + gCost;
     }
 
 

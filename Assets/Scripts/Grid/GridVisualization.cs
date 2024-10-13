@@ -7,8 +7,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
-
-
+using UnityEngine.Tilemaps;
 
 public class PlayerPositionArgs : EventArgs
 {
@@ -47,6 +46,7 @@ public class GridVisualization : MonoBehaviour
     public const int renderChunks = 2;
 
     public Map map;
+    Pathfinding pathfinding;
     public Dictionary<int, Transform> loadedChunks { private set; get; }
     public int lastPlayerChunk { private set; get; } = -1;
     public Vector2 playerPosition { private set; get; } = Vector2.zero;
@@ -156,6 +156,12 @@ public class GridVisualization : MonoBehaviour
         {
             CheckChunks(Vector2.zero);
         }
+        pathfinding = new Pathfinding(this);
+        foreach (var item in pathfinding.FindPath(0, 0, 30, 5))
+        {
+            Debug.Log(item);
+        } 
+
     }
     //Check current chunk
     //return coordinates of player chunk
@@ -278,11 +284,11 @@ public class GridVisualization : MonoBehaviour
 
         yield return null;
     }
-    private int GetChunkIndexByPositionXY(Vector2 position)
+    public int GetChunkIndexByPositionXY(Vector2 position)
     {
         return (int)position.x / map.chunkSize + ((int)position.y/ map.chunkSize) * map.widthInChunks;
     }
-    private int GetChunkIndexByCoordinates(Vector2 coordinates)
+    public int GetChunkIndexByCoordinates(Vector2 coordinates)
     {
         if(coordinates.x >= 0 && coordinates.y >= 0 && coordinates.x < map.widthInChunks && coordinates.y < map.heightInChunks)
         {
@@ -294,7 +300,16 @@ public class GridVisualization : MonoBehaviour
         }
     }
 
-    private int GetChunkIndexByWorldPosition(Vector2 worldPosition)
+    public GridTile GetGridTileByPositionXY(int x,int y)
+    {
+        if (x >= 0 && y >= 0 && x < map.mapWidthOnWorldScale && y < map.mapHeightOnWorldScale)
+        {
+            int chunkIndex = GetChunkIndexByPositionXY(new Vector2(x, y));
+            return map.chunks[chunkIndex].grid[x % map.chunkSize, y % map.chunkSize];
+        }
+        return null;
+    }
+    public int GetChunkIndexByWorldPosition(Vector2 worldPosition)
     {
         if (worldPosition.x >= 0 && worldPosition.y >= 0 && worldPosition.x < map.mapWidthOnWorldScale && worldPosition.y < map.mapHeightOnWorldScale)
         {
@@ -364,6 +379,7 @@ public class GridVisualization : MonoBehaviour
         Vector2 pos = GetChunkCoordinates(chunkIndex);
         return new Vector2(pos.x * map.chunkSize + localCoordinates.x, pos.y * map.chunkSize + localCoordinates.y);
     }
+
     public Vector2 GetCoordinatesByLocalChunkCoordinates(int chunkIndex, int x ,int y)
     {
         return GetCoordinatesByLocalChunkCoordinates(chunkIndex, new Vector2(x, y));
@@ -656,7 +672,6 @@ public class GridVisualization : MonoBehaviour
         int itemChunkIndex = map.chunks[gridIndex].AddItem(new ChunkItem(item, target,wItem));
         wItem.GetComponent<WorldItem>().SetItem(item, target, itemChunkIndex);
     }
-
     private void LoadWorldItem(int itemChunkIndex,Chunk chunk)
     {
         var item = chunk.items[itemChunkIndex];
@@ -664,8 +679,6 @@ public class GridVisualization : MonoBehaviour
         item.worldItem = wItem;
         wItem.GetComponent<WorldItem>().SetItem(item.item, item.position, itemChunkIndex);
     }
-
-
     public void UnloadWorldItem(ChunkItem chunkItem)
     {
         chunkItem.worldItem.GetComponent<WorldItem>().ClearTimers();
