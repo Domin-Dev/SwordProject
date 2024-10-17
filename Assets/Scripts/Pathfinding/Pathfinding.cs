@@ -13,6 +13,8 @@ public class Pathfinding
 
     private List<GridTile> openList;
     private List<GridTile> closedList;
+
+    private List<int> usedChunks;
     public Pathfinding(GridVisualization gridVisualization)
     {
         this.gridVisualization = gridVisualization;
@@ -20,11 +22,14 @@ public class Pathfinding
 
     public List<GridTile> FindPath(int startX,int startY,int endX,int endY)
     {
+        Debug.Log(startX + " " + startY + " " + endX + " " + endY);
         GridTile startNode = gridVisualization.GetGridTileByPositionXY(startX, startY);
         GridTile endNode = gridVisualization.GetGridTileByPositionXY(endX, endY);
+        Debug.Log(startNode + " " + endNode);
 
         openList = new List<GridTile>() { startNode };
         closedList = new List<GridTile>();
+        usedChunks = new List<int>();
 
         startNode.gCost = 0;
         startNode.hCost = CalculateDistanceCost(startNode, endNode);
@@ -56,9 +61,27 @@ public class Pathfinding
                 }
             }
         }
+
+
+        Clear();
         return null;
     }
 
+    private void Clear()
+    {
+        for (int i = 0; i < usedChunks.Count; i++)
+        {
+            Chunk chunk = gridVisualization.map.chunks[usedChunks[i]];
+            for (int x = 0; x < gridVisualization.map.chunkSize; x++)
+            {
+                for (int y = 0; y < gridVisualization.map.chunkSize; y++)
+                {
+                    var item = chunk.grid[x, y];
+                    item.ResetNode();
+                }
+            }
+        }
+    }
     private List<GridTile> GetNeighbourList(GridTile gridTile)
     {
         Vector2 pos = new  Vector2(gridTile.x, gridTile.y);
@@ -66,8 +89,13 @@ public class Pathfinding
         for (int i = 0; i < MyTools.directions8.Length; i++)
         {
             Vector2 vector2 = MyTools.directions8[i] + pos;
-            var value =  gridVisualization.GetGridTileByPositionXY((int)vector2.x, (int)vector2.y);
-            if(value != null) list.Add(value);
+            int chunkIndex; 
+            var value =  gridVisualization.GetGridTileByPositionXY((int)vector2.x, (int)vector2.y,out chunkIndex);
+            if (value != null)
+            {
+                list.Add(value);
+                if (!usedChunks.Contains(chunkIndex)) usedChunks.Add(chunkIndex);
+            }
         }
         return list;
     }
@@ -83,6 +111,8 @@ public class Pathfinding
             current = current.cameFrom;
         }
         path.Reverse();
+        path.RemoveAt(0);
+        Clear();
         return path;
     }
 

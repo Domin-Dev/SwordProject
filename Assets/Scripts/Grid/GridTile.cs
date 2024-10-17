@@ -24,10 +24,7 @@ public class GridTile: IGetBarValue
         this.borders = 0;
         this.x = x;
         this.y = y;
-
-        gCost = int.MaxValue;
-        cameFrom = null;
-        CalculateFCost();
+        ResetNode();
     }
 
     public void CalculateFCost()
@@ -35,6 +32,12 @@ public class GridTile: IGetBarValue
         fCost = hCost + gCost;
     }
 
+    public void ResetNode()
+    {
+        gCost = int.MaxValue;
+        cameFrom = null;
+        CalculateFCost();
+    }
 
     public void ChangeTileType(int tileID)
     {

@@ -21,9 +21,6 @@ public class CharacterSpriteController : MonoBehaviour
 
     [SerializeField] int[] clothesID = new int[8];
 
-    [SerializeField] Sprite[] bodySprites;
-    [SerializeField] Sprite[] headSprites;
-
     private CharacterEditorSettings characterEditorSettings;
 
     private Vector2 lastMoveDir = Vector2.zero;
@@ -31,7 +28,7 @@ public class CharacterSpriteController : MonoBehaviour
 
     public int hairstyleIndex = 1;
 
-    private void Start()
+    private void Awake()
     {
         characterEditorSettings = Resources.Load<CharacterEditorSettings>("CharacterParts/CharacterEditorSettings");
         ClearArray();
@@ -57,7 +54,7 @@ public class CharacterSpriteController : MonoBehaviour
             ChangeBodySprites(moveDir);
         }
 
-        if (lastMoveDir != sightDir)
+        if (lastSightDir != sightDir)
         {
             lastSightDir = sightDir;
             ChangeHeadSprites(sightDir);
@@ -84,14 +81,22 @@ public class CharacterSpriteController : MonoBehaviour
 
     private void ChangeBodySprites(Vector2 dir)
     {
-        if (dir.x > 0) SetSpriteBody(2);
-        else if (dir.x < 0) SetSpriteBody(3);
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        angle += 180;
 
-        if (dir.y > 0) SetSpriteBody(1);
-        else if (dir.y < 0) SetSpriteBody(0);
+        if (angle >= 20 && angle <= 160) SetSpriteBody(0);
+        else if (angle > 160 && angle < 200) SetSpriteBody(2);
+        else if (angle >= 200 && angle <= 340) SetSpriteBody(1);
+        else SetSpriteBody(3);
+
+        //if (dir.x > 0) SetSpriteBody(2);
+        //else if (dir.x < 0) SetSpriteBody(3);
+
+        //if (dir.y > 0) SetSpriteBody(1);
+        //else if (dir.y < 0) SetSpriteBody(0);
     }
 
-    private void ChangeHeadSprites(Vector2 dir)
+    protected void ChangeHeadSprites(Vector2 dir)
     {
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         angle += 180;

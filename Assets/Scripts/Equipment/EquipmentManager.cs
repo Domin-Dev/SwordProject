@@ -231,7 +231,7 @@ public class EquipmentManager : MonoBehaviour
     [HideInInspector] public PointerEventData.InputButton input;
     public static EquipmentManager instance { private set; get; }
 
-    private CharacterSpriteController characterSpriteController;
+    [SerializeField] private CharacterSpriteController player;
 
     private void Awake()
     {
@@ -250,8 +250,6 @@ public class EquipmentManager : MonoBehaviour
         UIManager.instance.SetUpUIEquipment(this);
         selectedSlotInEQ = new SlotPosition(-1, -1);
         ChangeSelectedSlot(0);
-        characterSpriteController = FindObjectOfType<CharacterSpriteController>();
-
     }
 
     private void Update()
@@ -772,12 +770,12 @@ public class EquipmentManager : MonoBehaviour
         if (position.gridIndex == 2)
         {
             Garment garment = (Garment)ItemsAsset.instance.GetItem(itemStats.itemID);
-            characterSpriteController.SetClothes((int)garment.type, garment.ID);
+            player.SetClothes((int)garment.type, garment.ID);
         }
         else if (selectedSlotInEQ.gridIndex == 2)
         {
             Garment garment = (Garment)ItemsAsset.instance.GetItem(itemStats.itemID);
-            characterSpriteController.RemoveClothes((int)garment.type);
+            player.RemoveClothes((int)garment.type);
         }
 
 
@@ -970,7 +968,7 @@ public class EquipmentManager : MonoBehaviour
             TurnPlaceholder(this, new PlaceholderArgs(true, selectedSlotInEQ));
         }
         
-        GridVisualization.instance.CreateWorldItem(selectedItemStats, (Vector2)characterSpriteController.transform.position , characterSpriteController.GetThrowDir(UnityEngine.Random.Range(0.25f,0.5f)));  
+        GridVisualization.instance.CreateWorldItem(selectedItemStats, (Vector2)player.transform.position , player.GetThrowDir(UnityEngine.Random.Range(0.25f,0.5f)));  
         ClearSelectedSlot();
     }
 

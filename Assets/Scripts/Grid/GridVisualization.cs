@@ -46,7 +46,7 @@ public class GridVisualization : MonoBehaviour
     public const int renderChunks = 2;
 
     public Map map;
-    Pathfinding pathfinding;
+    public Pathfinding pathfinding;
     public Dictionary<int, Transform> loadedChunks { private set; get; }
     public int lastPlayerChunk { private set; get; } = -1;
     public Vector2 playerPosition { private set; get; } = Vector2.zero;
@@ -157,11 +157,6 @@ public class GridVisualization : MonoBehaviour
             CheckChunks(Vector2.zero);
         }
         pathfinding = new Pathfinding(this);
-        foreach (var item in pathfinding.FindPath(0, 0, 30, 5))
-        {
-            Debug.Log(item);
-        } 
-
     }
     //Check current chunk
     //return coordinates of player chunk
@@ -307,6 +302,17 @@ public class GridVisualization : MonoBehaviour
             int chunkIndex = GetChunkIndexByPositionXY(new Vector2(x, y));
             return map.chunks[chunkIndex].grid[x % map.chunkSize, y % map.chunkSize];
         }
+        return null;
+    }
+
+    public GridTile GetGridTileByPositionXY(int x, int y,out int chunkIndex)
+    {
+        if (x >= 0 && y >= 0 && x < map.mapWidthOnWorldScale & y < map.mapHeightOnWorldScale)
+        {
+            chunkIndex = GetChunkIndexByPositionXY(new Vector2(x, y));
+            return map.chunks[chunkIndex].grid[x % map.chunkSize, y % map.chunkSize];
+        }
+        chunkIndex = -1;
         return null;
     }
     public int GetChunkIndexByWorldPosition(Vector2 worldPosition)
@@ -582,6 +588,11 @@ public class GridVisualization : MonoBehaviour
     {
         return map.offset + gridPosition * map.cellSize + new Vector2(map.cellSize / 2, 0);
     }
+    public Vector2 GetWorldPosition(int x, int y)
+    {
+        return GetWorldPosition(new Vector2(x, y)); 
+    }
+
     public GridTile[,] GetGridByXY(Vector2 posXY)
     {
         int x = (int)posXY.x % map.chunkSize;

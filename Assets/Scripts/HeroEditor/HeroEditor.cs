@@ -8,10 +8,10 @@ public class HeroEditor: MonoBehaviour
 {
  
     [SerializeField] private Material colorSwapMaterial;
-    [SerializeField] private ColorPicker colorPicker;
     [SerializeField] private GameObject colorToSelectPrefab;
     [Space]
 
+    [SerializeField] private Transform UIEditor;
     [SerializeField] private Transform skinColors;
     [SerializeField] private Transform hairColors;
     [SerializeField] private Transform underwearColors;
@@ -22,20 +22,31 @@ public class HeroEditor: MonoBehaviour
     [SerializeField] private Sprite unselected;
 
     private CharacterEditorSettings characterEditorSettings;
-    private CharacterSpriteController characterSpriteController;
+    [SerializeField] private CharacterSpriteController player;
 
     private Image skinColorSelected;
     private Image hairColorSelected;
     private Image underwearColorSelected;
 
+    public static HeroEditor instance { private set; get; }
+
+    private void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        characterEditorSettings = Resources.Load<CharacterEditorSettings>("CharacterParts/CharacterEditorSettings");
+    }
     private void Start()
     {
-        characterSpriteController = FindObjectOfType<CharacterSpriteController>();
-        colorPicker.newColor += NewColor;
-        characterEditorSettings = Resources.Load<CharacterEditorSettings>("CharacterParts/CharacterEditorSettings");
         saveButton.onClick.AddListener(() =>
         {
-            this.gameObject.SetActive(false);
+            UIEditor.gameObject.SetActive(false);
         });
 
         hairSwitch.SetUpSwitch(0, characterEditorSettings.hairstyles.Length, "Hairstyle");
@@ -43,9 +54,6 @@ public class HeroEditor: MonoBehaviour
     }
     private void LoadColors()
     {
-        ChangeSkinColor(characterEditorSettings.skinColors[1]);
-        ChangeHairColor(characterEditorSettings.hairColors[1]);
-        ChangeUnderwearColor(characterEditorSettings.clothesColors[1]);
         for (int i = 0; i < characterEditorSettings.skinColors.Length; i++)
         {
             Transform transform = Instantiate(colorToSelectPrefab, skinColors).transform;
@@ -53,7 +61,7 @@ public class HeroEditor: MonoBehaviour
             transform.GetComponent<Button>().onClick.AddListener(() => 
             {
                 Image selectedColor = transform.GetComponent<Image>();
-                ChangeSkinColor(selectedColor.color);
+                ChangeSkinColor(player, selectedColor.color);
                 SelectNew(selectedColor, ref skinColorSelected);
             });
         }
@@ -65,7 +73,7 @@ public class HeroEditor: MonoBehaviour
             transform.GetComponent<Button>().onClick.AddListener(() => 
             {
                 Image selectedColor = transform.GetComponent<Image>();
-                ChangeHairColor(selectedColor.color);
+                ChangeHairColor(player, selectedColor.color);
                 SelectNew(selectedColor, ref hairColorSelected);
             });
         }
@@ -77,26 +85,20 @@ public class HeroEditor: MonoBehaviour
             transform.GetComponent<Button>().onClick.AddListener(() =>
             {
                 Image selectedColor = transform.GetComponent<Image>();
-                ChangeUnderwearColor(selectedColor.color);
+                ChangeUnderwearColor(player, selectedColor.color);
                 SelectNew(selectedColor, ref underwearColorSelected);
             });
         }
 
+        SetCharacterSpriteProperties(player, 1, 1, 1, 1);
         hairSwitch.OnChangedValue += ChangeHair;
     }
 
+    
     private void ChangeHair(object sender, SwitchArgs e)
     {
-        characterSpriteController.hair.sprite = characterEditorSettings.hairstyles[e.newValue].sprites[0];
-        characterSpriteController.hairstyleIndex = e.newValue;
+        ChangeHair(player, e.newValue);
     }
-
-    private void NewColor(object sender, ColorArgs e)
-    {
-        characterSpriteController.head.material = colorSwapMaterial;
-        colorSwapMaterial.color = e.color;
-    }
-
     private void SelectNew(Image newSelected,ref Image currentSelected)
     {
         if(currentSelected != null)
@@ -108,17 +110,31 @@ public class HeroEditor: MonoBehaviour
         border.sprite = selected;
     }
 
-    private void ChangeHairColor(Color color)
+
+
+    public void SetCharacterSpriteProperties(CharacterSpriteController controller,int hair,int hairColor,int underwearColor,int skinColor)
+    {
+        ChangeHair(controller, hair);
+        ChangeHairColor(controller, characterEditorSettings.hairColors[hairColor]);
+        ChangeUnderwearColor(controller,characterEditorSettings.clothesColors[underwearColor]);
+        ChangeSkinColor(controller, characterEditorSettings.skinColors[skinColor]);
+    }
+
+    public void ChangeHair(CharacterSpriteController CharacterSpriteController, int value)
+    {
+        CharacterSpriteController.hair.sprite = characterEditorSettings.hairstyles[value].sprites[0];
+        CharacterSpriteController.hairstyleIndex = value;
+    }
+    public void ChangeHairColor(CharacterSpriteController characterSpriteController,Color color)
     {
         ChangeColor(characterSpriteController.hair, color);
         ChangeColor(characterSpriteController.eyes, color, 0.6f);
     }
-
-    private void ChangeUnderwearColor(Color color)
+    public void ChangeUnderwearColor(CharacterSpriteController characterSpriteController,Color color)
     {
         ChangeColor(characterSpriteController.underwear, color);
     }
-    private void ChangeSkinColor(Color color)
+    public void ChangeSkinColor(CharacterSpriteController characterSpriteController,Color color)
     {
         ChangeColor(characterSpriteController.head, color);
         ChangeColor(characterSpriteController.handL, color);
