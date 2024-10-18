@@ -98,7 +98,7 @@ public class Actions : MonoBehaviour
                 if (item != null)
                 {
                     VariantItem variantItem = ItemsAsset.instance.GetItem(gridObject.ID) as VariantItem;
-                    Instantiate(variantItem.HitParticles, gridObject.objectTransform.position + (Vector3)variantItem.objectVariants[gridObject.variantIndex].variants[0].particlePoint, Quaternion.identity);
+                    if(variantItem.HitParticles != null) Instantiate(variantItem.HitParticles, gridObject.objectTransform.position + (Vector3)variantItem.objectVariants[gridObject.variantIndex].variants[0].particlePoint, Quaternion.identity);
                     GridTile[] neighbors = gridTile.GetNeighbors();
 
                     if(gridTile.DecreaseHitPoints(20))

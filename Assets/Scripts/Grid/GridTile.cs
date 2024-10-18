@@ -1,10 +1,12 @@
 ﻿
 using UnityEngine;
+[System.Serializable]
 public class GridTile: IGetBarValue
 {
+    
     public int tileID;
     public int borders;
-    public GridObject gridObject;
+    public GridObject gridObject { private set; get; }
     public int x, y;
 
     //pathfinding
@@ -14,6 +16,7 @@ public class GridTile: IGetBarValue
 
     public GridTile cameFrom;
 
+    public bool isWalkable;
     public enum TileType
     {
 
@@ -25,6 +28,13 @@ public class GridTile: IGetBarValue
         this.x = x;
         this.y = y;
         ResetNode();
+        this.isWalkable = true;
+    }
+
+    public void SetGridObject(GridObject gridObject, bool isWalkable = false)
+    {
+        this.gridObject = gridObject;
+        this.isWalkable = isWalkable;
     }
 
     public void CalculateFCost()

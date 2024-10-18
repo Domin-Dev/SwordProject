@@ -15,6 +15,14 @@ public class GridDoor : GridObject
         this.doorIsClosed = doorIsClosed;
     }
 }
+
+public class Wall : GridObject
+{
+    public Wall(int ID, int indexVariant, Transform obj, int stateIndex = 0) : base(ID, indexVariant, obj, stateIndex)
+    {
+    }
+}
+
 public class GridObject: IGetBarValue
 {
     public int ID;

@@ -159,7 +159,7 @@ public class BuildingManager : MonoBehaviour
     private void SetBuildMode()
     {
         Item item = ItemsAsset.instance.GetItem(selectedObjectID);
-        if (item is Wall) build = BuildWall;
+        if (item is WallObject) build = BuildWall;
         else if (item is Floor) build = BuildFloor;
         else if (item is BuildingObject) build = BuildObject;
 
@@ -176,14 +176,14 @@ public class BuildingManager : MonoBehaviour
         if (gridTile == null || gridTile.IsBuildObject()) return;    
         Sounds.instance.Hammer();
         Transform obj = Instantiate(buildingPrefab,GridVisualization.instance.GetWorldPosition(posXY), Quaternion.identity, parent).transform;
-        GridVisualization.instance.GetValueByGridPosition(posXY).gridObject = new GridObject(selectedObjectID,0,obj);
+        gridTile.SetGridObject(new Wall(selectedObjectID,0,obj));
         GridVisualization.instance.SetNewSprite(posXY,selectedObjectID);
         builtObject(this, null);
     }
     public void LoadObject(GridObject gridObject,Vector2 gridPosition)
     {
         Item item = ItemsAsset.instance.GetItem(gridObject.ID);
-        if (item is Wall)
+        if (item is WallObject)
         { 
             Transform obj = Instantiate(buildingPrefab, GridVisualization.instance.GetWorldPosition(gridPosition), Quaternion.identity, parent).transform;
             gridObject.objectTransform = obj;
@@ -233,11 +233,11 @@ public class BuildingManager : MonoBehaviour
 
         switch (item)
         {
-            case DoorItem : gridObject.gridObject = new GridDoor(itemID, indexVariant, buildingObj);
+            case DoorItem : gridObject.SetGridObject(new GridDoor(itemID, indexVariant, buildingObj),true);
                 return;
         }
 
-        gridObject.gridObject = new GridObject(itemID, indexVariant, buildingObj);
+        gridObject.SetGridObject(new GridObject(itemID, indexVariant, buildingObj));
     }
     public void ChangeSprite(Vector2 posXY, int index)
     {

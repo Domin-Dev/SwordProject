@@ -22,10 +22,11 @@ public class Pathfinding
 
     public List<GridTile> FindPath(int startX,int startY,int endX,int endY)
     {
-        Debug.Log(startX + " " + startY + " " + endX + " " + endY);
         GridTile startNode = gridVisualization.GetGridTileByPositionXY(startX, startY);
         GridTile endNode = gridVisualization.GetGridTileByPositionXY(endX, endY);
-        Debug.Log(startNode + " " + endNode);
+        if(startNode == null || endNode == null) return null; 
+
+
 
         openList = new List<GridTile>() { startNode };
         closedList = new List<GridTile>();
@@ -42,7 +43,6 @@ public class Pathfinding
             {
                 return CalculatePath(currentNode);
             }
-
             openList.Remove(currentNode);
             closedList.Add(currentNode);
 
@@ -50,6 +50,11 @@ public class Pathfinding
             foreach (GridTile tile in list)
             {
                 if (closedList.Contains(tile)) continue;
+                if(!tile.isWalkable)
+                {
+                    closedList.Add(tile);
+                    continue;
+                }
                 int tentativeGCost = currentNode.gCost + CalculateDistanceCost(currentNode, tile);
                 if(tentativeGCost < tile.gCost)
                 {
@@ -81,6 +86,7 @@ public class Pathfinding
                 }
             }
         }
+        usedChunks = null;
     }
     private List<GridTile> GetNeighbourList(GridTile gridTile)
     {
@@ -112,6 +118,7 @@ public class Pathfinding
         }
         path.Reverse();
         path.RemoveAt(0);
+        path.RemoveAt(0);
         Clear();
         return path;
     }
@@ -121,7 +128,7 @@ public class Pathfinding
         int xDistance = math.abs(a.x - b.x);
         int yDistance = math.abs(a.y - b.y);
         int remaining = math.abs(xDistance - yDistance);
-        return moveStraightCost * math.min(xDistance, yDistance) + moveStraightCost * remaining;
+        return moveDiagonalCost * math.min(xDistance, yDistance) + moveStraightCost * remaining;
     }
 
     private GridTile GetLowestFCostNode(List<GridTile> noteList)

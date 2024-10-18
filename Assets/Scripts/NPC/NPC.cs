@@ -7,49 +7,72 @@ public class NPC : MonoBehaviour
 
     Rigidbody2D rigidbody2D;
     [SerializeField] Vector2 target; 
+    [SerializeField] Vector2 newX;
     [SerializeField] NPCSpriteController characterSpriteController;
 
-    List<GridTile> path;
+    public List<GridTile> path;
     
     private void Start()
     {
         rigidbody2D = GetComponent<Rigidbody2D>();
         characterSpriteController = GetComponent<NPCSpriteController>();
-        NewPath();
-        if (path.Count > 0)
-        target = GridVisualization.instance.GetWorldPosition(path[0].x, path[0].y);
+        NewPath(10,0);
     }
 
     private void FixedUpdate()
     {
-        Follow();
+       if (path != null) Follow();
+    }
+
+    private void Update()
+    {
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    Vector2 x = GridVisualization.instance.GetGridPosition(MyTools.GetMouseWorldPosition());
+        //    NewPath((int)x.x, (int)x.y);
+        //}
     }
     public void Follow()
     {
         Vector2 vector2 = target - (Vector2)transform.position;
-        rigidbody2D.velocity = vector2.normalized * 0.7f;
+        rigidbody2D.velocity = vector2.normalized * 0.4f;
         characterSpriteController.UpdateSprite(vector2.normalized, vector2.normalized);
-        if (Vector2.Distance(transform.position, target) <= 0.02)
+        //Debug.Log(transform.position + " " + target + " = " + Vector2.Distance(transform.position, target));
+        if (Vector2.Distance(transform.position, target) <= 0.01)
         {
             path.RemoveAt(0);
             if (path.Count > 0)
             {
-                target = GridVisualization.instance.GetWorldPosition(path[0].x, path[0].y);
+                NextTarget();
             }
             else
             {
-                NewPath();
+                rigidbody2D.velocity = Vector2.zero;
+                path = null;
+                Debug.Log("end");
+                NewPath(Random.Range(0, 20), Random.Range(0, 20));
             }
         }
        
     }
 
-    public void NewPath()
+    public void NewPath(int x,int y)
     {
         Vector2 xy = GridVisualization.instance.GetGridPosition(transform.position);
-        int x = Random.Range(0, 20);
-        int y = Random.Range(0, 20);
         path = GridVisualization.instance.pathfinding.FindPath((int)xy.x, (int)xy.y,x, y);
-        Debug.Log(x + " " + y);
+        if (path != null && path.Count > 0)
+        {
+            NextTarget();
+        }
+        else
+        {
+            Debug.Log(x + "  " +  y + " " + gameObject.name);
+            NewPath(Random.Range(0, 20), Random.Range(0, 20));
+        }
+    }
+
+    private void NextTarget()
+    {
+        target = GridVisualization.instance.GetWorldPosition(path[0].x, path[0].y) + new Vector2(0,0.1f);
     }
 }

@@ -62,7 +62,7 @@ public class MapGenerator : MonoBehaviour
     
     private void SetBuildingObject(Chunk chunk, int x, int y,int index)
     {
-        chunk.grid[x, y].gridObject = new GridObject(index, 0, null);
+        chunk.grid[x, y].SetGridObject(new GridObject(index, 0, null));
     }
 
     public Map GenerateMap(float cellSize, Vector2 offset)
@@ -88,7 +88,7 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int x = 0; x < chunkSize; x++)
                 {
-                    // GenerateCell(item.Value, x, y,rand);
+                    GenerateCell(item.Value, x, y,rand);
                     if (value >= 0.75f)
                     { 
                         SetValue(item.Value, x, y,8);
@@ -105,6 +105,8 @@ public class MapGenerator : MonoBehaviour
                     {
                         SetValue(item.Value, x, y, 9);
                     }
+
+
                 }
             }
         }
@@ -119,23 +121,23 @@ public class MapGenerator : MonoBehaviour
         float tempValue = Generate(posX,posY, offsetTemp, scaleTemp);
 
 
-        if (rainValue <= 0.3f && tempValue > 0.8f)
-        {
-            SetValue(chunk, x, y, 8);
-        }
-        else if (rainValue <= 0.3f && tempValue > 0.2f)
-        {
-            SetValue(chunk, x, y, 1);
-        }
-        else
-        {
-            SetValue(chunk, x, y, 0);
-        }
-
-        //if (rand.Next(0, 100) <= 5)
+        //if (rainValue <= 0.3f && tempValue > 0.8f)
         //{
-        //    SetBuildingObject(chunk, x, y, 300);
+        //    SetValue(chunk, x, y, 8);
         //}
+        //else if (rainValue <= 0.3f && tempValue > 0.2f)
+        //{
+        //    SetValue(chunk, x, y, 1);
+        //}
+        //else
+        //{
+        //    SetValue(chunk, x, y, 0);
+        //}
+
+        if (rand.Next(0, 100) <= 5)
+        {
+            SetBuildingObject(chunk, x, y, 300);
+        }
     }
 
     private void GenerateTempCell(Chunk chunk, int x, int y, System.Random rand)

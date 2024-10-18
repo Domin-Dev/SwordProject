@@ -7,7 +7,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Tilemaps;
+
 
 public class PlayerPositionArgs : EventArgs
 {
@@ -54,7 +54,7 @@ public class GridVisualization : MonoBehaviour
     public event EventHandler<PlayerPositionArgs> onPlayerMove;
     public event EventHandler<PlayerPositionArgs> onChangeChunk;
 
-    public Dictionary<int, TileUV> TilesUV { get;private set; }
+    public Dictionary<int, TileUV> TilesUV { get; private set; }
     public MapGeneratorSettings settings { private set; get; }
 
     int textureWidth;
@@ -87,7 +87,7 @@ public class GridVisualization : MonoBehaviour
     private void SetUpMapMaterial(int sizeTile = 25)
     {
         TilesUV = new Dictionary<int, TileUV>();
-        Floor[] array = ItemsAsset.instance.GetItemsByType<Floor>();    
+        Floor[] array = ItemsAsset.instance.GetItemsByType<Floor>();
         Texture2D texture = new Texture2D(46 * sizeTile, sizeTile * CountTextures(array));
         texture.filterMode = FilterMode.Point;
 
@@ -108,11 +108,11 @@ public class GridVisualization : MonoBehaviour
                 grassUV = new Vector2(0, (float)k * sizeTile / textureHeight);
                 CopyTexture(ref k, sizeTile, floor.grassTexture, texture);
             }
-            Vector2 uv00 = new Vector2(0,(float)k * sizeTile / textureHeight);
+            Vector2 uv00 = new Vector2(0, (float)k * sizeTile / textureHeight);
             CopyTexture(ref k, sizeTile, floor.texture, texture);
             int variants = floor.texture.width / sizeTile;
 
-            TilesUV.Add(floor.ID, new TileUV(uv00,variants,grassUV));
+            TilesUV.Add(floor.ID, new TileUV(uv00, variants, grassUV));
         }
         texture.Apply(true, true);
         mapTexture = texture;
@@ -122,10 +122,10 @@ public class GridVisualization : MonoBehaviour
         int counter = 0;
         foreach (Floor floor in array)
         {
-            if(floor.texture != null)
+            if (floor.texture != null)
             {
                 counter++;
-                if(floor.grassTexture != null)
+                if (floor.grassTexture != null)
                 {
                     counter++;
                 }
@@ -133,7 +133,7 @@ public class GridVisualization : MonoBehaviour
         }
         return counter;
     }
-    private void CopyTexture(ref int index,int height, Texture2D from,Texture2D to)
+    private void CopyTexture(ref int index, int height, Texture2D from, Texture2D to)
     {
         int width = from.width;
         Color32[] grassColors = from.GetPixels32();
@@ -144,7 +144,7 @@ public class GridVisualization : MonoBehaviour
     {
         this.map = map;
         loadedChunks = new Dictionary<int, Transform>();
-        
+
         if (LoadAllMap)
         {
             foreach (var item in map.chunks)
@@ -164,28 +164,46 @@ public class GridVisualization : MonoBehaviour
     {
         Vector2 positionXY = GetGridPosition(worldPosition);
         playerPosition = positionXY;
-        
+
         int chunkIndex = GetChunkIndexByPositionXY(positionXY);
 
         if (lastPlayerChunk != chunkIndex && !LoadAllMap)
         {
             lastPlayerChunk = chunkIndex;
             Vector2 posChunk = GetChunkCoordinates(chunkIndex);
+            StartCoroutine(LoadChunks(posChunk));
 
-            for (int x = -renderChunks; x <= renderChunks; x++)
-            {
-                for (int y = -renderChunks; y<= renderChunks; y++)
-                {            
-                    TryLoadChunk(GetChunkIndexByCoordinates(posChunk + new Vector2(x,y)));
-                }
-            }
-            TryUnloadChunks(chunkIndex);
+            StartCoroutine(TryUnloadChunks(chunkIndex));
             onChangeChunk?.Invoke(this, new PlayerPositionArgs(positionXY, chunkIndex, GetChunkCoordinates(chunkIndex)));
             return posChunk;
         }
         return GetChunkCoordinates(lastPlayerChunk);
     }
-    private void TryUnloadChunks(int chunkIndex)
+
+    IEnumerator LoadChunks(Vector2 posChunk)
+    {
+        List<int> list = new List<int>();
+        for (int x = -renderChunks; x <= renderChunks; x++)
+        {
+            for (int y = -renderChunks; y <= renderChunks; y++)
+            {
+               int index = GetChunkIndexByCoordinates(posChunk + new Vector2(x, y));
+               if(CheckChunk(index))
+               {
+                    list.Add(index);
+               }
+            }
+        }
+
+        foreach (int index in list)
+        {
+            StartCoroutine(LoadChunk(index));
+            yield return null;
+        }
+        yield return null;
+    }
+
+    IEnumerator TryUnloadChunks(int chunkIndex)
     {
         List<int> chunks = new List<int>();
         Vector2 pos = GetChunkCoordinates(chunkIndex);
@@ -196,17 +214,19 @@ public class GridVisualization : MonoBehaviour
 
             if(math.abs(chunkPos.x - pos.x) > renderChunks || math.abs(chunkPos.y - pos.y) > renderChunks)
             {
-                UnloadChunk(item.Key);
-                chunks.Add(item.Key);  
+                chunks.Add(item.Key);
             }
         }
 
         for (int i = 0; i < chunks.Count; i++)
         {
+            StartCoroutine(UnloadChunk(chunks[i]));
             loadedChunks.Remove(chunks[i]);
+            yield return null;
         }
+        yield return null;
     }
-    private void UnloadChunk(int index)
+    IEnumerator UnloadChunk(int index)
     {
         if(loadedChunks[index] != null) Destroy(loadedChunks[index].gameObject);
         Chunk chunk = map.chunks[index];
@@ -224,6 +244,8 @@ public class GridVisualization : MonoBehaviour
             }
         }
 
+        yield return null;
+
         for (int i = 0; i < chunk.items.Count; i++)
         {
             var item = chunk.items[i];
@@ -231,14 +253,17 @@ public class GridVisualization : MonoBehaviour
             {
                 UnloadWorldItem(item);
             }
-        } 
+        }
+        yield return null;
+
     }
-    private void TryLoadChunk(int chunkIndex)
+    private bool CheckChunk(int chunkIndex)
     {
         if(!loadedChunks.ContainsKey(chunkIndex) && chunkIndex >= 0 && chunkIndex < map.chunkCount)
         {
-           StartCoroutine(LoadChunk(chunkIndex));
+            return true;
         }
+        return false;
     }
     IEnumerator LoadChunk(int chunkIndex)
     {
@@ -254,20 +279,22 @@ public class GridVisualization : MonoBehaviour
                     BuildingManager.instance.LoadObject(value,chunk.ChunkGridPosition + new Vector2(x,y));
                 }
             }
+            yield return null;
         }
 
+        yield return null;
         for (int x = 0; x < map.chunkSize; x++)
         {
             for (int y = 0; y < map.chunkSize; y++)
             {
                 var value = chunk.grid[x, y].gridObject;
-                if(value != null)
+                if(value != null &&  value is Wall)
                 {
                     SetNewSprite(GetCoordinatesByLocalChunkCoordinates(chunkIndex,x,y),value.ID);
                 }
             }
         }
-
+        yield return null;
         for (int i = 0; i < chunk.items.Count; i++)
         {
             var value = chunk.items[i];
@@ -276,7 +303,6 @@ public class GridVisualization : MonoBehaviour
                 LoadWorldItem(i,chunk);
             }
         }
-
         yield return null;
     }
     public int GetChunkIndexByPositionXY(Vector2 position)
@@ -297,7 +323,7 @@ public class GridVisualization : MonoBehaviour
 
     public GridTile GetGridTileByPositionXY(int x,int y)
     {
-        if (x >= 0 && y >= 0 && x < map.mapWidthOnWorldScale && y < map.mapHeightOnWorldScale)
+        if (x >= 0 && y >= 0 && x < map.width && y < map.height)
         {
             int chunkIndex = GetChunkIndexByPositionXY(new Vector2(x, y));
             return map.chunks[chunkIndex].grid[x % map.chunkSize, y % map.chunkSize];
@@ -334,12 +360,7 @@ public class GridVisualization : MonoBehaviour
         uv[index * 4 + 2] = new Vector2(uv11.x         ,uv11.y          );
         uv[index * 4 + 3] = new Vector2(uv11.x         ,uv00.y + height1);
     }
-   /// <summary>
-   /// naprawic!!!
-   /// </summary>
-   /// <param name="x"></param>
-   /// <param name="y"></param>
-   /// <param name="repeat"></param>
+
     public void UpdateMesh(int x,int y,bool repeat)
     {
         int chunkIndex = GetChunkIndexByPositionXY(new Vector2(x, y));
@@ -604,12 +625,12 @@ public class GridVisualization : MonoBehaviour
         int id = gridTile.gridObject.ID;
         Item item = ItemsAsset.instance.GetItem(id);
         Destroy(gridTile.gridObject.objectTransform.gameObject);
-        gridTile.gridObject = null;
+        gridTile.SetGridObject(null);
 
         Vector2 vector2 = new Vector2(gridTile.x, gridTile.y);
         Vector2 target = GetWorldPosition(vector2 + new Vector2(UnityEngine.Random.Range(-0.5f,0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)));
         CreateWorldItem(new ItemStats(id), GetWorldPosition(vector2 + new Vector2(0,0.5f)),target);
-        if (item is Wall) UpdateNeighbors(vector2, id); 
+        if (item is WallObject) UpdateNeighbors(vector2, id); 
     }
     public void UpdateNeighbors(Vector2 positionXY, int ID)
     {
@@ -633,11 +654,9 @@ public class GridVisualization : MonoBehaviour
     private void UpdateSprite(Vector2 positionXY)
     {
         var gridTile = GetValueByGridPosition(positionXY);
-        Debug.Log(gridTile);
         if (gridTile == null) return;
         GridObject gridObject = gridTile.gridObject;
         if (gridObject == null) return;
-        Debug.Log(gridTile.ToString());
         bool[] neighbors = GetNeighbors(positionXY, gridObject.ID);
         int value = 0;
 
@@ -660,13 +679,13 @@ public class GridVisualization : MonoBehaviour
 
         Transform child = gridObject.objectTransform.GetChild(0);
         ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(gridObject.ID, value);
+        Debug.Log(objectVariant);
         child.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
         child.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
         MyTools.ChangePositionPivot(gridObject.objectTransform, child.TransformPoint(0, objectVariant.variants[0].minY, 0));
     }
     public void SetNewSprite(Vector2 positionXY,int id)
     {
-        Debug.Log(positionXY);
         bool[] neighbors = GetNeighbors(positionXY, id);
         for (int i = 0; i < 4; i++)
         {
@@ -676,9 +695,7 @@ public class GridVisualization : MonoBehaviour
     }
     public void CreateWorldItem(ItemStats item,Vector2 pos,Vector2 target)
     {
-        Debug.Log(target);
         int gridIndex = GetChunkIndexByWorldPosition(new Vector2(target.x, target.y));
-        Debug.Log(gridIndex);
         Transform wItem = Instantiate(worldItem, pos, Quaternion.identity,transform).transform;
         int itemChunkIndex = map.chunks[gridIndex].AddItem(new ChunkItem(item, target,wItem));
         wItem.GetComponent<WorldItem>().SetItem(item, target, itemChunkIndex);
