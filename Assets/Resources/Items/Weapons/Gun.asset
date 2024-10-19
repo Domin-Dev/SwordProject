@@ -18,12 +18,10 @@ MonoBehaviour:
     id : 1
 
     stack max: 100'
-  ID: 0
+  ID: 35
   stackMax: 1
   icon: {fileID: -2066496519, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients:
-  - itemID: 22
-    number: 10
+  crafingIngredients: []
   craftTables: ffffffff
   numberItem: 1
   durability: 20

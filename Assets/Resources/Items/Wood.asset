@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Wood
   description: 
-  ID: 22
+  ID: 42
   stackMax: 50
   icon: {fileID: 752939284, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   crafingIngredients:
-  - itemID: 103
+  - itemID: 0
     number: 0
   craftTables: ffffffff
   numberItem: 1

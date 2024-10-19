@@ -14,11 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Stick
   description: 
-  ID: 24
+  ID: 32
   stackMax: 50
   icon: {fileID: -394807298, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients:
-  - itemID: 22
-    number: 1
+  crafingIngredients: []
   craftTables: ffffffff
   numberItem: 2

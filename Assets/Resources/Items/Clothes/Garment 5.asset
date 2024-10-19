@@ -14,12 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: 
   description: 
-  ID: 3439
+  ID: 16
   stackMax: 1
   icon: {fileID: -2016322367, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients:
-  - itemID: 0
-    number: 0
+  crafingIngredients: []
   craftTables: ffffffff
   numberItem: 1
   type: 5

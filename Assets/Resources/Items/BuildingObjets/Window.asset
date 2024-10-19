@@ -14,15 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Window
   description: 
-  ID: 104
+  ID: 9
   stackMax: 50
   icon: {fileID: -777032717, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients:
-  - itemID: 22
-    number: 5
+  crafingIngredients: []
   craftTables: ffffffff
   numberItem: 1
   durability: 0
+  drop: []
   texture: {fileID: 2800000, guid: 0bc28df9d3e4bd5419ed606036170148, type: 3}
   HitParticles: {fileID: 2590526293616396483, guid: 904f8924385a81440846293440c71717, type: 3}
   objectVariants:
@@ -32,6 +31,7 @@ MonoBehaviour:
       - {x: -0.12, y: 0.185}
       - {x: 0.12, y: 0.185}
       - {x: 0.12, y: 0.005}
+      particlePoint: {x: 0, y: 0}
       minY: 0.005
       sprite: {fileID: 21300000, guid: afaa8e47cd7a4074b9cc4b1b9c8aec4e, type: 2}
   - variants:
@@ -40,6 +40,7 @@ MonoBehaviour:
       - {x: -0.12, y: 0.285}
       - {x: 0, y: 0.285}
       - {x: 0, y: 0.005}
+      particlePoint: {x: 0, y: 0}
       minY: 0.005
       sprite: {fileID: 21300000, guid: b5f970d7d17d02247b57ca5f3cc8af25, type: 2}
   - variants:
@@ -48,6 +49,7 @@ MonoBehaviour:
       - {x: -0.12, y: 0.295}
       - {x: 0.12, y: 0.295}
       - {x: 0.12, y: 0.114999995}
+      particlePoint: {x: 0, y: 0}
       minY: 0.114999995
       sprite: {fileID: 21300000, guid: 3738d8285ab6568438dfb01de5bf0df7, type: 2}
   - variants:
@@ -56,5 +58,6 @@ MonoBehaviour:
       - {x: 0, y: 0.285}
       - {x: 0.12, y: 0.285}
       - {x: 0.12, y: 0.005}
+      particlePoint: {x: 0, y: 0}
       minY: 0.005
       sprite: {fileID: 21300000, guid: 9f3db07a68d12cf4ba9d2252ac029d28, type: 2}

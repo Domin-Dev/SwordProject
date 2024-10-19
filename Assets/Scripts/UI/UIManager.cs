@@ -686,7 +686,7 @@ public class UIManager : MonoBehaviour
                 if (item.crafingIngredients.Length > i)
                 {
                     Transform child = ingredients.GetChild(i);
-                    Item.CrafingIngredient crafingIngredient = item.crafingIngredients[i];
+                    Ingredient crafingIngredient = item.crafingIngredients[i];
                     Item ingredient = ItemsAsset.instance.GetItem(crafingIngredient.itemID);
                     child.gameObject.SetActive(true);
                     child.GetChild(0).GetComponent<Image>().sprite = ingredient.icon;
@@ -741,7 +741,7 @@ public class UIManager : MonoBehaviour
             }
         }
     }
-    private bool UpdateCheck(int idRecipe, Item.CrafingIngredient ingredient,int counter,int id, Dictionary<int, int> eq,bool increasedItemCount)
+    private bool UpdateCheck(int idRecipe, Ingredient ingredient,int counter,int id, Dictionary<int, int> eq,bool increasedItemCount)
     {
         if (ingredient.itemID == id)
         {

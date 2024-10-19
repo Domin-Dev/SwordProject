@@ -6,14 +6,14 @@ public class Item : ScriptableObject
     public string name;
     [Multiline()]
     public string description;
-    public int ID;
+    public int ID = -1;
     public int stackMax = 50;
 
     [Header("Item graphic")]
     public Sprite icon;
 
     [Header("Craft recipe")]
-    public CrafingIngredient[] crafingIngredients;
+    public Ingredient[] crafingIngredients;
     public int[] craftTables;
     public int numberItem = 1;
     public virtual ItemStats GetItemStats()
@@ -21,20 +21,24 @@ public class Item : ScriptableObject
         return new ItemStats(ID);
     }
 
-    [System.Serializable]
-    public class CrafingIngredient
+    private void OnValidate()
     {
-        public int itemID;
-        public int number;
-
-        public CrafingIngredient(int itemID, int number)
-        {
-            this.itemID = itemID;
-            this.number = number;
-        }
+       if(ID == -1) ID = Resources.Load<IDManager>("IDManager").GetNextID();
     }
 }
 
+[System.Serializable]
+public class Ingredient
+{
+    public int itemID;
+    public int number;
+
+    public Ingredient(int itemID, int number)
+    {
+        this.itemID = itemID;
+        this.number = number;
+    }
+}
 
 
 

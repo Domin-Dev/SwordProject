@@ -628,9 +628,34 @@ public class GridVisualization : MonoBehaviour
         gridTile.SetGridObject(null);
 
         Vector2 vector2 = new Vector2(gridTile.x, gridTile.y);
-        Vector2 target = GetWorldPosition(vector2 + new Vector2(UnityEngine.Random.Range(-0.5f,0.5f), UnityEngine.Random.Range(-0.5f, 0.5f)));
-        CreateWorldItem(new ItemStats(id), GetWorldPosition(vector2 + new Vector2(0,0.5f)),target);
+        DestroyDrop(id, vector2);
         if (item is WallObject) UpdateNeighbors(vector2, id); 
+    }
+
+    public void DestroyDrop(int id, Vector2 pos)
+    {
+        BuildingItem item = (BuildingItem)ItemsAsset.instance.GetItem(id);
+        for (int i = 0; i < item.drop.Length; i++)
+        {
+            Drop drop = item.drop[i];
+            if(drop.probability > 0 && drop.probability >= UnityEngine.Random.Range(0f,1f))
+            {
+                int number = drop.ingredient.number;
+                if(drop.maxNumber > 0) number = UnityEngine.Random.Range(drop.ingredient.number, drop.maxNumber + 1);
+                for (int j = 0; j < number; j++)
+                {
+                    Vector2 target = GetWorldPosition(pos + new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(0f, 0.5f)));
+                    CreateWorldItem(new ItemStats(drop.ingredient.itemID), GetWorldPosition(pos + new Vector2(0, 0.5f)), target);
+                }
+            }
+        }
+
+        if(item.drop.Length == 0)
+        {
+            Vector2 target = GetWorldPosition(pos + new Vector2(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(0f, 0.5f)));
+            CreateWorldItem(new ItemStats(id), GetWorldPosition(pos + new Vector2(0, 0.5f)), target);
+        }
+
     }
     public void UpdateNeighbors(Vector2 positionXY, int ID)
     {

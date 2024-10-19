@@ -956,7 +956,7 @@ public class EquipmentManager : MonoBehaviour
         AddNewItem(itemStats);
         for (int i = 0; i < item.crafingIngredients.Length; i++)
         {
-            Item.CrafingIngredient ingredient = item.crafingIngredients[i];
+            Ingredient ingredient = item.crafingIngredients[i];
             DecreaseItemCount(ingredient.itemID, ingredient.number);
         }
     }

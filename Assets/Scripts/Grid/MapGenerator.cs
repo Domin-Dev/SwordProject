@@ -88,10 +88,10 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int x = 0; x < chunkSize; x++)
                 {
-                    GenerateCell(item.Value, x, y,rand);
+                   // GenerateCell(item.Value, x, y,rand);
                     if (value >= 0.75f)
                     { 
-                        SetValue(item.Value, x, y,8);
+                        SetValue(item.Value, x, y,0);
                     }
                     else if (value >= 0.5f)
                     {
@@ -99,11 +99,11 @@ public class MapGenerator : MonoBehaviour
                     }
                     else if (value >= 0.25f)
                     {
-                        SetValue(item.Value, x, y, 0);
+                        SetValue(item.Value, x, y, 2);
                     }
                     else 
                     {
-                        SetValue(item.Value, x, y, 9);
+                        SetValue(item.Value, x, y, 3);
                     }
 
 
@@ -136,7 +136,7 @@ public class MapGenerator : MonoBehaviour
 
         if (rand.Next(0, 100) <= 5)
         {
-            SetBuildingObject(chunk, x, y, 300);
+            SetBuildingObject(chunk, x, y, 402);
         }
     }
 

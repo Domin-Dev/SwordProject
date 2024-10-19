@@ -2,7 +2,8 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
-[CustomPropertyDrawer(typeof(Item.CrafingIngredient))]
+
+[CustomPropertyDrawer(typeof(Ingredient))]
 public class CrafingIngredientDrawer : PropertyDrawer
 {
     private bool foldout = true;
@@ -38,7 +39,6 @@ public class CrafingIngredientDrawer : PropertyDrawer
             {
                 SearchWindow.Open(new SearchWindowContext(GUIUtility.GUIToScreenPoint(Event.current.mousePosition)), new ItemFinder((x) => {
                     itemId.intValue = x; 
-
                     property.serializedObject.ApplyModifiedProperties();
                 }));
             }
@@ -52,12 +52,10 @@ public class CrafingIngredientDrawer : PropertyDrawer
     {
         if (foldout)
         {
-            // Wysokoœæ foldoutu + dwóch pól tekstowych
             return (EditorGUIUtility.singleLineHeight + 2) * 3;
         }
         else
         {
-            // Wysokoœæ tylko foldoutu
             return EditorGUIUtility.singleLineHeight;
         }
     }

@@ -14,15 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Stack
   description: 
-  ID: 400
+  ID: 3
   stackMax: 1
   icon: {fileID: 2119187107, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients:
-  - itemID: 22
-    number: 5
+  crafingIngredients: []
   craftTables: ffffffff
   numberItem: 1
   durability: 50
+  drop: []
   texture: {fileID: 2800000, guid: c5a6fc0172e160f4ba651d2fd14720af, type: 3}
   HitParticles: {fileID: 0}
   objectVariants:

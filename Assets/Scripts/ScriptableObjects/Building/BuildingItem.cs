@@ -1,7 +1,19 @@
 using UnityEngine;
+
+[System.Serializable]
+public class Drop
+{
+    public int maxNumber;
+    public float probability;
+    public Ingredient ingredient;
+}
+
+
 public abstract class BuildingItem : Item
 {
     public int durability;
+    [Header("Drop")]
+    public Drop[] drop;
     public Texture2D texture;
 }
 public abstract class VariantItem : BuildingItem

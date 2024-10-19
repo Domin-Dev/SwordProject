@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Stone
   description: 
-  ID: 23
+  ID: 43
   stackMax: 50
   icon: {fileID: 2076849020, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
   crafingIngredients:

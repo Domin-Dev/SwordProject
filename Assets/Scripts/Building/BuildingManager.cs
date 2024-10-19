@@ -15,6 +15,7 @@ public class BuildingManager : MonoBehaviour
     [SerializeField] GameObject pointer;
     [SerializeField] GameObject buildingPrefab;
     [SerializeField] GameObject buildingBar;
+    [SerializeField] GameObject shadow;
     private Transform barValue;
 
     [SerializeField] Transform parent;
@@ -192,12 +193,14 @@ public class BuildingManager : MonoBehaviour
         else if(item is BuildingObject)
         {
             Transform obj = Instantiate(buildingPrefab, GridVisualization.instance.GetWorldPosition(gridPosition), Quaternion.identity, parent).transform.GetChild(0);
+            Transform shadowT = Instantiate(shadow, obj.parent).transform;
             ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(gridObject.ID,gridObject.variantIndex);
             obj.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
             obj.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
 
             CreateGridObject(gridObject.ID,gridPosition, gridObject.variantIndex, obj.parent);
-            MyTools.ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0)); 
+            MyTools.ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0));
+            shadowT.localPosition = obj.localPosition;
         }
     }
     private void BuildFloor(Vector2 posXY)
@@ -217,13 +220,15 @@ public class BuildingManager : MonoBehaviour
 
         Sounds.instance.Hammer();
         Transform obj = Instantiate(buildingPrefab, GridVisualization.instance.GetWorldPosition(posXY), Quaternion.identity, parent).transform.GetChild(0);
-      
+        Transform shadowT = Instantiate(shadow, obj.parent).transform;
+
         ObjectVariant objectVariant = ItemsAsset.instance.GetObjectVariant(selectedObjectID, rotation % rotationStates);
 
         obj.GetComponent<SpriteRenderer>().sprite = objectVariant.variants[0].sprite;
         obj.GetComponent<PolygonCollider2D>().points = objectVariant.variants[0].hitbox;
         CreateGridObject(selectedObjectID,posXY, rotation % rotationStates, obj.parent);
         MyTools.ChangePositionPivot(obj.parent, obj.TransformPoint(0, objectVariant.variants[0].minY, 0));
+        shadowT.localPosition = obj.localPosition;
         builtObject(this, null);
     }
     private void CreateGridObject(int itemID,Vector2 posXY,int indexVariant, Transform buildingObj)

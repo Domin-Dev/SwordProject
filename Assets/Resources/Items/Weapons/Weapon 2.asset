@@ -14,14 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Axe
   description: 
-  ID: 2
+  ID: 39
   stackMax: 1
   icon: {fileID: -1329511708, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients:
-  - itemID: 22
-    number: 2
-  - itemID: 23
-    number: 1
+  crafingIngredients: []
   craftTables: ffffffff
   numberItem: 1
   durability: 10

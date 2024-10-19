@@ -14,17 +14,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: 
   description: 
-  ID: 302
+  ID: 6
   stackMax: 50
   icon: {fileID: -2117217138, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients:
-  - itemID: 23
-    number: 4
-  - itemID: 22
-    number: 5
+  crafingIngredients: []
   craftTables: ffffffff
   numberItem: 1
   durability: 0
+  drop:
+  - maxNumber: 0
+    probability: 1
+    ingredient:
+      itemID: 0
+      number: 0
+  - maxNumber: 0
+    probability: 0
+    ingredient:
+      itemID: 0
+      number: 0
   texture: {fileID: 2800000, guid: 0e37490adaca0fa4193da2800616f6c8, type: 3}
   HitParticles: {fileID: 2590526293616396483, guid: 904f8924385a81440846293440c71717, type: 3}
   objectVariants:
@@ -34,5 +41,6 @@ MonoBehaviour:
       - {x: -0.11, y: 0.114999995}
       - {x: 0.11, y: 0.114999995}
       - {x: 0.11, y: 0.055}
+      particlePoint: {x: 0, y: 0}
       minY: 0.055
       sprite: {fileID: 21300000, guid: 34d97362b1f40fe409fceea662f14394, type: 2}

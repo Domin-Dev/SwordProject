@@ -14,14 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   name: Spear
   description: 
-  ID: 1
+  ID: 38
   stackMax: 1
   icon: {fileID: -588481162, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients:
-  - itemID: 23
-    number: 1
-  - itemID: 22
-    number: 5
+  crafingIngredients: []
   craftTables: ffffffff
   numberItem: 1
   durability: 10
