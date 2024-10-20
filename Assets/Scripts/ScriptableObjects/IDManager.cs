@@ -7,8 +7,10 @@ public class IDManager : ScriptableObject
     public int LastID  = 0;
 
     public int GetNextID()
-    { 
-        return  ++LastID;
+    {
+        LastID++;
+        this.SetDirty();
+        return  LastID;
     }
 }
 

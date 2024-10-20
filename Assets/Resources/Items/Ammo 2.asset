@@ -16,9 +16,11 @@ MonoBehaviour:
   description: 
   ID: 2
   stackMax: 20
-  icon: {fileID: -1828702530, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
-  crafingIngredients: []
-  craftTables: 
+  icon: {fileID: 459137630, guid: 9ae147eb5c363e047b3b208350004b11, type: 3}
+  crafingIngredients:
+  - itemID: 0
+    number: 0
+  craftTables: ffffffff
   numberItem: 1
   bullet: {fileID: 907356828559875784, guid: 39d35432007d90f40b15bf375f8b9449, type: 3}
   UIBulletIcon: {fileID: -494962642, guid: 6f6089b46f69a5d4d99bc7c3bcd304d1, type: 3}

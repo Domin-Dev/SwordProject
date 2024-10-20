@@ -1,5 +1,6 @@
 
 
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static UnityEditor.Progress;
 
 
 public class PlayerPositionArgs : EventArgs
@@ -38,16 +40,32 @@ public class TileUV
     public int variants { private set; get; }
     public Vector2? uv00Grass { private set; get; }
 }
+
+
+[System.Serializable]
+public class LoadedChunk
+{
+    public int loadedTime;
+    public Transform transform;
+
+    public LoadedChunk(int loadedTime,Transform transform)
+    {
+        this.loadedTime = loadedTime;
+        this.transform = transform;
+    }
+}
+
 public class GridVisualization : MonoBehaviour
 {
     public bool LoadAllMap = true;
 
     [SerializeField] public GameObject worldItem;
     public const int renderChunks = 2;
+    public const int maxLoadedChunks = 35;
 
     public Map map;
     public Pathfinding pathfinding;
-    public Dictionary<int, Transform> loadedChunks { private set; get; }
+     public Dictionary<int, LoadedChunk> loadedChunks { private set; get; }
     public int lastPlayerChunk { private set; get; } = -1;
     public Vector2 playerPosition { private set; get; } = Vector2.zero;
 
@@ -143,7 +161,7 @@ public class GridVisualization : MonoBehaviour
     public void SetMap(Map map)
     {
         this.map = map;
-        loadedChunks = new Dictionary<int, Transform>();
+        loadedChunks = new Dictionary<int, LoadedChunk>();
 
         if (LoadAllMap)
         {
@@ -187,10 +205,14 @@ public class GridVisualization : MonoBehaviour
         {
             for (int y = -renderChunks; y <= renderChunks; y++)
             {
-               int index = GetChunkIndexByCoordinates(posChunk + new Vector2(x, y));
+               int index = GetChunkIndexByCoordinates(posChunk + new Vector2(x, y));     
                if(CheckChunk(index))
                {
                     list.Add(index);
+               }
+               else
+               {
+                   if(loadedChunks.ContainsKey(index)) loadedChunks[index].loadedTime = (int)Time.time;
                }
             }
         }
@@ -205,30 +227,55 @@ public class GridVisualization : MonoBehaviour
 
     IEnumerator TryUnloadChunks(int chunkIndex)
     {
-        List<int> chunks = new List<int>();
+       // List<int> chunks = new List<int>();
         Vector2 pos = GetChunkCoordinates(chunkIndex);
+        KeyValuePair<int, int>[] array;
 
-        foreach (var item in loadedChunks)
+        if (loadedChunks.Count <= maxLoadedChunks) yield break;
+        else
         {
-            Vector2 chunkPos = GetChunkCoordinates(item.Key);
-
-            if(math.abs(chunkPos.x - pos.x) > renderChunks || math.abs(chunkPos.y - pos.y) > renderChunks)
+            array = new KeyValuePair<int, int>[loadedChunks.Count - maxLoadedChunks];
+            Debug.Log(loadedChunks.Count);
+            Debug.Log(array.Length);
+            for (int i = 0; i < array.Length; i++)
             {
-                chunks.Add(item.Key);
+                array[i] = new KeyValuePair<int, int>(-1,int.MaxValue);
+            }
+
+            foreach (var item in loadedChunks)
+            {
+                Vector2 chunkPos = GetChunkCoordinates(item.Key);
+                if (math.abs(chunkPos.x - pos.x) > renderChunks || math.abs(chunkPos.y - pos.y) > renderChunks)
+                {
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        if (array[i].Value > item.Value.loadedTime)
+                        {
+                            array[i] = new KeyValuePair<int, int>(item.Key, item.Value.loadedTime);
+                            break;
+                        }
+                    }
+                }
             }
         }
 
-        for (int i = 0; i < chunks.Count; i++)
+       
+
+        //chunks.Add(item.Key);
+
+        for (int i = 0; i < array.Length; i++)
         {
-            StartCoroutine(UnloadChunk(chunks[i]));
-            loadedChunks.Remove(chunks[i]);
+            StartCoroutine(UnloadChunk(array[i].Key));
+            loadedChunks.Remove(array[i].Key);
             yield return null;
         }
+        Debug.Log(loadedChunks.Count);
         yield return null;
     }
     IEnumerator UnloadChunk(int index)
     {
-        if(loadedChunks[index] != null) Destroy(loadedChunks[index].gameObject);
+        if(!loadedChunks.ContainsKey(index)) yield break;
+        if(loadedChunks[index] != null) Destroy(loadedChunks[index].transform.gameObject);
         Chunk chunk = map.chunks[index];
         var grid = chunk.grid;
 
@@ -243,8 +290,6 @@ public class GridVisualization : MonoBehaviour
                 }
             }
         }
-
-        yield return null;
 
         for (int i = 0; i < chunk.items.Count; i++)
         {
@@ -267,8 +312,9 @@ public class GridVisualization : MonoBehaviour
     }
     IEnumerator LoadChunk(int chunkIndex)
     {
+        if (loadedChunks.ContainsKey(chunkIndex)) yield break;
         Chunk chunk = map.chunks[chunkIndex];
-        loadedChunks.Add(chunkIndex, CreateMesh(chunk));
+        loadedChunks.Add(chunkIndex,new LoadedChunk((int)Time.time,CreateMesh(chunk)));
         for (int x = 0; x < map.chunkSize; x++)
         {
             for (int y = 0; y < map.chunkSize; y++)
@@ -278,11 +324,10 @@ public class GridVisualization : MonoBehaviour
                 {
                     BuildingManager.instance.LoadObject(value,chunk.ChunkGridPosition + new Vector2(x,y));
                 }
+
             }
-            yield return null;
         }
 
-        yield return null;
         for (int x = 0; x < map.chunkSize; x++)
         {
             for (int y = 0; y < map.chunkSize; y++)
@@ -294,7 +339,7 @@ public class GridVisualization : MonoBehaviour
                 }
             }
         }
-        yield return null;
+
         for (int i = 0; i < chunk.items.Count; i++)
         {
             var value = chunk.items[i];
@@ -370,7 +415,7 @@ public class GridVisualization : MonoBehaviour
             int localY = y % map.chunkSize;
 
             GridTile[,] grid = map.chunks[chunkIndex].grid;
-            Mesh mesh = loadedChunks[chunkIndex].GetComponent<MeshFilter>().mesh;
+            Mesh mesh = loadedChunks[chunkIndex].transform.GetComponent<MeshFilter>().mesh;
             Vector2[] uv = mesh.uv;
             int index = localX + localY * map.chunkSize;
             GridTile gridTile = grid[localX,localY];

@@ -88,7 +88,7 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int x = 0; x < chunkSize; x++)
                 {
-                   // GenerateCell(item.Value, x, y,rand);
+                    GenerateCell(item.Value, x, y,rand);
                     if (value >= 0.75f)
                     { 
                         SetValue(item.Value, x, y,0);
@@ -105,8 +105,6 @@ public class MapGenerator : MonoBehaviour
                     {
                         SetValue(item.Value, x, y, 3);
                     }
-
-
                 }
             }
         }
@@ -134,10 +132,23 @@ public class MapGenerator : MonoBehaviour
         //    SetValue(chunk, x, y, 0);
         //}
 
-        if (rand.Next(0, 100) <= 5)
+        if (rand.Next(0, 100) <= 2)
         {
-            SetBuildingObject(chunk, x, y, 402);
+            SetBuildingObject(chunk, x, y, 5);
         }
+        else if (rand.Next(0, 100) <= 2)
+        {
+            SetBuildingObject(chunk, x, y, 44);
+        }
+        else if (rand.Next(0, 100) <= 1)
+        {
+            SetBuildingObject(chunk, x, y, 45);
+        }
+        else if (rand.Next(0, 100) <= 1)
+        {
+            SetBuildingObject(chunk, x, y, 46);
+        }
+
     }
 
     private void GenerateTempCell(Chunk chunk, int x, int y, System.Random rand)

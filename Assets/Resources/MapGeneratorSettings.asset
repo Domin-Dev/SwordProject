@@ -14,12 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grassID: 21
   tiles:
-  - tileID: 26
-  - tileID: 25
-  - tileID: 24
-  - tileID: 23
-  - tileID: 22
-  - tileID: 21
+  - tileID: 19
+  - tileID: 19
+  - tileID: 19
+  - tileID: 19
+  - tileID: 19
+  - tileID: 19
   - tileID: 10004
   - tileID: 10005
   - tileID: 105

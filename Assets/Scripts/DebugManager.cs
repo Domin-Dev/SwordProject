@@ -73,7 +73,7 @@ public class DebugManager : MonoBehaviour
         float distance = GridVisualization.instance.map.chunkSizeOnWorldScale;
         foreach (var item in GridVisualization.instance.loadedChunks)
         {
-            debuggingChunks.Add(item.Key, CreateChunkBorder(item.Value.position,distance));
+            debuggingChunks.Add(item.Key, CreateChunkBorder(item.Value.transform.position,distance));
         }
     }
 
@@ -162,13 +162,13 @@ public class DebugManager : MonoBehaviour
                 if(freeLines.Count > 0)
                 {
                     int index = freeLines[0];
-                    line = CreateChunkBorder(debuggingChunks[index],value.Value.position, distance);
+                    line = CreateChunkBorder(debuggingChunks[index],value.Value.transform.position, distance);
                     debuggingChunks.Remove(index);
                     freeLines.RemoveAt(0);
                 }
                 else
                 {
-                    line = CreateChunkBorder(value.Value.position, distance);
+                    line = CreateChunkBorder(value.Value.transform.position, distance);
                 }
                 debuggingChunks.Add(value.Key, line);
             }
